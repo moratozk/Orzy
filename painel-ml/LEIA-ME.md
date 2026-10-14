@@ -15,7 +15,8 @@ Roda no seu computador, não precisa de servidor e não custa nada.
 
 ## 0. Instale o Python (só uma vez)
 
-1. Baixe em **python.org/downloads** (botão amarelo "Download Python").
+1. Entre em **python.org/downloads/windows** e, na versão mais nova (a primeira da lista),
+   clique em **Windows installer (64-bit)**. Prefira esse instalador ao "Python install manager".
 2. Na primeira tela da instalação, marque **"Add python.exe to PATH"** e clique em Install Now.
 3. Para conferir: abra o Prompt de Comando e digite `python --version`. Tem que aparecer "Python 3...".
 
@@ -81,8 +82,8 @@ As visitas podem levar até 48 horas para aparecer no Mercado Livre.
 
 ## Deu erro?
 
-- **"python não é reconhecido"**: reinstale o Python marcando "Add python.exe to PATH",
-  ou troque `python` por `py` nos comandos.
+- **"python não é reconhecido"** ou **digitar `python` abre a Microsoft Store**: reinstale o Python
+  marcando "Add python.exe to PATH", ou troque `python` por `py` nos comandos.
 - **Erro de redirect_uri / URL de redirecionamento no navegador**: a Redirect URI do app e a que
   você digitou no programa precisam ser idênticas (atenção à barra no final).
   Rode `python conectar.py --refazer`.

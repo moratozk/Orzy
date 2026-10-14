@@ -87,18 +87,23 @@ def buscar_detalhes(cliente, ids):
 
 def buscar_visitas(cliente, ids, dias):
     visitas = {}
+    ultimo_erro = None
     for n, item_id in enumerate(ids, 1):
         try:
             r = cliente.get(f"/items/{item_id}/visits/time_window", {"last": dias, "unit": "day"}) or {}
             visitas[item_id] = int(r.get("total_visits") or 0)
         except ml_api.ErroLogin:
             raise
-        except ml_api.ErroML:
+        except ml_api.ErroML as e:
             visitas[item_id] = None
+            ultimo_erro = e
         if n % 10 == 0 or n == len(ids):
             print(f"  {n}/{len(ids)}", end="\r", flush=True)
         time.sleep(PAUSA_ENTRE_CHAMADAS)
     print()
+    sem_visitas = sum(1 for v in visitas.values() if v is None)
+    if sem_visitas:
+        print(f"  Não consegui ler as visitas de {sem_visitas} anúncio(s). Último erro: {ultimo_erro}")
     return visitas
 
 

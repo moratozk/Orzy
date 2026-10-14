@@ -6,6 +6,13 @@ Roda no seu computador, não precisa de servidor e não custa nada.
 
 ---
 
+## Baixe o programa
+
+1. Entre em **github.com/moratozk/Orzy** com a sua conta do GitHub.
+2. Clique no botão verde **Code** e depois em **Download ZIP**.
+3. Clique com o botão direito no arquivo baixado e escolha **Extrair tudo**.
+4. Dentro da pasta extraída tem a pasta **painel-ml**. É nela que você vai trabalhar.
+
 ## 0. Instale o Python (só uma vez)
 
 1. Baixe em **python.org/downloads** (botão amarelo "Download Python").
@@ -22,6 +29,8 @@ Roda no seu computador, não precisa de servidor e não custa nada.
 4. **PKCE:** se aparecer essa opção, pode ativar. Só lembre o que escolheu.
 5. **Escopos / permissões:** marque **Leitura** (read) e **Acesso offline** (offline_access).
    Escrita pode ficar desmarcada por enquanto.
+   - Se o formulário também mostrar permissões por área, marque pelo menos **leitura** nas áreas
+     de anúncios (publicações), vendas (pedidos) e métricas (visitas). Os nomes podem variar um pouco no site.
 6. **Tópicos e notificações:** não precisa marcar nada. Se o formulário exigir uma URL de
    notificação, use `https://www.google.com` também.
 7. Salve. Na tela do app, copie o **Client ID** (o número) e o **Client Secret** (a chave).
@@ -80,9 +89,14 @@ As visitas podem levar até 48 horas para aparecer no Mercado Livre.
 - **"O código não foi aceito"**: ele vale poucos minutos e só pode ser usado uma vez.
   Rode `python conectar.py` de novo e cole o endereço logo depois de clicar em Permitir.
 - **"Problema com o PKCE"**: rode `python conectar.py --refazer` e responda o PKCE igual ao que está no app.
-- **"Sem permissão"**: entre com a conta dona dos anúncios, não com a de um operador.
+- **"Sem permissão"**: entre com a conta dona dos anúncios, não com a de um operador. Se já entrou com ela,
+  confira as permissões do app (passo 1, item 5) e rode `python conectar.py` de novo.
+- **"Não consegui ler as visitas"**: quase sempre é o app sem permissão de métricas. Acerte no app
+  e rode `python conectar.py` de novo.
+- **"Sem conexão" ou "respondeu algo inesperado"**: confira a internet. Em rede com bloqueio, como a da
+  escola ou do trabalho, o Mercado Livre pode estar bloqueado: tente de casa.
 - **"Seu login venceu"**: rode `python conectar.py` de novo. Acontece se você trocar a senha,
-  gerar um novo Secret no app ou ficar 4 meses sem usar.
+  gerar um novo Secret no app ou ficar 6 meses sem usar.
 - **O relatório não foi sobrescrito**: o CSV antigo estava aberto no Excel. O programa salva
   um novo com data e hora no nome.
 

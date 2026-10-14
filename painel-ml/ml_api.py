@@ -9,6 +9,7 @@ Só usa a biblioteca padrão do Python: não precisa instalar nada.
 
 import base64
 import hashlib
+import http.client
 import json
 import os
 import secrets
@@ -99,8 +100,8 @@ def _requisicao(metodo, url, cabecalhos=None, corpo=None, tentativas=4):
         req = urllib.request.Request(url, data=dados, headers=cab, method=metodo)
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
-                texto = resp.read().decode("utf-8")
-                return json.loads(texto) if texto.strip() else None
+                texto = resp.read().decode("utf-8", errors="replace")
+            return _decodificar(texto)
         except urllib.error.HTTPError as e:
             texto = e.read().decode("utf-8", errors="replace")
             try:
@@ -115,13 +116,26 @@ def _requisicao(metodo, url, cabecalhos=None, corpo=None, tentativas=4):
                 continue
             mensagem = erro.get("message") or erro.get("error") or f"HTTP {e.code}"
             raise ErroML(mensagem, status=e.code, codigo=erro.get("error")) from None
-        except (urllib.error.URLError, TimeoutError) as e:
+        except (urllib.error.URLError, OSError, http.client.HTTPException) as e:
+            # Sem internet, conexão caiu no meio da resposta ou demorou demais.
             if tentativa < tentativas:
                 time.sleep(espera)
                 espera *= 2
                 continue
-            motivo = getattr(e, "reason", e)
+            motivo = getattr(e, "reason", None) or e
             raise ErroML(f"Sem conexão com o Mercado Livre ({motivo}). Verifique sua internet.") from None
+
+
+def _decodificar(texto):
+    if not texto.strip():
+        return None
+    try:
+        return json.loads(texto)
+    except ValueError:
+        # Acontece em rede com bloqueio (escola, trabalho), que devolve uma página no lugar dos dados.
+        raise ErroML("O Mercado Livre respondeu algo inesperado, que não veio em formato de dados. "
+                     "Se você estiver numa rede com bloqueio, como a da escola ou do trabalho, "
+                     "tente de outra internet.") from None
 
 
 # ---------------------------------------------------------------- login (OAuth)
@@ -269,7 +283,9 @@ class MercadoLivre:
                                     401, e.codigo) from None
                 if e.status == 403:
                     raise ErroML(f"Sem permissão ({e}). Confira se você entrou com a conta dona "
-                                 "dos anúncios, e não com um operador.", 403, e.codigo) from None
+                                 "dos anúncios, e não com um operador, e se o seu app no Mercado Livre "
+                                 "tem permissão de leitura para anúncios, vendas e métricas.",
+                                 403, e.codigo) from None
                 raise
 
     def obter_usuario(self):

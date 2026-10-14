@@ -25,6 +25,8 @@ Não precisam de conta nem de internet. Na pasta do Orzy, no Prompt de Comando:
 python -m unittest discover -s testes -v
 ```
 
+O GitHub também roda esses testes sozinho a cada PR, no Windows e no Linux.
+
 ## Segurança
 
 `config.json` e `tokens.json` dão acesso à sua conta. Eles ficam só no seu PC e estão no `.gitignore`:

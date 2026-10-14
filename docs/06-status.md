@@ -17,6 +17,7 @@ Ainda **não foi rodado na conta real**: o próximo passo é do Nicolas, em casa
   - rede com bloqueio (escola, trabalho) que devolve uma página no lugar dos dados também fechava o programa: agora explica;
   - quando as visitas não podiam ser lidas (por exemplo, app sem permissão de métricas), o relatório saía todo "SEM DADOS" sem dizer por quê: agora mostra o motivo.
 - LEIA-ME com como baixar do GitHub, permissões por área no app e os erros novos.
+- Testes rodando sozinhos no GitHub a cada PR, no Windows (Python mais recente e 3.10) e no Linux: todos passam.
 
 ## O que foi testado (com dados simulados)
 
@@ -34,7 +35,7 @@ Ainda **não foi rodado na conta real**: o próximo passo é do Nicolas, em casa
 - [ ] Criar o app no Mercado Livre (formulário, permissões por área).
 - [ ] `python conectar.py`: o Google mantém o código no endereço e o login dá certo.
 - [ ] `python meus_anuncios.py`: roda sem erro e os números batem com o painel do Mercado Livre.
-- [ ] Rodar no Windows (até agora os testes rodaram em Linux).
+- [ ] Rodar no Windows de casa (os testes simulados já passam no Windows do GitHub).
 
 ## Próximo passo
 

@@ -461,6 +461,11 @@ class TestSemLogin(Base):
 
 # ================================================================ como a pessoa usa
 
+# Roda o conectar.py de verdade, mas sem abrir o navegador: o "clique em Permitir" é feito pelo simulado.
+CONECTAR_SEM_NAVEGADOR = ("import runpy, webbrowser; webbrowser.open = lambda *a, **k: True; "
+                          "runpy.run_path('conectar.py', run_name='__main__')")
+
+
 class TestComoNoPrompt(unittest.TestCase):
     """Roda os dois programas de verdade, como no Prompt de Comando, numa cópia da pasta."""
 
@@ -478,10 +483,10 @@ class TestComoNoPrompt(unittest.TestCase):
         shutil.copytree(PASTA_PAINEL, self.pasta, ignore=shutil.ignore_patterns(
             "__pycache__", "config.json", "tokens.json", "relatorio_anuncios*.csv"))
         self.env = dict(os.environ, ML_API_BASE=base, ML_AUTH_URL=base + "/authorization",
-                        BROWSER="true", PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
+                        PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
 
     def test_conectar_e_gerar_relatorio(self):
-        proc = subprocess.Popen([sys.executable, "conectar.py"], cwd=self.pasta, env=self.env,
+        proc = subprocess.Popen([sys.executable, "-c", CONECTAR_SEM_NAVEGADOR], cwd=self.pasta, env=self.env,
                                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                 text=True, encoding="utf-8")
         relogio = threading.Timer(60, proc.kill)

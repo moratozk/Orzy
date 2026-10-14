@@ -1,0 +1,9 @@
+# Credenciais e login: nunca envie
+config.json
+tokens.json
+*.tmp
+
+# Relatórios gerados
+relatorio_anuncios*.csv
+
+__pycache__/

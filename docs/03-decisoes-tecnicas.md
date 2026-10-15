@@ -19,3 +19,5 @@ Cada decisão com o motivo. Mudar alguma delas é uma conversa, não um detalhe.
 | Se o CSV estiver aberto no Excel, salva outro com data e hora | O Windows não deixa sobrescrever arquivo aberto. |
 | Todo erro vira mensagem em português com o que fazer | O Nicolas não deve ver erro técnico em inglês. |
 | Testes com um Mercado Livre simulado (`testes/ml_simulado.py`) | Dá para testar tudo sem conta e sem internet. Também só biblioteca padrão. |
+| Site no orzy.com.br na fase 3, com um servidor guardando o Client Secret | O Orzy é para outros vendedores. Cada um criar o próprio app no Mercado Livre é difícil demais, e o Secret dentro de um programa distribuído pode ser copiado por qualquer um. Escolha do Nicolas em 14/10/2026. |
+| Um app só, "Orzy", na conta do Nicolas | Serve para o teste e é editado na fase 3 (Redirect URI do site e Client Secret novo). Só vira outro app se o Orzy passar para uma conta de empresa, que é o que o Mercado Livre recomenda para o dono da solução. |

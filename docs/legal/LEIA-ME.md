@@ -47,18 +47,23 @@ quanto tempo ela guarda registros de acesso e cópias de segurança (itens 2.4 e
   Frankfurt e Singapura). Em qualquer transferência para fora do Brasil, a Política também precisa dizer a finalidade,
   a duração e os direitos ligados a ela, e o Orzy entrega o texto das cláusulas a quem pedir (Resolução CD/ANPD
   nº 19/2024).
-- **Google (recomendação da thread de hospedagem, 15/10/2026, ainda não decidida):** servidor no Cloud Run nos Estados
-  Unidos (`us-east1`) e histórico no Firestore em São Paulo. Segundo a thread de hospedagem, Cloud Run, Firestore,
-  Secret Manager e Cloud Logging seguem o Cloud Data Processing Addendum do Google Cloud, que traz as cláusulas-padrão
-  da ANPD na parte "Brazil"; para eles vale o texto dos Estados Unidos acima. O Firebase Hosting, que hoje serve o
-  orzy.com.br, segue outro contrato: os Firebase Data Processing and Security Terms (21/08/2024), que não falam de
-  LGPD nem da ANPD. E ele guarda o IP de quem visita "por alguns meses". Com ele na frente, a transferência desses IPs
-  fica sem base clara no art. 33 da LGPD: o consentimento não cobre quem só abre a página inicial, e "necessário para
-  o contrato" é fraco para esse uso. Para fechar isso, quem recebe as visitas precisa ser um serviço coberto pelo
-  contrato do Google Cloud, ou um advogado precisa aceitar o risco. Se for Google, mudam também nos textos: o nome do
-  cookie (`__session`); a sessão, que acaba se o site ficar uns 15 minutos sem nenhum uso, porque o servidor desliga;
-  os registros (IP, data e página por 30 dias no Cloud Logging); e a exclusão nos sistemas do Google, que termina em
-  até 180 dias.
+- **Google (recomendação da thread de hospedagem, 15/10/2026, ainda não decidida):** servidor no Cloud Run e histórico
+  no Firestore, os dois em São Paulo, contratados com a Google Cloud Brasil Computação e Serviços de Dados Ltda.
+  Segundo a thread de hospedagem, Cloud Run, Firestore, Secret Manager e Cloud Logging seguem o Cloud Data Processing
+  Addendum do Google Cloud, que traz as cláusulas-padrão da ANPD na parte "Brazil". O que recebe as visitas muda a
+  conta. O endereço do próprio Cloud Run (`...run.app`, grátis, bom para um teste fechado) e um balanceador de carga do
+  Google no orzy.com.br (cerca de R$ 92 por mês) ficam cobertos por esse contrato. O Firebase Hosting, que serve hoje a
+  página temporária do orzy.com.br, segue outro contrato: os Firebase Data Processing and Security Terms (21/08/2024),
+  que não falam de LGPD nem da ANPD. Ele guarda o IP de quem visita "por alguns meses", e com ele o servidor iria para
+  os Estados Unidos. Com o Firebase Hosting na frente, a transferência desses IPs fica sem base clara no art. 33 da
+  LGPD: o consentimento não cobre quem só abre a página inicial, e "necessário para o contrato" é fraco para esse uso.
+  Então ele só serve com o ok de um advogado. Ligar o domínio direto no Cloud Run não resolve, porque é um recurso em
+  teste, e nenhum contrato de dados do Google vale para ele.
+- **Se for Google, mudam também nos textos:** a sessão acaba se o site ficar uns 15 minutos sem nenhum uso, porque o
+  servidor desliga; os registros do servidor (IP, data e página) ficam 30 dias no Cloud Logging, que por padrão guarda
+  "em qualquer centro de dados do mundo", então ou a configuração os põe em São Paulo, ou a Política diz que eles podem
+  ir para fora do Brasil com as cláusulas da ANPD; a exclusão nos sistemas do Google termina em até 180 dias; e, só com
+  o Firebase Hosting, o cookie passa a se chamar `__session`.
 
 **Site: código e login:** os itens da seção seguinte.
 
@@ -193,5 +198,6 @@ Consultadas em 15/10/2026.
 - [Privacidade no Firebase: o Hosting guarda IPs "por alguns meses"](https://firebase.google.com/support/privacy)
 - [Cloud Data Processing Addendum do Google Cloud](https://cloud.google.com/terms/data-processing-addendum) (lido pela
   thread de hospedagem)
+- [Onde o Cloud Logging guarda os registros](https://docs.cloud.google.com/logging/docs/region-support)
 - [Transparência nas transferências pela Resolução CD/ANPD nº 19/2024](https://www.mattosfilho.com.br/en/unico/regulates-international-data-transfers/)
 - [Declaração de Privacidade do Mercado Livre](https://www.mercadolivre.com.br/privacidade/declaracao-privacidade)

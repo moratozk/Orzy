@@ -47,13 +47,13 @@ Mercado Livre). As sugestões do relatório são regras fixas: o site não as ch
 - `painel-ml/`: a mesma coleta e as mesmas regras do PC. O que mudou para o site: o login passou a ter uma
   versão que não grava em arquivo, e a coleta ganhou etapas e andamento que o PC também usa.
   O PC continua igual: os 64 testes antigos passam sem mudança.
-- `testes/test_site.py`: 35 testes contra o Mercado Livre simulado. Cobrem o login inteiro, o estado do OAuth,
+- `testes/test_site.py`: 36 testes contra o Mercado Livre simulado. Cobrem o login inteiro, o estado do OAuth,
   o escape de títulos, o CSV com BOM, o isolamento entre contas, token vencido, pedido de outro site, histórico,
   cabeçalhos de segurança, uma ida e volta por HTTP real (com `HEAD`), a página inicial, os textos legais (com
   escape), o rodapé, a hora do relatório em horário de Brasília, a limpeza diária do histórico, o `robots.txt`, a
-  descrição para buscadores, as sessões sem login (prazo e limite), o código novo da sessão depois do login e a
-  conexão parada.
-- Verificado: 99 testes passam no Python 3.13 e no 3.10 (64 do PC e 35 do site); pyflakes limpo. Quebrar de
+  descrição para buscadores, as sessões sem login (prazo e limite), o código novo da sessão depois do login, a
+  conexão parada e a palavra sem espaço que quebra no celular.
+- Verificado: 100 testes passam no Python 3.13 e no 3.10 (64 do PC e 36 do site); pyflakes limpo. Quebrar de
   propósito a checagem do estado, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a
   limpeza diária, o `HEAD`, o `robots.txt`, o prazo e o limite das sessões sem login, o código novo depois do
   login ou o tempo máximo de uma conexão faz os testes falharem.
@@ -67,9 +67,12 @@ Limites da primeira versão (propostos, a confirmar):
 - **Sessões sem login** (quem clicou em Conectar e não voltou do Mercado Livre) somem em 15 minutos, no máximo
   1000 de uma vez. Quem entra ganha um código de sessão novo, e uma conexão parada fecha em 60 segundos.
 
+Conferido no navegador (Chromium), com login e relatórios simulados: as páginas internas (formulário, andamento,
+resultado e histórico) de 320 a 1280 px, nos dois temas. Nada empurra a página para o lado, e as tabelas largas
+rolam dentro da própria caixa. Só funcionamento: o visual final vem depois, com a identidade escolhida.
+
 Não testado ainda: o site falando com o Mercado Livre de verdade (depende da Redirect URI cadastrada, passo 3),
-HTTPS e domínio, carga com muitos anúncios e as páginas internas no celular (a página inicial foi conferida de
-360 a 1280 px).
+HTTPS e domínio e carga com muitos anúncios.
 
 ## Custos de hospedagem (estimativas de 15/10/2026)
 

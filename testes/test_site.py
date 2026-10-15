@@ -428,6 +428,14 @@ class PaginasSimplesTests(SiteBase):
         inicio = self.pedir("GET", "/", origem=None)[2].decode("utf-8")
         self.assertIn('<meta name="description" content="Conecte sua conta do Mercado Livre', inicio)
 
+    def test_palavra_sem_espaco_quebra_no_celular(self):
+        # Apelidos como LOJA_DO_JOAO_OFICIAL, no título da página, empurravam a página para o lado num celular de 360 px.
+        status, _, css = self.pedir("GET", "/static/estilo.css", origem=None)
+        self.assertEqual(status, 200)
+        corpo = css.decode("utf-8")
+        regra = corpo[corpo.index("\nbody {"):]
+        self.assertIn("overflow-wrap: break-word", regra[:regra.index("}")])
+
     def test_pagina_que_nao_existe(self):
         self.assertEqual(self.pedir("GET", "/nao-existe", origem=None)[0], 404)
 

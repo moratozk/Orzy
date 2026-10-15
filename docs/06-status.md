@@ -91,6 +91,7 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
     resposta a `HEAD` (verificadores de link) e cor dos links com contraste suficiente para leitura;
   - segurança: quem abre o login e não volta perde a sessão em 15 minutos (no máximo 1000 sessões assim; sai a
     mais antiga), o código da sessão muda depois do login e uma conexão parada fecha em 60 segundos;
+  - páginas internas conferidas no celular: um apelido ou título sem espaço não empurra mais a página para o lado;
   - recomendação de hospedagem com custos em reais (thread "Hospedagem e domínio").
 
 ## O que foi testado (com dados simulados)
@@ -106,8 +107,9 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
   lidos de `docs/legal/` (com escape), rodapé com os dois textos e o e-mail, data do relatório em horário de Brasília, limpeza
   diária do histórico que continua depois de um erro, `HEAD` sem corpo, `robots.txt`, descrição para buscadores,
   sessão sem login que some em 15 minutos e o limite delas, código novo da sessão depois do login e conexão parada
-  que fecha sem erro.
-- Testes rodados no Python 3.10 e 3.13 (99: 64 do PC e 35 do site). Quebrar de propósito a checagem do estado do
+  que fecha sem erro. No navegador (Chromium), com login e relatórios simulados: as páginas internas (formulário,
+  andamento, resultado e histórico) de 320 a 1280 px, nos dois temas, sem nada empurrando a página para o lado.
+- Testes rodados no Python 3.10 e 3.13 (100: 64 do PC e 36 do site). Quebrar de propósito a checagem do estado do
   OAuth, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a limpeza diária, o `HEAD`, o
   `robots.txt`, o prazo e o limite das sessões sem login, o código novo depois do login ou o tempo máximo de uma
   conexão faz os testes falharem.

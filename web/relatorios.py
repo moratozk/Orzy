@@ -35,6 +35,7 @@ class Relatorio:
         self.aviso = ""  # ex.: "lê até 300 anúncios por relatório"
         self.mensagem = ""  # o que aconteceu, quando deu erro ou não há anúncios
         self.gerado_em = None  # quando os dados terminaram de chegar do Mercado Livre (UTC)
+        self.historico_id = None  # número dele no histórico, depois de guardado
         self.thread = None
         self._trava = threading.Lock()
 
@@ -95,7 +96,7 @@ class Relatorios:
                 relatorio.aviso = (f"Esta versão lê até {self._max} anúncios por relatório. "
                                    "Se você tem mais, os que sobraram não entram aqui.")
             try:
-                self._historico.salvar(relatorio.ml_user_id, relatorio.dias, linhas)
+                relatorio.historico_id = self._historico.salvar(relatorio.ml_user_id, relatorio.dias, linhas)
             except Exception:
                 logging.exception("Não consegui salvar o histórico de um relatório")
             relatorio.terminar(linhas)

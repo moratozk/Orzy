@@ -13,7 +13,8 @@ Plano, custos e decisões em [docs/07-fase-3-plano.md](../docs/07-fase-3-plano.m
 3. **Resultado:** o mesmo conteúdo do CSV do PC, com "Comece por estes" e a tabela de todos os anúncios, e a data e
    a hora em que os dados foram buscados (horário de Brasília).
 4. **Histórico:** cada relatório fica guardado (só números e títulos); dá para abrir e apagar tudo. O que passa de
-   365 dias é apagado sozinho: o servidor confere ao ligar e depois uma vez por dia.
+   365 dias é apagado sozinho: o servidor confere ao ligar e depois uma vez por dia. Cada relatório mostra o que
+   mudou desde o anterior da mesma conta e do mesmo período, sem dizer por quê.
 5. **Privacidade e Termos:** `/privacidade` e `/termos` mostram os textos de `docs/legal/`, que são de outra frente do
    projeto. O site lê o arquivo a cada pedido: mudar o texto não pede mudança no código. O rodapé de todas as páginas
    leva aos dois, e junto de cada botão Conectar aparece o aviso de que, ao conectar, a pessoa aceita os Termos.
@@ -75,7 +76,8 @@ Os testes do site (`testes/test_site.py`) usam o Mercado Livre simulado e não p
 | `login.py` | Entrar com o Mercado Livre (PKCE e conferência do estado) |
 | `sessoes.py` | Sessões na memória, com prazo (8 horas com login, 15 minutos sem), limite para as sem login e código novo depois do login |
 | `relatorios.py` | Gera o relatório em segundo plano e guarda o andamento |
-| `historico.py` | Histórico em SQLite: salvar, listar, ver, apagar e apagar os antigos |
+| `historico.py` | Histórico em SQLite: salvar, listar, ver, achar o anterior, apagar e apagar os antigos |
+| `comparacao.py` | O que mudou entre dois relatórios do histórico (mesma conta e mesmo período) |
 | `paginas.py` | HTML das páginas (todo texto do Mercado Livre passa por escape) |
 | `legal.py` | Mostra a Política de Privacidade e os Termos de Uso a partir do Markdown de `docs/legal/`, com escape |
 | `app.py` | Rotas, cookies, cabeçalhos de segurança e conferência da origem dos pedidos |

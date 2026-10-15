@@ -409,7 +409,8 @@ def _tabela(linhas):
     return f'<div class="tabela"><table><thead>{cabecalho}</thead><tbody>{corpo}</tbody></table></div>'
 
 
-def resultado(relatorio):
+def resultado(relatorio, ver_mudancas=None):
+    """ver_mudancas: endereço da comparação com o relatório anterior do histórico, quando existe."""
     linhas = relatorio.linhas
     contagem = {s: sum(1 for l in linhas if l["situacao"] == s) for s in analise.ORDEM}
     com_problema = analise.PROBLEMA_DE_VENDA | analise.PROBLEMA_DE_VISITA
@@ -422,9 +423,14 @@ def resultado(relatorio):
     if relatorio.gerado_em is not None:
         quando = relatorio.gerado_em.astimezone(BRASILIA).strftime("%d/%m/%Y às %H:%M")
         gerado = f'<p class="ajuda">Dados buscados no Mercado Livre em {quando} (horário de Brasília).</p>'
+    mudancas = ""
+    if ver_mudancas:
+        mudancas = (f'<p><a href="{escape(ver_mudancas)}">Ver o que mudou desde o relatório anterior de '
+                    f'{relatorio.dias} dias</a></p>')
     corpo = f"""
 <h1>Relatório dos últimos {relatorio.dias} dias</h1>
 {gerado}
+{mudancas}
 {_aviso(relatorio.aviso)}
 {_aviso(relatorio.mensagem)}
 <ul class="resumo">{_resumo_html(contagem)}</ul>
@@ -469,17 +475,90 @@ def historico(lista):
     return _pagina("Histórico", corpo, logado=True)
 
 
-def historico_relatorio(dados):
-    linhas = "".join(
-        f"<tr><td>{escape(a['titulo'] or '(sem título)')}</td><td>{escape(a['situacao'])}</td>"
-        f"<td class=n>{_t(a['visitas'])}</td><td class=n>{_t(a['vendas'])}</td>"
-        f"<td class=n>{a['pontos']}</td></tr>"
-        for a in dados["anuncios"])
+def _antes_agora(antes, agora):
+    """Um número com o do relatório anterior: "120 → 150 (+30)". Se não mudou, só o de agora."""
+    if antes == agora:
+        return _t(agora)
+    if antes is None or agora is None:
+        return f"{_t(antes)} → {_t(agora)}"
+    return f"{antes} → {agora} ({agora - antes:+d})"
+
+
+def _titulo_guardado(anuncio):
+    return escape(anuncio["titulo"] or "(sem título)")
+
+
+def _linha_do_historico(anuncio, antes, comparando):
+    """Uma linha da tabela. antes: o mesmo anúncio no relatório anterior (None se não estava lá)."""
+    titulo = _titulo_guardado(anuncio)
+    situacao = escape(anuncio["situacao"])
+    visitas, vendas = _t(anuncio["visitas"]), _t(anuncio["vendas"])
+    if antes is None:
+        if comparando:
+            titulo += '<br><span class="ajuda">Novo neste relatório</span>'
+    else:
+        if antes["titulo"] != anuncio["titulo"]:
+            titulo += f'<br><span class="ajuda">Título antes: {_titulo_guardado(antes)}</span>'
+        if antes["situacao"] != anuncio["situacao"]:
+            situacao = f"{escape(antes['situacao'])} → {situacao}"
+        visitas = _antes_agora(antes["visitas"], anuncio["visitas"])
+        vendas = _antes_agora(antes["vendas"], anuncio["vendas"])
+    return (f"<tr><td>{titulo}</td><td>{situacao}</td><td class=n>{visitas}</td><td class=n>{vendas}</td>"
+            f"<td class=n>{anuncio['pontos']}</td></tr>")
+
+
+def _mudancas(dados, comparacao):
+    """O que mudou desde o relatório anterior, sem dizer por quê (docs/03-decisoes-tecnicas.md)."""
+    if comparacao is None:
+        return (f'<p class="ajuda">Ainda não há um relatório anterior de {dados["dias"]} dias para comparar. '
+                'Gere outro com o mesmo período daqui a alguns dias para ver o que mudou em cada anúncio.</p>')
+    antes = comparacao["antes"]
+    itens = [f"Visitas, somando todos os anúncios: {_antes_agora(*comparacao['visitas'])}",
+             f"Vendas, somando todos os anúncios: {_antes_agora(*comparacao['vendas'])}",
+             f"Mudaram de situação: {len(comparacao['mudaram_de_situacao'])}",
+             f"Novos neste relatório: {len(comparacao['novos'])}",
+             f"Não estão mais no relatório: {len(comparacao['sairam'])}"]
+    if comparacao["titulos_mudaram"]:
+        itens.append(f"Títulos que mudaram: {comparacao['titulos_mudaram']}")
+    mudaram = ""
+    if comparacao["mudaram_de_situacao"]:
+        linhas = "".join(
+            f"<tr><td>{_titulo_guardado(a)}</td><td>{escape(antes[a['id']]['situacao'])}</td>"
+            f"<td>{escape(a['situacao'])}</td><td class=n>{_antes_agora(antes[a['id']]['visitas'], a['visitas'])}</td>"
+            f"<td class=n>{_antes_agora(antes[a['id']]['vendas'], a['vendas'])}</td></tr>"
+            for a in comparacao["mudaram_de_situacao"])
+        mudaram = ('<h3>Mudaram de situação</h3><div class="tabela"><table><thead><tr><th>Anúncio</th><th>Antes</th>'
+                   '<th>Agora</th><th class=n>Visitas</th><th class=n>Vendas</th></tr></thead>'
+                   f'<tbody>{linhas}</tbody></table></div>')
+    sairam = ""
+    if comparacao["sairam"]:
+        nomes = "".join(f"<li>{_titulo_guardado(a)}</li>" for a in comparacao["sairam"])
+        sairam = ('<h3>Não estão mais no relatório</h3>'
+                  '<p class="ajuda">Estavam no relatório anterior e não estão neste. '
+                  'O relatório só lê anúncios ativos.</p>'
+                  f'<ul>{nomes}</ul>')
+    anterior = comparacao["anterior"]
+    return f"""
+<h2 id="mudancas">O que mudou desde o relatório de
+<a href="/historico/{anterior['id']}">{_data(anterior['criado_em'])}</a></h2>
+<p class="ajuda">Comparado com o relatório anterior do mesmo período (últimos {dados['dias']} dias). Mostra o que
+mudou, não o porquê: visitas e vendas mudam por muitos motivos, como época do ano, preço e concorrência.</p>
+<ul>{"".join(f"<li>{i}</li>" for i in itens)}</ul>
+{mudaram}
+{sairam}"""
+
+
+def historico_relatorio(dados, comparacao=None):
+    """Um relatório guardado. comparacao: o que comparacao.comparar() devolve, ou None se não há anterior."""
+    antes = comparacao["antes"] if comparacao else {}
+    linhas = "".join(_linha_do_historico(a, antes.get(a["id"]), comparacao is not None) for a in dados["anuncios"])
     corpo = f"""
 <h1>Relatório de {_data(dados['criado_em'])}</h1>
 <p class="ajuda">Últimos {dados['dias']} dias · {dados['total']} anúncios.
 Mostra como os anúncios estavam nesse dia: não é atualizado depois.</p>
 <ul class="resumo">{_resumo_html(dados['resumo'])}</ul>
+{_mudancas(dados, comparacao)}
+<h2>Todos os anúncios</h2>
 <div class="tabela"><table><thead><tr><th>Anúncio</th><th>Situação</th><th class=n>Visitas</th>
 <th class=n>Vendas</th><th class=n>Sugestões</th></tr></thead><tbody>{linhas}</tbody></table></div>
 <p><a href="/historico">Voltar ao histórico</a></p>"""

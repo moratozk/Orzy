@@ -19,6 +19,10 @@ estão em [docs/legal/](legal/LEIA-ME.md). A recomendação de hospedagem, com c
 - Mostra o resultado no navegador (o que mudar em cada anúncio primeiro) e baixa o mesmo CSV do PC. A página diz a
   data e a hora em que os dados foram buscados, como pedem os termos do Mercado Livre (item 5.3).
 - Guarda um histórico dos relatórios, para abrir cada um depois. Dá para apagar tudo com um clique.
+- Compara cada relatório do histórico com o anterior da mesma conta e do mesmo período: o que mudou em cada
+  anúncio (situação, visitas, vendas e título), os novos e os que saíram. Diz o que mudou, sem afirmar a causa
+  ([03-decisoes-tecnicas.md](03-decisoes-tecnicas.md)). Fotos e ficha técnica não entram: o histórico não as
+  guarda, e guardá-las pede mudar a Política de Privacidade.
 - Mostra a Política de Privacidade e os Termos de Uso de `docs/legal/` (rascunhos), com os dois e o e-mail de contato
   no rodapé de todas as páginas e o aviso de aceite junto de cada botão Conectar. Tem cabeçalhos de segurança.
 - Para buscadores: descrição da página (o resumo que o Google e o WhatsApp mostram) e `robots.txt`, que deixa os
@@ -47,16 +51,17 @@ Mercado Livre). As sugestões do relatório são regras fixas: o site não as ch
 - `painel-ml/`: a mesma coleta e as mesmas regras do PC. O que mudou para o site: o login passou a ter uma
   versão que não grava em arquivo, e a coleta ganhou etapas e andamento que o PC também usa.
   O PC continua igual: os 64 testes antigos passam sem mudança.
-- `testes/test_site.py`: 36 testes contra o Mercado Livre simulado. Cobrem o login inteiro, o estado do OAuth,
+- `testes/test_site.py`: 39 testes contra o Mercado Livre simulado. Cobrem o login inteiro, o estado do OAuth,
   o escape de títulos, o CSV com BOM, o isolamento entre contas, token vencido, pedido de outro site, histórico,
   cabeçalhos de segurança, uma ida e volta por HTTP real (com `HEAD`), a página inicial, os textos legais (com
   escape), o rodapé, a hora do relatório em horário de Brasília, a limpeza diária do histórico, o `robots.txt`, a
   descrição para buscadores, as sessões sem login (prazo e limite), o código novo da sessão depois do login, a
-  conexão parada e a palavra sem espaço que quebra no celular.
-- Verificado: 100 testes passam no Python 3.13 e no 3.10 (64 do PC e 36 do site); pyflakes limpo. Quebrar de
+  conexão parada, a palavra sem espaço que quebra no celular e a comparação com o relatório anterior.
+- Verificado: 103 testes passam no Python 3.13 e no 3.10 (64 do PC e 39 do site); pyflakes limpo. Quebrar de
   propósito a checagem do estado, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a
   limpeza diária, o `HEAD`, o `robots.txt`, o prazo e o limite das sessões sem login, o código novo depois do
-  login ou o tempo máximo de uma conexão faz os testes falharem.
+  login, o tempo máximo de uma conexão, a escolha do relatório anterior ou o escape dos títulos antigos faz os
+  testes falharem.
 
 Limites da primeira versão (propostos, a confirmar):
 - **Uma instância só**: as sessões e os relatórios em andamento ficam na memória do servidor.

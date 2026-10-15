@@ -1,12 +1,13 @@
 """Rotas do site. Cada requisição vira (status, cabeçalhos, corpo); o servidor só repassa a resposta."""
 
 import json
+import logging
 from http.cookies import CookieError, SimpleCookie
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 import meus_anuncios
-from . import legal, login, paginas
+from . import comparacao, legal, login, paginas
 from .historico import Historico
 from .relatorios import ERRO, GERANDO, PRONTO, ErroRelatorio, Relatorios
 from .sessoes import Sessoes
@@ -138,7 +139,18 @@ class Site:
             return self._html(200, paginas.andamento(relatorio))
         if relatorio.estado == ERRO:
             return self._html(200, paginas.relatorio_com_erro(relatorio))
-        return self._html(200, paginas.resultado(relatorio))
+        return self._html(200, paginas.resultado(relatorio, self._endereco_das_mudancas(relatorio)))
+
+    def _endereco_das_mudancas(self, relatorio):
+        """Onde ver o que mudou desde o relatório anterior, se este foi guardado e há um anterior para comparar."""
+        if relatorio.historico_id is None:
+            return None
+        try:
+            anterior = self.historico.id_do_anterior(relatorio.ml_user_id, relatorio.historico_id)
+        except Exception:  # o resultado já está na memória: um problema no histórico não o esconde
+            logging.exception("Não consegui procurar o relatório anterior no histórico")
+            return None
+        return f"/historico/{relatorio.historico_id}#mudancas" if anterior is not None else None
 
     def _andamento(self, relatorio_id, cabecalhos):
         relatorio = self._relatorio_da_sessao(relatorio_id, cabecalhos)
@@ -173,7 +185,10 @@ class Site:
         dados = self.historico.ver(sessao.usuario["id"], int(relatorio_id))
         if dados is None:
             return self._nao_encontrado()
-        return self._html(200, paginas.historico_relatorio(dados))
+        anterior_id = self.historico.id_do_anterior(sessao.usuario["id"], dados["id"])
+        anterior = self.historico.ver(sessao.usuario["id"], anterior_id) if anterior_id is not None else None
+        mudancas = comparacao.comparar(anterior, dados) if anterior is not None else None
+        return self._html(200, paginas.historico_relatorio(dados, mudancas))
 
     def _apagar_historico(self, cabecalhos, corpo):
         sessao = self._logada(cabecalhos)

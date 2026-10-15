@@ -91,6 +91,19 @@ class Historico:
         return {"id": id_, "criado_em": criado, "dias": dias, "total": total, "resumo": json.loads(resumo),
                 "anuncios": [dict(zip(COLUNAS_ANUNCIO, a)) for a in anuncios]}
 
+    def id_do_anterior(self, ml_user_id, relatorio_id):
+        """O relatório guardado logo antes deste, da mesma conta e do mesmo período: é com ele que se compara.
+
+        Devolve o número dele, ou None se não houver (ou se o relatório pedido não for da conta).
+        """
+        with self._conectar() as con:
+            linha = con.execute(
+                "SELECT antes.id FROM relatorios AS este JOIN relatorios AS antes "
+                "ON antes.ml_user_id = este.ml_user_id AND antes.dias = este.dias AND antes.id < este.id "
+                "WHERE este.id = ? AND este.ml_user_id = ? ORDER BY antes.id DESC LIMIT 1",
+                (int(relatorio_id), int(ml_user_id))).fetchone()
+        return linha[0] if linha else None
+
     def apagar(self, ml_user_id):
         """Apaga todos os relatórios da conta. Devolve quantos foram apagados."""
         with self._conectar() as con:

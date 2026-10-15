@@ -27,7 +27,7 @@ sys.path.insert(0, str(PASTA_RAIZ / "painel-ml"))
 import analise  # noqa: E402
 import ml_api  # noqa: E402
 from ml_simulado import MLSimulado, performance  # noqa: E402
-from web import app, configuracao, login, relatorios, servidor, sessoes  # noqa: E402
+from web import app, comparacao, configuracao, login, relatorios, servidor, sessoes  # noqa: E402
 from web.historico import Historico  # noqa: E402
 
 URL = "https://orzy.test"
@@ -208,6 +208,43 @@ class HistoricoTests(unittest.TestCase):
         self.historico.salvar(111, 30, self.linhas)
         self.assertEqual(self.historico.apagar_antigos(365), 1)
         self.assertEqual(len(self.historico.listar(111)), 1)
+
+    def test_anterior_e_o_ultimo_da_mesma_conta_e_do_mesmo_periodo(self):
+        primeiro = self.historico.salvar(111, 30, self.linhas)
+        self.historico.salvar(111, 60, self.linhas)  # outro período: os números não são comparáveis
+        self.historico.salvar(222, 30, self.linhas)  # outra conta: nunca
+        segundo = self.historico.salvar(111, 30, self.linhas)
+        terceiro = self.historico.salvar(111, 30, self.linhas)
+        self.assertIsNone(self.historico.id_do_anterior(111, primeiro))
+        self.assertEqual(self.historico.id_do_anterior(111, segundo), primeiro)
+        self.assertEqual(self.historico.id_do_anterior(111, terceiro), segundo)
+        self.assertIsNone(self.historico.id_do_anterior(222, terceiro), "o relatório pedido não é da conta 222")
+
+
+class ComparacaoTests(unittest.TestCase):
+    def test_diz_o_que_mudou_em_cada_anuncio(self):
+        def anuncio(id_, titulo, visitas, vendas, situacao):
+            return {"id": id_, "titulo": titulo, "visitas": visitas, "vendas": vendas, "situacao": situacao,
+                    "pontos": 0}
+        anterior = {"id": 1, "criado_em": "2026-10-01T12:00:00+00:00", "anuncios": [
+            anuncio("MLB1", "Fone", 100, 0, "VISITA SEM VENDA"),
+            anuncio("MLB2", "Cabo", 10, 1, "VENDE, MAS POUCO VISTO"),
+            anuncio("MLB3", "Caixa", None, None, "SEM DADOS"),
+            anuncio("MLB4", "Capa", 5, 0, "POUCA VISITA")]}
+        atual = {"id": 2, "criado_em": "2026-10-08T12:00:00+00:00", "anuncios": [
+            anuncio("MLB1", "Fone Bluetooth Sem Fio", 150, 3, "VENDENDO BEM"),
+            anuncio("MLB2", "Cabo", 12, 1, "VENDE, MAS POUCO VISTO"),
+            anuncio("MLB3", "Caixa", 40, 0, "VISITA SEM VENDA"),
+            anuncio("MLB5", "Suporte", 7, 0, "POUCA VISITA")]}
+        mudou = comparacao.comparar(anterior, atual)
+        self.assertEqual([a["id"] for a in mudou["mudaram_de_situacao"]], ["MLB1", "MLB3"])
+        self.assertEqual(mudou["titulos_mudaram"], 1)
+        self.assertEqual([a["id"] for a in mudou["novos"]], ["MLB5"])
+        self.assertEqual([a["id"] for a in mudou["sairam"]], ["MLB4"])
+        self.assertEqual(mudou["visitas"], (115, 209), "anúncio sem dados não entra na soma")
+        self.assertEqual(mudou["vendas"], (1, 4))
+        self.assertEqual(mudou["antes"]["MLB1"]["titulo"], "Fone")
+        self.assertEqual(mudou["anterior"], {"id": 1, "criado_em": "2026-10-01T12:00:00+00:00"})
 
 
 class ClienteDaSessaoTests(unittest.TestCase):
@@ -401,6 +438,49 @@ class HistoricoSiteTests(SiteBase):
         self.assertEqual(status, 303)
         self.assertEqual(self.site.historico.listar(111222333), [])
 
+    def test_compara_com_o_relatorio_anterior_do_mesmo_periodo(self):
+        self.semear()
+        self.ml.adicionar_item("MLB1000000003", "Capa <b>antiga</b> para celular", visitas=50)
+        cookie = self.entrar()
+        primeiro = self.gerar(cookie)
+        self.esperar(cookie, primeiro)
+        self.assertNotIn(b"#mudancas", self.pedir("GET", f"/relatorio/{primeiro}", cookie=cookie)[2],
+                         "sem relatório anterior, não há o que comparar")
+        guardado_1 = self.site.historico.listar(111222333)[0]["id"]
+        texto = self.pedir("GET", f"/historico/{guardado_1}", cookie=cookie)[2].decode("utf-8")
+        self.assertIn("Ainda não há um relatório anterior de 30 dias para comparar", texto)
+
+        # Entre um relatório e outro, o vendedor mudou o título do fone, que passou a ter visitas e vendas;
+        # a capa saiu dos anúncios ativos e entrou um suporte.
+        self.ml.itens["MLB1000000001"]["title"] = "Fone Bluetooth <script>x</script> Novo"
+        self.ml.visitas["MLB1000000001"] = 200
+        self.ml.adicionar_pedido("MLB1000000001", quantidade=5, dias_atras=1)
+        self.ml.itens["MLB1000000003"]["status"] = "paused"
+        self.ml.adicionar_item("MLB1000000004", "Suporte de mesa", visitas=10)
+        self.esperar(cookie, self.gerar(cookie, dias=60))  # outro período: fica fora da comparação
+        segundo = self.gerar(cookie)
+        self.esperar(cookie, segundo)
+        guardado_2 = self.site.historico.listar(111222333)[0]["id"]
+
+        pagina = self.pedir("GET", f"/relatorio/{segundo}", cookie=cookie)[2].decode("utf-8")
+        self.assertIn(f'<a href="/historico/{guardado_2}#mudancas">Ver o que mudou', pagina)
+
+        texto = self.pedir("GET", f"/historico/{guardado_2}", cookie=cookie)[2].decode("utf-8")
+        self.assertIn('<h2 id="mudancas">', texto)
+        self.assertIn(f'<a href="/historico/{guardado_1}">', texto, "compara com o de 30 dias, não com o de 60")
+        self.assertIn("Mostra o que\nmudou, não o porquê", texto)
+        self.assertIn("Mudaram de situação: 1", texto)
+        self.assertIn("Novos neste relatório: 1", texto)
+        self.assertIn("Não estão mais no relatório: 1", texto)
+        self.assertIn("Títulos que mudaram: 1", texto)
+        self.assertIn("<td class=n>0 → 200 (+200)</td><td class=n>0 → 5 (+5)</td>", texto)
+        self.assertIn("POUCA VISITA → VENDENDO BEM", texto)
+        self.assertIn(f"Título antes: {TITULO_BOM}", texto)
+        self.assertIn("Fone Bluetooth &lt;script&gt;x&lt;/script&gt; Novo", texto)
+        self.assertNotIn("<script>x", texto)
+        self.assertIn("<li>Capa &lt;b&gt;antiga&lt;/b&gt; para celular</li>", texto)
+        self.assertIn('Suporte de mesa<br><span class="ajuda">Novo neste relatório</span>', texto)
+
 
 class PaginasSimplesTests(SiteBase):
     def test_privacidade_e_cabecalhos_de_seguranca(self):
@@ -429,7 +509,7 @@ class PaginasSimplesTests(SiteBase):
         self.assertIn('<meta name="description" content="Conecte sua conta do Mercado Livre', inicio)
 
     def test_palavra_sem_espaco_quebra_no_celular(self):
-        # Apelidos como LOJA_DO_JOAO_OFICIAL, no título da página, empurravam a página para o lado num celular de 360 px.
+        # Apelidos como LOJA_DO_JOAO_OFICIAL, no título, empurravam a página para o lado num celular de 360 px.
         status, _, css = self.pedir("GET", "/static/estilo.css", origem=None)
         self.assertEqual(status, 200)
         corpo = css.decode("utf-8")

@@ -17,8 +17,11 @@ Legenda: **[doc]** está na documentação oficial · **[código]** é como o pa
 - Formulário novo do app (visto em 14/10/2026): nome único com pelo menos 5 caracteres, descrição de até 150 caracteres
   (aparece na autorização), propósito, quantos usuários e logotipo PNG obrigatório. Depois, na tela "Configuração e scopes":
   URIs de redirect, Fluxos OAuth (Authorization Code, Client Credentials, Refresh Token), PKCE, unidades de negócio
-  (Mercado Livre, VIS) e permissões por área (Usuários, Comunicações pré e pós-vendas, Publicação e sincronização e outras),
-  cada uma com um tipo de acesso (por exemplo, Sem acesso ou Leitura e escrita).
+  (Mercado Livre, VIS) e permissões por área, cada uma com Sem acesso, Leitura ou Leitura e escrita: Usuários (fixo em
+  Leitura e escrita), Comunicações pré e pós-vendas, Publicação e sincronização, Publicidade de um produto, Faturamento
+  de uma venda, Métricas do negócio, Promoções, cupons e descontos de uma venda, Venda e envios de um produto.
+  O painel pede Leitura em Publicação e sincronização (anúncios), Métricas do negócio (visitas) e Venda e envios
+  de um produto (pedidos). **[código]**
 - Trocar a senha ou tirar a permissão do app invalida tudo: tem que fazer login de novo. **[doc]**
 - A Redirect URI tem que ser idêntica à cadastrada no app. **[doc]**
 - Erros: `invalid_client` (Client ID ou Secret errado), `invalid_grant` (código ou refresh token vencido, já usado ou com Redirect URI diferente), `local_rate_limited` (429). **[doc]**

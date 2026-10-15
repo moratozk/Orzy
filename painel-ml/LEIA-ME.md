@@ -38,9 +38,9 @@ Roda no seu computador, não precisa de servidor e não custa nada.
      Client Credentials pode ficar desmarcado: o painel não usa.
    - **PKCE:** pode marcar. Só lembre o que escolheu, porque o `conectar.py` vai perguntar.
    - **Negócios:** marque **Mercado Livre**.
-   - **Permissões:** escolha pelo menos **Leitura** em Publicação e sincronização (anúncios), em Vendas e envios
-     (pedidos) e na área de métricas (visitas). Usuários pode ficar como está e o resto, Sem acesso.
-     Os nomes podem variar um pouco no site.
+   - **Permissões:** escolha **Leitura** em **Publicação e sincronização** (anúncios), **Métricas do negócio**
+     (visitas) e **Venda e envios de um produto** (pedidos). Usuários fica como está (não dá para mudar)
+     e o resto, Sem acesso.
    - **Tópicos e notificações:** não precisa marcar nada. Se o formulário exigir uma URL de
      notificação, use `https://www.google.com` também.
 4. Salve. Na tela do app, copie o **Client ID** (o número) e o **Client Secret** (a chave).

@@ -48,6 +48,10 @@ class ErroLogin(ErroML):
     """O login venceu, foi cancelado ou ainda não foi feito: precisa rodar conectar.py."""
 
 
+class ErroColagem(ErroML):
+    """O que foi colado não tem o código, mas o login ainda espera: dá para colar de novo."""
+
+
 # ---------------------------------------------------------------- arquivos
 
 def _ler_json(caminho):
@@ -165,7 +169,7 @@ def extrair_code(texto, state_esperado=None):
     """Aceita o endereço inteiro copiado do navegador ou só o código TG-..."""
     texto = texto.strip().strip('"').strip("'")
     if not texto:
-        raise ErroML("Nada foi colado.")
+        raise ErroColagem("Nada foi colado.")
     if "code=" in texto or "error=" in texto or texto.lower().startswith("http"):
         if not texto.lower().startswith("http"):
             texto = "https://" + texto
@@ -174,7 +178,7 @@ def extrair_code(texto, state_esperado=None):
             detalhe = params.get("error_description", params["error"])[0]
             raise ErroML("O Mercado Livre recusou a autorização: " + detalhe)
         if "code" not in params:
-            raise ErroML("Não achei o código (code=...) nesse endereço. Copie o endereço INTEIRO "
+            raise ErroColagem("Não achei o código (code=...) nesse endereço. Copie o endereço INTEIRO "
                          "da barra do navegador, logo depois de clicar em Permitir.")
         state = params.get("state", [None])[0]
         if state_esperado and state is not None and state != state_esperado:

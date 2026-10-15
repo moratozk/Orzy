@@ -153,6 +153,14 @@ class TestLogin(Base):
         codigo, saida, _ = self.rodar_conectar([CLIENT_ID, SECRET, "", "n", colado_torto])
         self.assertEqual(codigo, 0, saida)
 
+    def test_colou_errado_e_pode_colar_de_novo(self):
+        # Foi o que aconteceu no primeiro teste de verdade: digitou o exemplo do passo a passo.
+        codigo, saida, _ = self.rodar_conectar([CLIENT_ID, SECRET, "", "n", "code=TG-...", self.ml.autorizar])
+        self.assertEqual(codigo, 0, saida)
+        self.assertIn("Não achei o código", saida)
+        self.assertIn("O login continua esperando", saida)
+        self.assertIn("Pronto! Conectado como LOJA_TESTE", saida)
+
     def test_endereco_de_outra_tentativa_e_recusado(self):
         def outro_state(link):
             return self.ml.autorizar(link).replace("state=", "state=x")

@@ -74,9 +74,18 @@ def main():
     print(url + "\n")
     webbrowser.open(url)
 
-    colado = perguntar("Cole aqui o endereço")
+    while True:
+        colado = perguntar("Cole aqui o endereço")
+        try:
+            code = ml_api.extrair_code(colado, state)
+            break
+        except ml_api.ErroColagem as e:
+            # Sem fechar o programa: se fechasse, a pessoa colaria o endereço no cmd, que tenta rodar como comando.
+            print(f"\n{e}\nO login continua esperando: cole aqui o endereço que começa com {config['redirect_uri']}\n")
+        except ml_api.ErroML as e:
+            print("\nNão deu certo:", e)
+            sys.exit(1)
     try:
-        code = ml_api.extrair_code(colado, state)
         tokens = ml_api.trocar_code_por_token(config, code, verifier)
         eu = ml_api.MercadoLivre().obter_usuario()
     except ml_api.ErroML as e:
@@ -94,6 +103,6 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, EOFError):
         print("\nCancelado.")
         sys.exit(1)

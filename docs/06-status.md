@@ -20,7 +20,7 @@ O Nicolas está criando o app de teste no Mercado Livre. Ainda **não foi rodado
 ## Feito
 
 - Código do painel em `painel-ml/` (veio de uma conversa anterior com o Claude, que não está acessível aqui).
-- Mercado Livre simulado em `testes/ml_simulado.py` e 35 testes em `testes/test_painel.py`.
+- Mercado Livre simulado em `testes/ml_simulado.py` e 36 testes em `testes/test_painel.py`.
 - Correções depois dos testes:
   - conexão que cai no meio da resposta fechava o programa com erro técnico em inglês: agora tenta de novo e, se não der, explica;
   - rede com bloqueio (escola, trabalho) que devolve uma página no lugar dos dados também fechava o programa: agora explica;
@@ -29,6 +29,8 @@ O Nicolas está criando o app de teste no Mercado Livre. Ainda **não foi rodado
 - LEIA-ME com o formulário novo do app (informações básicas e a tela "Configuração e scopes") e como autorizar
   com outra conta numa janela anônima. As mensagens do programa falam em "Refresh Token", o nome novo de "Acesso offline".
 - O `conectar.py` não mostra mais o Client Secret depois de colado: no primeiro teste, a chave apareceu num print do cmd.
+- Se o que foi colado não tem o código, o `conectar.py` pede de novo em vez de fechar: no primeiro teste,
+  o endereço acabou colado no cmd depois que o programa fechou.
 - Testes rodando sozinhos no GitHub a cada PR, no Windows (Python mais recente e 3.10) e no Linux: todos passam.
 
 ## O que foi testado (com dados simulados)

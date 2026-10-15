@@ -6,6 +6,7 @@ O resultado fica na memória da sessão (para ver e baixar o CSV) e no históric
 import logging
 import secrets
 import threading
+from datetime import datetime, timezone
 
 import meus_anuncios
 import ml_api
@@ -33,6 +34,7 @@ class Relatorio:
         self.linhas = []
         self.aviso = ""  # ex.: "lê até 300 anúncios por relatório"
         self.mensagem = ""  # o que aconteceu, quando deu erro ou não há anúncios
+        self.gerado_em = None  # quando os dados terminaram de chegar do Mercado Livre (UTC)
         self.thread = None
         self._trava = threading.Lock()
 
@@ -47,6 +49,7 @@ class Relatorio:
         with self._trava:
             self.linhas = linhas
             self.mensagem = mensagem
+            self.gerado_em = datetime.now(timezone.utc)
             self.estado = PRONTO
 
     def falhar(self, mensagem):

@@ -1,17 +1,19 @@
 # 06 · Status
 
 **Atualizado em:** 15/10/2026
-**Fase atual:** 3, planejamento e código em rascunho do site (PR, sem merge). A fase 2 está concluída.
-Plano e custos em [07-fase-3-plano.md](07-fase-3-plano.md).
+**Fase atual:** 3, construindo o site (código em rascunho no PR #5, sem merge). A fase 2 está concluída.
+Plano e custos em [07-fase-3-plano.md](07-fase-3-plano.md). Nada vai ao ar antes de o site estar quase pronto.
 
 ## Quem faz o quê (15/10/2026)
 
-- **Site: código e login** (esta thread): `web/`, `testes/test_site.py`, `docs/07-fase-3-plano.md`, este arquivo e o PR #5 (rascunho).
-- **Página inicial do site**: entrega os arquivos em `/mnt/project-files/orzy/site/inicio/`; a thread de código integra.
-- **Privacidade e termos**: `docs/legal/` e PR próprio. O texto de `/privacidade` em `web/` é só rascunho.
-- **Hospedagem e domínio**: hospedagem, deploy, DNS, Redirect URI e Client Secret do OrzyApp. Nada disso sai sem o ok do Nicolas.
-- Pesquisa de hospedagem e LGPD para todas: `/mnt/project-files/orzy/hospedagem-e-lgpd.md`.
-- Domínio: orzy.com.br já responde com uma página temporária que o Nicolas colocou (15/10/2026). Não sabemos onde ela roda.
+- **Site: código e login**: `web/`, `testes/test_site.py`, `docs/07-fase-3-plano.md`, este arquivo e o PR #5 (rascunho).
+- **Página inicial do site**: entregou a página, que já está no PR #5. Thread encerrada.
+- **Privacidade e termos**: `docs/legal/` (PR #6, mesclado em 15/10/2026). O site mostra esses textos em `/privacidade`
+  e `/termos`.
+- **Hospedagem e domínio**: hospedagem, deploy, DNS, Redirect URI e Client Secret do OrzyApp. A recomendação está em
+  `/mnt/project-files/orzy/hospedagem-recomendacao.md`; o resto espera o lançamento e o ok do Nicolas.
+- Pesquisa anterior de hospedagem e LGPD: `/mnt/project-files/orzy/hospedagem-e-lgpd.md`.
+- Domínio: orzy.com.br responde com uma página temporária que o Nicolas colocou no Firebase (DNS no Registro.br).
 
 ## Onde parou
 
@@ -25,6 +27,10 @@ Falta uma coisa pequena, que não segura a fase: ver na próxima rodada a contag
 
 A fase 3 começou só como planejamento e rascunho, porque o Nicolas pediu para avançar enquanto estava fora.
 Nada foi publicado, contratado nem mudado no app do Mercado Livre. Ele decide hospedagem, app, LGPD e limites.
+
+Em 15/10/2026 o Nicolas aprovou a página inicial como primeiro protótipo (logo e cores vêm depois) e decidiu que o
+site só vai ao ar quando estiver quase pronto ("95% concluído"), sem endereço temporário. O foco agora é construir
+o site e o servidor.
 
 ## Decisões de 14/10/2026
 
@@ -62,8 +68,13 @@ Nada foi publicado, contratado nem mudado no app do Mercado Livre. Ele decide ho
   - `web/`: o site (login com PKCE, relatório em segundo plano, histórico, páginas e servidor, só biblioteca padrão);
   - `painel-ml/`: o login e a coleta ganharam versões que o site usa sem gravar em arquivo; o PC continua igual;
   - `testes/test_site.py`: testes do site contra o Mercado Livre simulado;
-  - `docs/07-fase-3-plano.md`: plano em 5 passos, custos em reais, LGPD e decisões que faltam.
-  - `/mnt/project-files/orzy/hospedagem-e-lgpd.md`: pesquisa de hospedagem e LGPD para as outras threads.
+  - `docs/07-fase-3-plano.md`: plano em 5 passos, custos em reais, LGPD e decisões que faltam;
+  - página inicial (aprovada como primeiro protótipo em 15/10/2026), com o aviso de aceite dos Termos junto de cada
+    botão Conectar;
+  - `/privacidade` e `/termos` mostram os textos de `docs/legal/`, com links no rodapé de todas as páginas;
+  - o resultado mostra a data e a hora em que os dados foram buscados (termos do Mercado Livre, item 5.3);
+  - o histórico com mais de 365 dias é apagado todo dia, e não só quando o servidor liga;
+  - recomendação de hospedagem com custos em reais (thread "Hospedagem e domínio").
 
 ## O que foi testado (com dados simulados)
 
@@ -74,9 +85,12 @@ Nada foi publicado, contratado nem mudado no app do Mercado Livre. Ele decide ho
 - Site (fase 3): login inteiro (estado do OAuth, PKCE, retorno), token que não é gravado em disco, relatório
   com título que tem HTML (sai escapado), CSV com BOM, isolamento entre contas, token vencido sem renovação
   escondida, pedido de outro site recusado, um relatório por conta, histórico com confirmação para apagar,
-  cabeçalhos de segurança e uma ida e volta por HTTP real.
-- Testes rodados no Python 3.10 e 3.13. Quebrar de propósito a checagem do estado do OAuth e o escape de títulos
-  faz os testes falharem.
+  cabeçalhos de segurança, uma ida e volta por HTTP real, página inicial com e sem login, textos legais lidos de
+  `docs/legal/` (com escape), rodapé com os dois textos, data do relatório em horário de Brasília e limpeza diária
+  do histórico, que continua depois de um erro.
+- Testes rodados no Python 3.10 e 3.13 (95: 64 do PC e 31 do site). Quebrar de propósito a checagem do estado do
+  OAuth, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília ou a limpeza diária faz os testes
+  falharem.
 
 ## Validado com dados reais (14 e 15/10/2026)
 
@@ -96,13 +110,13 @@ Nada foi publicado, contratado nem mudado no app do Mercado Livre. Ele decide ho
 
 ## Próximo passo
 
-1. Nicolas: responder as decisões de [07-fase-3-plano.md](07-fase-3-plano.md) (hospedagem, app, limites, contato,
-   revisão de advogado, beta ou público). Uma palavra por item basta.
+1. Nicolas: nada urgente. As decisões de [07-fase-3-plano.md](07-fase-3-plano.md) (hospedagem, app, limites,
+   contato, revisão de advogado, beta ou público) ficam para quando o site estiver quase pronto.
 2. Nicolas: quando puder, baixar o ZIP de novo do GitHub. Para não fazer login de novo, copiar o `config.json` e o
    `tokens.json` da pasta `painel-ml` usada por último para a nova. Rodar `python meus_anuncios.py` e mandar o
    texto do que apareceu no cmd (sem print). Ver a linha "Ficha técnica: X de Y campos".
-3. Hospedagem e domínio: com o ok do Nicolas nos passos 1 e 2 da fase 3, publicar num endereço de teste e testar com a conta dele.
-4. Site: integrar a página inicial quando chegar em `/mnt/project-files/orzy/site/inicio/`, e ajustar o código conforme o teste real.
+3. Site: seguir construindo o que não depende de decisão. As mudanças da hospedagem entram quando ela for escolhida,
+   e a identidade visual (logo e cores) quando o Nicolas trouxer.
 
 Na conversa, mandar só o texto do que apareceu no cmd, sem print. **Nunca** mandar o Client Secret,
 o `config.json`, o `tokens.json` nem o banco do site.
@@ -111,5 +125,8 @@ o `config.json`, o `tokens.json` nem o banco do site.
 
 - Qual vendedor com mais anúncios vai testar.
 - O que "propósito" e "quantos usuários" do formulário do app mudam: a documentação do Mercado Livre não fala.
-- Os termos do Mercado Livre sobre guardar dados de vendedores: a página não abriu no dia 15/10/2026, nem em duas tentativas. Ler antes de abrir ao público e confirmar se o histórico de 12 meses é permitido.
+- Hospedagem: Firebase + Cloud Run + Firestore (recomendado, R$ 0 no teste) ou Render (cerca de R$ 37/mês). Decide na
+  hora de lançar.
+- Termos do Mercado Livre para desenvolvedores (lidos em 15/10/2026): não fixam prazo para guardar dados. O histórico
+  de 12 meses, privado e que o vendedor apaga, é compatível na leitura mais razoável; confirmar com advogado.
 - Se existirem os arquivos de plano originais da conversa anterior, juntar com estes.

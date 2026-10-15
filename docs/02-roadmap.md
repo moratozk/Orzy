@@ -36,11 +36,22 @@ da mesma situação. Agora o programa lê o próprio anúncio e diz o que mudar 
 - [x] Conferir as sugestões com o anúncio aberto no site (15/10/2026: 1 foto, título curto e frete grátis batem)
 - [ ] Ver a contagem da ficha técnica na tela ("Ficha técnica: X de Y campos") na próxima rodada. Não segura a fase.
 
-## Fase 3 · Site no orzy.com.br (planejamento e rascunho do código, sem publicar)
+## Fase 3 · Site no orzy.com.br (em construção, sem publicar)
 
 Decidido pelo Nicolas em 14/10/2026: é aqui que o Orzy vira site, para outros vendedores usarem sem instalar nada.
 Plano em 5 passos, custos, LGPD e decisões em [07-fase-3-plano.md](07-fase-3-plano.md). O código está num PR de
-rascunho: não entra no main nem vai para o ar antes do ok do Nicolas.
+rascunho: não entra no main nem vai para o ar antes do ok do Nicolas. Decidido por ele em 15/10/2026: o site só vai
+ao ar quando estiver quase pronto (95%), sem endereço temporário.
+
+- [x] Código do site em rascunho (`web/`): login, relatório, histórico e testes com o Mercado Livre simulado
+- [x] Página inicial (primeiro protótipo, aprovado em 15/10/2026)
+- [x] Política de Privacidade e Termos de Uso em rascunho (`docs/legal/`), já mostrados no site
+- [x] Recomendação de hospedagem com custos em reais
+- [ ] Identidade visual: logo e cores
+- [ ] Escolher a hospedagem e adaptar o código a ela
+- [ ] Preencher os textos legais (responsável e contato) e, se o Nicolas quiser, revisão de advogado
+- [ ] Cadastrar a Redirect URI do site no OrzyApp e lançar no orzy.com.br, testando primeiro com a conta do Nicolas
+- [ ] Beta fechado com 3 a 5 vendedores
 
 - O vendedor entra no orzy.com.br e clica em **Conectar com Mercado Livre**. Ninguém precisa criar app.
 - Um servidor pequeno guarda o Client Secret do app do Orzy. O Secret nunca vai dentro de um programa distribuído.

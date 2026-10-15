@@ -59,7 +59,7 @@ def _pagina(titulo, corpo, logado=False, script=None, atualizar=None):
 <header class="topo"><a class="marca" href="/">Orzy</a><nav>{menu}</nav></header>
 <main>{corpo}</main>
 <footer class="rodape">O Orzy só lê os seus anúncios: não altera nada na sua conta.
-Não somos o Mercado Livre. <a href="/privacidade">Privacidade e dados</a></footer>
+Não somos o Mercado Livre. <a href="/privacidade">Política de Privacidade</a> · <a href="/termos">Termos de Uso</a></footer>
 {arquivo_js}
 </body>
 </html>
@@ -67,26 +67,270 @@ Não somos o Mercado Livre. <a href="/privacidade">Privacidade e dados</a></foot
 
 
 def inicio(logado, aviso=""):
-    botao = ('<a class="botao" href="/relatorio">Ver meu relatório</a>' if logado
-             else '<a class="botao" href="/entrar">Conectar com Mercado Livre</a>')
+    """Página inicial: o que o Orzy faz, como funciona, as situações, o que ele confere, dados e perguntas.
+
+    Os números das situações e das regras vêm do analise.py, então a página acompanha qualquer ajuste nele.
+    """
+    if logado:
+        botao = '<a class="botao botao-grande" href="/relatorio">Ver meu relatório</a>'
+        aceite = ""
+    else:
+        botao = '<a class="botao botao-grande" href="/entrar">Conectar com Mercado Livre</a>'
+        # Pedido dos Termos de Uso: o aviso fica junto de todo botão Conectar.
+        aceite = ('<p class="aceite">Ao conectar, você aceita os <a href="/termos">Termos de Uso</a> e confirma '
+                  'que leu a <a href="/privacidade">Política de Privacidade</a>.</p>')
+    poucas = analise.POUCAS_VISITAS
+    a_cada = round(1 / analise.CONVERSAO_BAIXA)  # 0.01 vira "1 venda a cada 100 visitas"
+    dica = {nome: escape(texto) for nome, texto in analise.SITUACOES.items()}
+    ordem = {nome: i for i, nome in enumerate(analise.ORDEM, 1)}  # a ordem em que aparecem no relatório
     corpo = f"""
 {_aviso(aviso)}
-<section>
-  <h1>Veja quais anúncios vendem e o que mudar em cada um</h1>
-  <p>Entre com a sua conta do Mercado Livre. O Orzy mostra os seus anúncios ativos com visitas, vendas
-  e a nota de qualidade que o próprio Mercado Livre dá a cada um, e diz o que mudar primeiro.</p>
-  <p>{botao}</p>
+<div class="inicio">
+
+<section class="abertura" aria-labelledby="inicio-titulo">
+  <div class="abertura-texto">
+    <p class="sobretitulo">Para quem vende no Mercado Livre</p>
+    <h1 id="inicio-titulo">Veja quais anúncios vendem e o que mudar em cada um</h1>
+    <p class="lide">Conecte sua conta do Mercado Livre. O Orzy lê os seus anúncios ativos, com as visitas,
+    as vendas e a nota de qualidade de cada um, e mostra o que mudar primeiro: título, fotos, ficha técnica,
+    frete ou tipo de anúncio.</p>
+    <p class="acao">{botao}<a class="link-secundario" href="#como-funciona">Ver como funciona</a></p>
+    {aceite}
+    <ul class="garantias">
+      <li>Funciona no navegador, sem instalar nada</li>
+      <li>Não muda nada nos seus anúncios</li>
+      <li>Grátis durante o teste</li>
+    </ul>
+  </div>
+
+  <figure class="exemplo">
+    <figcaption><span>Exemplo de relatório</span><span>últimos 30 dias</span></figcaption>
+    <ol class="exemplo-lista">
+      <li>
+        <p class="exemplo-titulo">Fone de Ouvido Bluetooth Sem Fio TWS com Microfone e Case</p>
+        <p class="exemplo-dados"><span class="selo sit-vsv">Visita sem venda</span>
+          <span>412 visitas</span><span>0 vendas</span></p>
+        <ul>
+          <li>Coloque pelo menos {analise.MIN_FOTOS} fotos, mostrando o produto de ângulos diferentes (tem 2).</li>
+          <li>Ofereça frete grátis, se a margem permitir: o anúncio fica mais competitivo, mas o envio passa a ser
+          pago por você.</li>
+        </ul>
+        <p class="exemplo-nota">Nota do Mercado Livre: Satisfatória (64/100)</p>
+      </li>
+      <li>
+        <p class="exemplo-titulo">Suporte Celular Carro</p>
+        <p class="exemplo-dados"><span class="selo sit-pv">Pouca visita</span>
+          <span>9 visitas</span><span>0 vendas</span></p>
+        <ul>
+          <li>Mude o anúncio de Grátis para Clássico: o Grátis aparece pouco nas buscas. O Clássico cobra uma
+          tarifa por venda.</li>
+          <li>Título curto (21 de 60 caracteres): use o espaço com produto, marca, modelo e características
+          principais, que são as palavras que as pessoas buscam.</li>
+        </ul>
+        <p class="exemplo-nota">Nota do Mercado Livre: Satisfatória (55/100)</p>
+      </li>
+      <li>
+        <p class="exemplo-titulo">Garrafa Térmica Inox 1 Litro Para Café e Chá Quente e Fria</p>
+        <p class="exemplo-dados"><span class="selo sit-vb">Vendendo bem</span>
+          <span>380 visitas</span><span>19 vendas</span></p>
+        <ul>
+          <li>Está funcionando: use como modelo para os outros anúncios.</li>
+        </ul>
+        <p class="exemplo-nota">Nota do Mercado Livre: Profissional (91/100)</p>
+      </li>
+    </ol>
+    <p class="exemplo-rodape">Anúncios fictícios, só para mostrar como o relatório aparece.</p>
+  </figure>
 </section>
-<section class="cartoes">
-  <div class="cartao"><h2>Só leitura</h2>
-    <p>O Orzy lê anúncios, visitas e vendas. Não altera título, preço, estoque nem nada da sua conta.</p></div>
-  <div class="cartao"><h2>Login só na sessão</h2>
-    <p>O acesso fica na memória do servidor enquanto a sua sessão dura. Não é gravado em arquivo nem no seu navegador.</p></div>
-  <div class="cartao"><h2>Você apaga quando quiser</h2>
-    <p>Os relatórios guardados no histórico podem ser apagados com um clique.
-    Veja a <a href="/privacidade">política de privacidade</a>.</p></div>
-</section>"""
-    return _pagina("Início", corpo, logado=logado)
+
+<section class="secao" id="como-funciona" aria-labelledby="como-funciona-titulo">
+  <h2 id="como-funciona-titulo">Como funciona</h2>
+  <ol class="passos">
+    <li>
+      <h3>Conecte sua conta</h3>
+      <p>Clique em Conectar com Mercado Livre e entre com a sua conta no próprio site do Mercado Livre.
+      O Orzy não vê a sua senha.</p>
+    </li>
+    <li>
+      <h3>Gere o relatório</h3>
+      <p>Escolha o período, de 30 a 150 dias. O Orzy lê os anúncios ativos, as visitas, os pedidos pagos e a
+      nota de qualidade de cada anúncio.</p>
+    </li>
+    <li>
+      <h3>Mude o que importa</h3>
+      <p>Comece pelos anúncios que mais precisam de mudança e faça os ajustes no Mercado Livre. Depois, gere
+      outro relatório e compare no histórico.</p>
+    </li>
+  </ol>
+</section>
+
+<section class="secao" id="situacoes" aria-labelledby="situacoes-titulo">
+  <h2 id="situacoes-titulo">Cada anúncio cai numa de cinco situações</h2>
+  <p class="secao-lide">O Orzy compara as visitas e as vendas de cada anúncio no período. No relatório, as
+  situações que mais valem a pena mexer aparecem primeiro.</p>
+  <div class="matriz">
+    <span class="eixo eixo-canto" aria-hidden="true"></span>
+    <p class="eixo eixo-sem-venda" aria-hidden="true">Nenhuma venda</p>
+    <p class="eixo eixo-com-venda" aria-hidden="true">Com vendas</p>
+    <p class="eixo eixo-poucas" aria-hidden="true">Menos de {poucas} visitas</p>
+    <p class="eixo eixo-muitas" aria-hidden="true">{poucas} visitas ou mais</p>
+    <div class="situacao sit-vsv">
+      <div class="situacao-topo">
+        <h3 class="selo">Visita sem venda</h3>
+        <span class="ordem">{ordem["VISITA SEM VENDA"]}º no relatório</span>
+      </div>
+      <p class="regra">{poucas} visitas ou mais e nenhuma venda</p>
+      <p>{dica["VISITA SEM VENDA"]}</p>
+    </div>
+    <div class="situacao sit-cp">
+      <div class="situacao-topo">
+        <h3 class="selo">Converte pouco</h3>
+        <span class="ordem">{ordem["CONVERTE POUCO"]}º no relatório</span>
+      </div>
+      <p class="regra">{poucas} visitas ou mais e menos de 1 venda a cada {a_cada} visitas</p>
+      <p>{dica["CONVERTE POUCO"]}</p>
+    </div>
+    <div class="situacao sit-pv">
+      <div class="situacao-topo">
+        <h3 class="selo">Pouca visita</h3>
+        <span class="ordem">{ordem["POUCA VISITA"]}º no relatório</span>
+      </div>
+      <p class="regra">Menos de {poucas} visitas e nenhuma venda</p>
+      <p>{dica["POUCA VISITA"]}</p>
+    </div>
+    <div class="situacao sit-vpv">
+      <div class="situacao-topo">
+        <h3 class="selo">Vende, mas pouco visto</h3>
+        <span class="ordem">{ordem["VENDE, MAS POUCO VISTO"]}º no relatório</span>
+      </div>
+      <p class="regra">Menos de {poucas} visitas e pelo menos 1 venda</p>
+      <p>{dica["VENDE, MAS POUCO VISTO"]}</p>
+    </div>
+    <div class="situacao sit-vb">
+      <div class="situacao-topo">
+        <h3 class="selo">Vendendo bem</h3>
+        <span class="ordem">{ordem["VENDENDO BEM"]}º no relatório</span>
+      </div>
+      <p class="regra">{poucas} visitas ou mais e pelo menos 1 venda a cada {a_cada} visitas</p>
+      <p>{dica["VENDENDO BEM"]}</p>
+    </div>
+  </div>
+</section>
+
+<section class="secao" id="o-que-confere" aria-labelledby="o-que-confere-titulo">
+  <h2 id="o-que-confere-titulo">O que o Orzy confere em cada anúncio</h2>
+  <p class="secao-lide">As regras seguem o que o próprio Mercado Livre recomenda. Cada sugestão tem um peso
+  e, dentro de cada situação, os anúncios com mais para mudar aparecem primeiro.</p>
+  <dl class="conferidos">
+    <div>
+      <dt>Título <small>em geral, até {analise.TITULO_MAX_PADRAO} caracteres</small></dt>
+      <dd>Se o título aproveita o limite da categoria com as palavras que as pessoas buscam, e se tem o que o
+      Mercado Livre pede para não usar: frete, parcelamento, desconto, estado do produto, estoque (“pronta
+      entrega”) ou símbolos.</dd>
+    </div>
+    <div>
+      <dt>Fotos <small>pelo menos {analise.MIN_FOTOS}, com mais de {analise.LARGURA_ZOOM} px</small></dt>
+      <dd>Se o anúncio tem fotos suficientes, de ângulos diferentes, e se elas são grandes o bastante para o
+      zoom funcionar.</dd>
+    </div>
+    <div>
+      <dt>Ficha técnica <small>obrigatórios primeiro</small></dt>
+      <dd>Quais campos da categoria faltam preencher. Com a ficha completa, o anúncio aparece nos filtros
+      da busca.</dd>
+    </div>
+    <div>
+      <dt>Frete e tipo de anúncio <small>só quando há problema</small></dt>
+      <dd>Frete grátis, trocar o Grátis pelo Clássico ou testar o Premium. Como custam dinheiro, só aparecem
+      para anúncios com pouca visita ou pouca venda.</dd>
+    </div>
+    <div>
+      <dt>Nota do Mercado Livre <small>de 0 a 100</small></dt>
+      <dd>A nota de qualidade que o próprio Mercado Livre dá a cada anúncio (Básica, Satisfatória ou
+      Profissional) e o que ele pede para melhorar.</dd>
+    </div>
+  </dl>
+</section>
+
+<section class="secao" id="seus-dados" aria-labelledby="seus-dados-titulo">
+  <h2 id="seus-dados-titulo">Seus dados</h2>
+  <div class="cartoes">
+    <div class="cartao">
+      <h3>Só leitura</h3>
+      <p>O Orzy lê anúncios, visitas e vendas. Não altera título, preço, estoque nem nada da sua conta.</p>
+    </div>
+    <div class="cartao">
+      <h3>Login pelo Mercado Livre</h3>
+      <p>Você entra no site do próprio Mercado Livre e o Orzy não vê a sua senha. O acesso fica só na memória
+      do servidor, enquanto a sessão dura.</p>
+    </div>
+    <div class="cartao">
+      <h3>Você apaga quando quiser</h3>
+      <p>O histórico guarda títulos e números dos anúncios, nunca dados de compradores. Você apaga tudo com
+      um clique.</p>
+    </div>
+  </div>
+  <p class="secao-pe">Leia a <a href="/privacidade">Política de Privacidade</a> e os
+  <a href="/termos">Termos de Uso</a>.</p>
+</section>
+
+<section class="secao" id="perguntas" aria-labelledby="perguntas-titulo">
+  <h2 id="perguntas-titulo">Perguntas frequentes</h2>
+  <div class="perguntas">
+    <details>
+      <summary>Preciso instalar alguma coisa?</summary>
+      <p>Não. O Orzy funciona no navegador, no computador ou no celular.</p>
+    </details>
+    <details>
+      <summary>Preciso criar um app no Mercado Livre?</summary>
+      <p>Não. Basta clicar em Conectar com Mercado Livre e autorizar o Orzy na tela do Mercado Livre.</p>
+    </details>
+    <details>
+      <summary>O Orzy muda meus anúncios?</summary>
+      <p>Não. Ele só lê os dados. As mudanças você faz no Mercado Livre, quando quiser.</p>
+    </details>
+    <details>
+      <summary>De onde vêm as visitas e as vendas?</summary>
+      <p>Do próprio Mercado Livre. As vendas são os pedidos pagos no período: cancelados e não pagos não
+      contam. As visitas podem levar até 48 horas para aparecer.</p>
+    </details>
+    <details>
+      <summary>Quanto tempo leva o relatório?</summary>
+      <p>Depende de quantos anúncios você tem, porque o Orzy consulta as visitas de cada um. Pode fechar a
+      página: o relatório continua sendo gerado.</p>
+    </details>
+    <details>
+      <summary>Por que às vezes preciso conectar de novo?</summary>
+      <p>Por segurança, o Orzy não guarda o seu acesso: ele fica só na memória do servidor enquanto a sessão
+      dura. Depois, é só clicar em Conectar com Mercado Livre de novo.</p>
+    </details>
+    <details>
+      <summary>Quanto custa?</summary>
+      <p>Nada, enquanto o Orzy está em teste.</p>
+    </details>
+    <details>
+      <summary>Funciona com a Shopee?</summary>
+      <p>Ainda não. Por enquanto, só com o Mercado Livre.</p>
+    </details>
+    <details>
+      <summary>O Orzy é do Mercado Livre?</summary>
+      <p>Não. O Orzy é um serviço independente, que usa a API oficial do Mercado Livre com a sua autorização.</p>
+    </details>
+  </div>
+</section>
+
+<section class="chamada" aria-labelledby="chamada-titulo">
+  <div>
+    <h2 id="chamada-titulo">Descubra o que mudar primeiro</h2>
+    <p>Conecte sua conta e gere o primeiro relatório. Você pode fechar a página enquanto ele é gerado.</p>
+  </div>
+  <div class="chamada-acao">
+    <p class="acao">{botao}</p>
+    {aceite}
+  </div>
+</section>
+
+</div>"""
+    return _pagina("O que mudar nos seus anúncios do Mercado Livre", corpo, logado=logado)
 
 
 def formulario(usuario, opcoes, aviso="", em_andamento=None):
@@ -167,8 +411,14 @@ def resultado(relatorio):
     cartoes = "".join(_cartao_anuncio(l) for l in prioridade) or \
         '<p class="ajuda">Nenhum anúncio com sugestão de mudança neste período.</p>'
     tabela = _tabela(linhas) if linhas else ""
+    # Os termos do Mercado Livre (5.3) pedem que o aplicativo diga quando os dados foram atualizados.
+    gerado = ""
+    if relatorio.gerado_em is not None:
+        quando = relatorio.gerado_em.astimezone(BRASILIA).strftime("%d/%m/%Y às %H:%M")
+        gerado = f'<p class="ajuda">Dados buscados no Mercado Livre em {quando} (horário de Brasília).</p>'
     corpo = f"""
 <h1>Relatório dos últimos {relatorio.dias} dias</h1>
+{gerado}
 {_aviso(relatorio.aviso)}
 {_aviso(relatorio.mensagem)}
 <ul class="resumo">{_resumo_html(contagem)}</ul>
@@ -221,7 +471,8 @@ def historico_relatorio(dados):
         for a in dados["anuncios"])
     corpo = f"""
 <h1>Relatório de {_data(dados['criado_em'])}</h1>
-<p class="ajuda">Últimos {dados['dias']} dias · {dados['total']} anúncios</p>
+<p class="ajuda">Últimos {dados['dias']} dias · {dados['total']} anúncios.
+Mostra como os anúncios estavam nesse dia: não é atualizado depois.</p>
 <ul class="resumo">{_resumo_html(dados['resumo'])}</ul>
 <div class="tabela"><table><thead><tr><th>Anúncio</th><th>Situação</th><th class=n>Visitas</th>
 <th class=n>Vendas</th><th class=n>Sugestões</th></tr></thead><tbody>{linhas}</tbody></table></div>
@@ -229,43 +480,15 @@ def historico_relatorio(dados):
     return _pagina("Histórico", corpo, logado=True)
 
 
-def privacidade():
-    corpo = """
-<h1>Privacidade e dados</h1>
-<p class="aviso">Rascunho: esta página ainda vai ser revisada antes do lançamento para o público.</p>
+def texto_legal(titulo, html_do_texto):
+    """Política de Privacidade ou Termos de Uso, já convertidos de docs/legal/ (ver legal.py)."""
+    return _pagina(titulo, f'<article class="legal">{html_do_texto}</article>')
 
-<h2>Quem é responsável</h2>
-<p>[Nome completo e CPF ou CNPJ do responsável pelo Orzy, a preencher.]</p>
 
-<h2>Quais dados usamos</h2>
-<p>Ao conectar a sua conta, recebemos do Mercado Livre o número do seu usuário e o seu apelido.
-Para gerar o relatório, lemos os seus anúncios ativos (título, preço, estoque, fotos, ficha técnica e tipo de anúncio),
-as visitas de cada um no período escolhido, os pedidos pagos do período e a nota de qualidade de cada anúncio.</p>
-<p>Dos pedidos usamos só a quantidade vendida de cada anúncio. Não guardamos dados pessoais de compradores.</p>
-
-<h2>Para que usamos</h2>
-<p>Só para gerar o relatório e as sugestões que você pediu e para mostrar o seu histórico.</p>
-
-<h2>Login e sessão</h2>
-<p>O token de acesso do Mercado Livre fica na memória do servidor, enquanto a sua sessão dura.
-Não guardamos o token de atualização. Quando a sessão acaba ou o servidor reinicia, você conecta de novo.</p>
-
-<h2>Histórico</h2>
-<p>Guardamos, por relatório, a data, o período, a contagem de anúncios por situação e, para cada anúncio,
-o número, o título, as visitas, as vendas, a situação e os pontos de sugestão.
-Você apaga tudo na página Histórico. Relatórios com mais de 12 meses são apagados automaticamente.</p>
-
-<h2>Com quem compartilhamos</h2>
-<p>Não vendemos nem compartilhamos os seus dados. [A confirmar: fornecedor de hospedagem que guarda os dados em nosso nome.]</p>
-
-<h2>Seus direitos</h2>
-<p>Você pode pedir para ver, corrigir ou apagar os seus dados, e saber com quem eles foram compartilhados.
-Para apagar o histórico, use a página Histórico. Para o restante, escreva para o contato abaixo.</p>
-
-<h2>Contato</h2>
-<p>[E-mail de contato, a definir.]</p>
-"""
-    return _pagina("Privacidade", corpo)
+def texto_legal_ausente(nome):
+    corpo = (f"<h1>{escape(nome)}</h1>"
+             '<p class="aviso">Este texto ainda está sendo preparado.</p>')
+    return _pagina(nome, corpo)
 
 
 def erro(mensagem):

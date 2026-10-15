@@ -12,6 +12,7 @@ import sys
 import tempfile
 import threading
 import unittest
+from datetime import datetime, timezone
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from unittest import mock
@@ -22,6 +23,7 @@ sys.path.insert(0, str(PASTA_RAIZ))
 sys.path.insert(0, str(PASTA_TESTES))
 sys.path.insert(0, str(PASTA_RAIZ / "painel-ml"))
 
+import analise  # noqa: E402
 import ml_api  # noqa: E402
 from ml_simulado import MLSimulado, performance  # noqa: E402
 from web import app, configuracao, login, relatorios, servidor, sessoes  # noqa: E402
@@ -69,7 +71,9 @@ class SiteBase(unittest.TestCase):
             trocar.start()
             self.addCleanup(trocar.stop)
 
-        self.site = app.Site(configuracao_de_teste(self.pasta / "orzy.db"))
+        # Os textos legais saem de uma pasta temporária: os testes não dependem de docs/legal/.
+        self.pasta_legal = self.pasta / "legal"
+        self.site = app.Site(configuracao_de_teste(self.pasta / "orzy.db"), pasta_legal=self.pasta_legal)
 
     def semear(self):
         self.ml.adicionar_item("MLB1000000001", TITULO_BOM, preco=79.9, estoque=10, visitas=0)
@@ -248,6 +252,12 @@ class RelatorioTests(SiteBase):
         self.assertIn("Caixa de som", texto)
         self.assertNotIn("<script>alert(1)</script>", texto, "título do Mercado Livre tem que sair escapado")
         self.assertIn("&lt;script&gt;", texto)
+        # Os termos do Mercado Livre (5.3) pedem que o aplicativo diga quando os dados foram atualizados.
+        self.assertRegex(texto, r"Dados buscados no Mercado Livre em \d{2}/\d{2}/\d{4} às \d{2}:\d{2}")
+        # A hora é a de Brasília: 02h30 em UTC ainda é o dia anterior aqui.
+        relatorio.gerado_em = datetime(2026, 10, 15, 2, 30, tzinfo=timezone.utc)
+        texto = self.pedir("GET", f"/relatorio/{relatorio_id}", cookie=cookie)[2].decode("utf-8")
+        self.assertIn("Dados buscados no Mercado Livre em 14/10/2026 às 23:30 (horário de Brasília)", texto)
 
         status, cabecalhos, csv_bytes = self.pedir("GET", f"/relatorio/{relatorio_id}/csv", cookie=cookie)
         self.assertEqual(status, 200)
@@ -342,8 +352,10 @@ class HistoricoSiteTests(SiteBase):
         self.assertEqual(status, 200)
         self.assertIn(f"/historico/{self.site.historico.listar(111222333)[0]['id']}".encode("utf-8"), pagina)
 
-        status, _, _ = self.pedir("GET", f"/historico/{self.site.historico.listar(111222333)[0]['id']}", cookie=cookie)
+        status, _, pagina = self.pedir("GET", f"/historico/{self.site.historico.listar(111222333)[0]['id']}",
+                                       cookie=cookie)
         self.assertEqual(status, 200)
+        self.assertIn("não é atualizado depois".encode("utf-8"), pagina)
 
         status, _, _ = self.pedir("POST", "/historico/apagar", cookie=cookie, corpo=b"")
         self.assertEqual(status, 400, "apagar sem confirmar não pode")
@@ -358,7 +370,8 @@ class PaginasSimplesTests(SiteBase):
     def test_privacidade_e_cabecalhos_de_seguranca(self):
         status, cabecalhos, pagina = self.pedir("GET", "/privacidade", origem=None)
         self.assertEqual(status, 200)
-        self.assertIn("Privacidade e dados".encode("utf-8"), pagina)
+        self.assertIn("Política de Privacidade".encode("utf-8"), pagina)
+        self.assertIn("ainda está sendo preparado".encode("utf-8"), pagina, "sem o arquivo, a página avisa")
         self.assertEqual(_cab(cabecalhos, "Referrer-Policy"), "no-referrer")
         self.assertEqual(_cab(cabecalhos, "X-Frame-Options"), "DENY")
         self.assertIn("default-src 'self'", _cab(cabecalhos, "Content-Security-Policy"))
@@ -371,6 +384,71 @@ class PaginasSimplesTests(SiteBase):
 
     def test_pagina_que_nao_existe(self):
         self.assertEqual(self.pedir("GET", "/nao-existe", origem=None)[0], 404)
+
+    def test_textos_legais_vem_de_docs_legal_com_escape(self):
+        self.pasta_legal.mkdir()
+        (self.pasta_legal / "termos-de-uso.md").write_text(
+            "# Termos de Uso do Orzy\n\n"
+            "> **Rascunho.** O que falta está no [LEIA-ME](LEIA-ME.md).\n\n"
+            "Texto com <script>alert(1)</script> e o cookie `orzy_sessao`,\n"
+            "que continua na linha de baixo.\n\n"
+            "- um item que segue\n  na linha seguinte;\n- leia a [Política](politica-de-privacidade.md).\n\n"
+            "| Dado | Prazo |\n|---|---|\n| Código de renovação | Não é guardado |\n\n"
+            "[clique](javascript:alert(1)) ou veja a [ANPD](https://www.gov.br/anpd).\n",
+            encoding="utf-8")
+        status, _, pagina = self.pedir("GET", "/termos", origem=None)
+        texto = pagina.decode("utf-8")
+        self.assertEqual(status, 200)
+        self.assertIn("<title>Termos de Uso do Orzy · Orzy</title>", texto)
+        self.assertIn("<h1>Termos de Uso do Orzy</h1>", texto)
+        self.assertIn("<blockquote><p><strong>Rascunho.</strong> O que falta está no LEIA-ME.</p></blockquote>", texto)
+        self.assertNotIn("<script>alert", texto)
+        self.assertIn("&lt;script&gt;", texto)
+        self.assertIn("<code>orzy_sessao</code>, que continua na linha de baixo.", texto)
+        self.assertIn("<li>um item que segue na linha seguinte;</li>", texto)
+        self.assertIn('<a href="/privacidade">Política</a>', texto, "um texto aponta para a rota do outro")
+        self.assertIn("<td>Código de renovação</td><td>Não é guardado</td>", texto)
+        self.assertNotIn("javascript:", texto)
+        self.assertIn('<a href="https://www.gov.br/anpd"', texto)
+
+    def test_rodape_tem_os_dois_textos_em_todas_as_paginas(self):
+        cookie = self.entrar()
+        for caminho, com_cookie in (("/", None), ("/nao-existe", None), ("/relatorio", cookie),
+                                    ("/historico", cookie)):
+            texto = self.pedir("GET", caminho, cookie=com_cookie, origem=None)[2].decode("utf-8")
+            rodape = texto[texto.index('<footer class="rodape">'):]
+            self.assertIn('href="/privacidade"', rodape, caminho)
+            self.assertIn('href="/termos"', rodape, caminho)
+
+    def test_inicio_sem_login_leva_ao_mercado_livre(self):
+        status, _, pagina = self.pedir("GET", "/", origem=None)
+        self.assertEqual(status, 200)
+        texto = pagina.decode("utf-8")
+        self.assertIn('href="/entrar"', texto)
+        self.assertNotIn('href="/relatorio"', texto)
+        self.assertIn('href="/privacidade"', texto)
+        # Junto de cada botão Conectar, o aviso dos Termos de Uso e da Política de Privacidade.
+        self.assertEqual(texto.count('href="/entrar"'), texto.count("Ao conectar, você aceita os"))
+        self.assertIn('<a href="/termos">Termos de Uso</a>', texto)
+        # A política de segurança do site (CSP) bloqueia estilo e script escritos dentro da página.
+        self.assertNotIn("style=", texto)
+        self.assertNotIn("<style", texto)
+        self.assertNotIn("<script", texto)
+
+    def test_inicio_com_login_leva_ao_relatorio(self):
+        cookie = self.entrar()
+        status, _, pagina = self.pedir("GET", "/", cookie=cookie, origem=None)
+        self.assertEqual(status, 200)
+        texto = pagina.decode("utf-8")
+        self.assertIn('class="botao botao-grande" href="/relatorio"', texto)
+        self.assertNotIn('href="/entrar"', texto)
+        self.assertNotIn("Ao conectar", texto)
+
+    def test_inicio_acompanha_os_limites_do_analise(self):
+        with mock.patch.object(analise, "POUCAS_VISITAS", 50), mock.patch.object(analise, "CONVERSAO_BAIXA", 0.02):
+            texto = self.pedir("GET", "/", origem=None)[2].decode("utf-8")
+        self.assertIn("Menos de 50 visitas e nenhuma venda", texto)
+        self.assertIn("menos de 1 venda a cada 50 visitas", texto)
 
 
 class ServidorTests(SiteBase):
@@ -393,6 +471,25 @@ class ServidorTests(SiteBase):
         self.assertEqual(resposta.status, 403)
         resposta.read()
         conexao.close()
+
+
+class LimpezaDoHistoricoTests(unittest.TestCase):
+    def test_apaga_o_historico_antigo_todo_dia_e_segue_depois_de_um_erro(self):
+        parar = threading.Event()
+        chamadas = []
+
+        class HistoricoFalso:
+            def apagar_antigos(self, dias):
+                chamadas.append(dias)
+                if len(chamadas) == 1:
+                    raise sqlite3.OperationalError("database is locked")
+                if len(chamadas) == 3:
+                    parar.set()
+                return 0
+
+        with self.assertLogs(level="ERROR"):
+            servidor.apagar_antigos_todo_dia(HistoricoFalso(), parar, intervalo=0.01)
+        self.assertEqual(chamadas, [365, 365, 365], "um erro não pode parar a limpeza dos dias seguintes")
 
 
 if __name__ == "__main__":

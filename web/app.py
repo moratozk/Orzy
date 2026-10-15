@@ -6,7 +6,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 import meus_anuncios
-from . import login, paginas
+from . import legal, login, paginas
 from .historico import Historico
 from .relatorios import ERRO, GERANDO, PRONTO, ErroRelatorio, Relatorios
 from .sessoes import Sessoes
@@ -27,11 +27,12 @@ CABECALHOS_DE_SEGURANCA = [
 
 
 class Site:
-    def __init__(self, config, historico=None, sessoes=None, relatorios=None):
+    def __init__(self, config, historico=None, sessoes=None, relatorios=None, pasta_legal=legal.PASTA_LEGAL):
         self.config = config
         self.historico = historico or Historico(config.banco)
         self.sessoes = sessoes or Sessoes(horas=config.horas_sessao)
         self.relatorios = relatorios or Relatorios(self.historico, config.max_anuncios)
+        self.pasta_legal = pasta_legal
 
     def tratar(self, metodo, endereco, cabecalhos, corpo=b""):
         status, extras, dados = self._rotear(metodo, urlsplit(endereco), cabecalhos, corpo)
@@ -50,7 +51,8 @@ class Site:
             ("GET", "/historico"): lambda: self._historico(cabecalhos),
             ("POST", "/historico/apagar"): lambda: self._apagar_historico(cabecalhos, corpo),
             ("POST", "/sair"): lambda: self._sair(cabecalhos),
-            ("GET", "/privacidade"): self._privacidade,
+            ("GET", "/privacidade"): lambda: self._texto_legal("privacidade"),
+            ("GET", "/termos"): lambda: self._texto_legal("termos"),
             ("GET", "/saude"): self._saude,
         }
         rota = fixas.get((metodo, caminho))
@@ -181,8 +183,11 @@ class Site:
 
     # ------------------------------------------------------------ páginas simples
 
-    def _privacidade(self):
-        return self._html(200, paginas.privacidade())
+    def _texto_legal(self, rota):
+        texto = legal.carregar(rota, self.pasta_legal)
+        if texto is None:
+            return self._html(200, paginas.texto_legal_ausente(legal.NOMES[rota]))
+        return self._html(200, paginas.texto_legal(*texto))
 
     def _saude(self):
         return 200, [("Content-Type", "text/plain; charset=utf-8"), ("Cache-Control", "no-store")], b"ok"

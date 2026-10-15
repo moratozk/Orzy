@@ -17,7 +17,14 @@ NOME_COOKIE = "orzy_sessao"
 OPCOES_DIAS = (30, 60, 90, 150)
 PASTA_STATIC = Path(__file__).resolve().parent / "static"
 ARQUIVOS_STATIC = {"estilo.css": "text/css; charset=utf-8",
-                   "andamento.js": "application/javascript; charset=utf-8"}
+                   "andamento.js": "application/javascript; charset=utf-8",
+                   # marca Anel: ícones da aba e do celular, imagem de compartilhamento e a fonte Geist
+                   "favicon.svg": "image/svg+xml",
+                   "favicon-32.png": "image/png",
+                   "apple-touch-icon.png": "image/png",
+                   "compartilhar.png": "image/png",
+                   "geist.woff2": "font/woff2",
+                   "geist-mono.woff2": "font/woff2"}
 # Robôs de busca ficam nas páginas públicas: as outras pedem login e só ligariam o servidor à toa.
 ROBOTS = "User-agent: *\nDisallow: /entrar\nDisallow: /retorno\nDisallow: /relatorio\nDisallow: /historico\n"
 

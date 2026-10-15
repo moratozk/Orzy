@@ -92,4 +92,4 @@ de internet.
 | `legal.py` | Mostra a Política de Privacidade e os Termos de Uso a partir do Markdown de `docs/legal/`, com escape |
 | `app.py` | Rotas, cookies, cabeçalhos de segurança e conferência da origem dos pedidos |
 | `servidor.py` | Liga o servidor HTTP, não registra a busca (`?code=...`) no log, fecha conexões paradas depois de 60 segundos e apaga o histórico antigo todo dia |
-| `static/` | Folha de estilo e o script da página de andamento |
+| `static/` | Folha de estilo, script da página de andamento, ícones e imagem de compartilhamento da marca Anel e a fonte Geist (licença em `OFL-Geist.txt`) |

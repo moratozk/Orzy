@@ -1,36 +1,61 @@
-/* Visual base do site. O visual final vem com a identidade visual do Orzy (docs/02-roadmap.md, fase 3). */
+/* Visual base do site com a logo, as cores e a fonte da marca Anel (/mnt/project-files/orzy/marca/LEIA-ME.md).
+   O visual final vem depois (docs/02-roadmap.md, fase 3). */
 
 :root {
-  --fundo: #f6f7f9;
-  --texto: #1d2330;
-  --fraco: #5b6474;
+  --fundo: #f3f5f8;         /* Névoa */
+  --texto: #0d1321;         /* Tinta: 17:1 sobre o fundo */
+  --fraco: #5a6475;         /* Grafite: 5,5:1 sobre o fundo, 6:1 sobre o cartão */
   --cartao: #ffffff;
-  --borda: #e2e5ea;
-  --destaque: #1a66d9;  /* 4,96:1 sobre o fundo: link legível (o mínimo é 4,5:1) */
+  --borda: #e3e7ed;
+  --destaque: #3f6212;      /* Musgo, para links, botão secundário e foco: 6,5:1 sobre o fundo, 7:1 sobre o cartão */
   --destaque-texto: #ffffff;
+  --botao: #c4f135;         /* Lima: fundo do botão principal. Lima nunca é texto no tema claro (1,3:1) */
+  --botao-texto: #0d1321;   /* Tinta sobre Lima: 14:1 */
+  --marca-ponto: #6fb700;   /* Lima forte: só o ponto da logo, é enfeite e nunca texto */
   --aviso: #fff4d6;
   --aviso-borda: #e7c26a;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --fundo: #14171c;
-    --texto: #e7eaf0;
-    --fraco: #9aa3b2;
-    --cartao: #1c2028;
-    --borda: #2c323d;
-    --destaque: #4c8dff;
-    --destaque-texto: #0b1020;
+    --fundo: #0d1321;       /* Tinta */
+    --texto: #e6eaf0;       /* 15:1 sobre o fundo, 14:1 sobre o cartão */
+    --fraco: #aeb6c4;       /* 9:1 sobre o fundo, 8:1 sobre o cartão */
+    --cartao: #151d2e;
+    --borda: #263044;
+    --destaque: #c4f135;    /* Lima: 14:1 sobre o fundo, 12,8:1 sobre o cartão */
+    --destaque-texto: #0d1321;
+    --botao: #c4f135;
+    --botao-texto: #0d1321;
+    --marca-ponto: #c4f135;
     --aviso: #3a3117;
     --aviso-borda: #8a6d24;
   }
+}
+
+/* Geist e Geist Mono: Copyright 2024 The Geist Project Authors, SIL Open Font License 1.1 (web/static/OFL-Geist.txt).
+   Servidas pelo próprio site: a Política de Privacidade promete que o site não carrega nada de outras empresas. */
+@font-face {
+  font-family: "Geist";
+  src: url("/static/geist.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/static/geist-mono.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
 }
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 16px/1.5 "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   background: var(--fundo);
   color: var(--texto);
   overflow-wrap: break-word;  /* apelido ou título sem espaço não empurra a página para o lado no celular */
@@ -49,7 +74,9 @@ a { color: var(--destaque); }
   border-bottom: 1px solid var(--borda);
 }
 
-.marca { font-weight: 700; font-size: 1.1rem; color: var(--texto); text-decoration: none; }
+.marca { display: inline-flex; align-items: center; color: var(--texto); text-decoration: none; }
+.marca svg { display: block; }
+.marca-ponto { fill: var(--marca-ponto); }
 
 nav { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
 nav form { margin: 0; }
@@ -71,8 +98,8 @@ h3 { font-size: 1rem; margin: 0 0 4px; }
 
 .botao {
   display: inline-block;
-  background: var(--destaque);
-  color: var(--destaque-texto);
+  background: var(--botao);
+  color: var(--botao-texto);
   padding: 10px 16px;
   border: 0;
   border-radius: 8px;
@@ -179,7 +206,7 @@ progress { width: 100%; height: 14px; }
    Tudo da página inicial fica dentro de .inicio, para não mexer nas outras páginas. */
 
 :root {
-  --mono: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  --mono: "Geist Mono", ui-monospace, "Cascadia Mono", "Segoe UI Mono", "SFMono-Regular", Menlo, Consolas, monospace;
   --sombra: rgb(16 24 40 / 0.16);
   --sit-vsv: #b42318;  --sit-vsv-fundo: #fdecea;   /* visita sem venda */
   --sit-cp: #b54708;   --sit-cp-fundo: #fdf0e3;    /* converte pouco */

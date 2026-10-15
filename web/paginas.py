@@ -12,6 +12,16 @@ BRASILIA = timezone(timedelta(hours=-3))  # o Brasil não tem horário de verão
 DESCRICAO = ("Conecte sua conta do Mercado Livre e veja quais anúncios vendem, quais não vendem e o que mudar em "
              "cada um. Sem instalar nada.")
 CONTATO = "orzy.suporte@gmail.com"  # o mesmo da Política de Privacidade e dos Termos de Uso
+# Logo do topo (marca Anel, /mnt/project-files/orzy/marca/site/topo-logo.html). As letras usam a cor do texto
+# (currentColor) e o ponto usa a classe marca-ponto, então a logo acompanha o tema claro e o escuro.
+LOGO = ('<a class="marca" href="/" aria-label="Orzy, página inicial">'
+        '<svg viewBox="-6 -8 347.5 158" width="70" height="32" aria-hidden="true" focusable="false">'
+        '<path d="M92.86,42.69A42,42 0 1,1 58.81,8.64" fill="none" stroke="currentColor" stroke-width="19" '
+        'stroke-linecap="round"/>'
+        '<circle cx="81.2" cy="20.3" r="12.35" class="marca-ponto" fill="#6FB700"/>'
+        '<g fill="none" stroke="currentColor" stroke-width="19" stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M126.5,90.5V40A30.5,30.5 0 0,1 157,9.5"/><path d="M185,9.5H236L185,90.5H236"/>'
+        '<path d="M263,9.5L294.5,90.5M326,9.5L278.17,132.5"/></g></svg></a>')
 MAX_PRIORIDADES = 10
 SUGESTOES_POR_ANUNCIO = 3
 
@@ -59,11 +69,17 @@ def _pagina(titulo, corpo, logado=False, script=None, atualizar=None):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{escape(titulo)} · Orzy</title>
 <meta name="description" content="{escape(DESCRICAO)}">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#151d2e" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/static/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+<link rel="preload" href="/static/geist.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/static/estilo.css">
 {atualiza}
 </head>
 <body>
-<header class="topo"><a class="marca" href="/">Orzy</a><nav>{menu}</nav></header>
+<header class="topo">{LOGO}<nav>{menu}</nav></header>
 <main>{corpo}</main>
 <footer class="rodape">O Orzy só lê os seus anúncios: não altera nada na sua conta.
 Não somos o Mercado Livre. <a href="/privacidade">Política de Privacidade</a> · <a href="/termos">Termos de Uso</a>

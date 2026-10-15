@@ -703,6 +703,26 @@ class PaginasSimplesTests(SiteBase):
         self.assertEqual(status, 200)
         self.assertEqual(_cab(cabecalhos, "Content-Type"), "text/css; charset=utf-8")
 
+    def test_marca_logo_icones_e_fonte(self):
+        # Marca Anel: a logo vai no topo de toda página como SVG dentro do HTML (sem style, por causa da CSP),
+        # e os ícones e a fonte saem de /static.
+        pagina = self.pedir("GET", "/privacidade", origem=None)[2].decode("utf-8")
+        self.assertIn('<a class="marca" href="/" aria-label="Orzy, página inicial"><svg', pagina)
+        self.assertIn('class="marca-ponto"', pagina)
+        self.assertNotIn("style=", pagina)
+        for nome in ("favicon.svg", "favicon-32.png", "apple-touch-icon.png", "geist.woff2"):
+            self.assertIn(f'href="/static/{nome}"', pagina)
+        css = self.pedir("GET", "/static/estilo.css", origem=None)[2].decode("utf-8")
+        self.assertIn('url("/static/geist.woff2")', css)
+        self.assertIn('url("/static/geist-mono.woff2")', css)
+        tipos = {"favicon.svg": "image/svg+xml", "favicon-32.png": "image/png", "apple-touch-icon.png": "image/png",
+                 "compartilhar.png": "image/png", "geist.woff2": "font/woff2", "geist-mono.woff2": "font/woff2"}
+        for nome, tipo in tipos.items():
+            status, cabecalhos, corpo = self.pedir("GET", f"/static/{nome}", origem=None)
+            self.assertEqual(status, 200, nome)
+            self.assertEqual(_cab(cabecalhos, "Content-Type"), tipo, nome)
+            self.assertTrue(corpo, nome)
+
     def test_robots_e_descricao_para_buscadores(self):
         status, cabecalhos, corpo = self.pedir("GET", "/robots.txt", origem=None)
         self.assertEqual(status, 200)

@@ -12,10 +12,10 @@ tempo, e poucas ficam ativas de cada vez, porque cada thread ativa gasta o limit
 
 Agora:
 
-- **Site: código e login**: nesta ordem, a busca e o filtro em "Todos os anúncios"; a logo e as cores da Anel no
-  site base quando a thread da marca avisar (favicon, ícones, imagem de compartilhamento e a fonte Geist servida
-  pelo próprio site); as contagens do beta (contas conectadas, relatórios sem erro e anúncios por conta, só
-  contagens); depois, o visual final que a marca entregar e o Nicolas aprovar. Arquivos: `web/`, `testes/`,
+- **Site: código e login**: nesta ordem, a busca e o filtro em "Todos os anúncios" (feito); a logo e as cores da
+  Anel no site base (feito: favicon, ícones, imagem de compartilhamento e a fonte Geist servida pelo próprio
+  site); as contagens do beta (contas conectadas, relatórios sem erro e anúncios por conta, só contagens);
+  depois, o visual final que a marca entregar e o Nicolas aprovar. Arquivos: `web/`, `testes/`,
   `painel-ml/`, `docs/01` a `docs/07` (menos `docs/legal/`), o README e o PR #5 (rascunho).
 - **Identidade visual e logo**: fecha os arquivos da Anel (favicon, ícones, imagens, cores claro e escuro, guia) e
   avisa a thread do código; depois desenha o visual final das páginas como prévia e CSS prontos, sem estilo ou
@@ -123,6 +123,9 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
   - um erro inesperado (o histórico fora do ar, por exemplo) mostra uma página de erro, em vez de cortar a conexão;
   - busca pelo título (sem diferença de acento nem de maiúscula, palavras em qualquer ordem) e filtro por situação
     na tabela "Todos os anúncios", no resultado e no histórico;
+  - marca Anel no site base: a logo no topo (muda com o tema), as cores dos temas claro e escuro, o favicon, o
+    ícone do iPhone e a fonte Geist, servida pelo próprio site. A imagem de compartilhamento já está em
+    `web/static`; as etiquetas que a mostram no WhatsApp entram no lançamento, com o endereço público;
   - recomendação de hospedagem com custos em reais (thread "Hospedagem e domínio").
 
 ## O que foi testado (com dados simulados)
@@ -151,7 +154,7 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
   e histórico) de 320 a 1280 px, nos dois temas, sem nada empurrando a página para o lado. O formulário de busca
   usado de verdade: o endereço guarda a busca, a página volta rolada até a tabela e "Ver todos" mostra a lista
   inteira.
-- Testes rodados no Python 3.10 e 3.13 (126: 64 do PC e 62 do site). Quebrar de propósito a checagem do estado do
+- Testes rodados no Python 3.10 e 3.13 (127: 64 do PC e 63 do site). Quebrar de propósito a checagem do estado do
   OAuth, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a limpeza diária, o `HEAD`, o
   `robots.txt`, o prazo e o limite das sessões sem login, o código novo depois do login, o tempo máximo de uma
   conexão, a escolha do relatório anterior, o escape dos títulos antigos, a página de erro ou, no Firestore, a
@@ -182,10 +185,9 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
    `tokens.json` da pasta `painel-ml` usada por último para a nova. Rodar `python meus_anuncios.py` e mandar o
    texto do que apareceu no cmd (sem print). Ver a linha "Ficha técnica: X de Y campos".
 3. Site: os passos que o Nicolas aprovou em 15/10/2026 estão prontos (segurança, páginas internas no celular,
-   comparação de relatórios e histórico no Firestore), e a busca e o filtro também. Próximos, pela divisão de
-   15/10/2026: a logo e as cores da Anel no site base quando a thread da marca avisar, as contagens do beta e,
-   depois, o visual final que o Nicolas aprovar. A hospedagem e o que vem com ela (monitoramento e cópia de
-   segurança) ficam para perto de lançar.
+   comparação de relatórios e histórico no Firestore), e a busca, o filtro e a marca Anel no site base também.
+   Próximos, pela divisão de 15/10/2026: as contagens do beta e, depois, o visual final que o Nicolas aprovar.
+   A hospedagem e o que vem com ela (monitoramento e cópia de segurança) ficam para perto de lançar.
 
 Na conversa, mandar só o texto do que apareceu no cmd, sem print. **Nunca** mandar o Client Secret,
 o `config.json`, o `tokens.json` nem o banco do site.

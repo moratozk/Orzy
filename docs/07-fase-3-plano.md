@@ -53,15 +53,15 @@ Mercado Livre). As sugestões do relatório são regras fixas: o site não as ch
   O PC continua igual: os 64 testes antigos passam sem mudança.
 - `testes/firestore_simulado.py`: Firestore e servidor de metadados do Google simulados, para testar o histórico
   no Firestore sem conta e sem internet.
-- `testes/test_site.py`: 62 testes contra o Mercado Livre e o Firestore simulados. Cobrem o login inteiro, o
+- `testes/test_site.py`: 63 testes contra o Mercado Livre e o Firestore simulados. Cobrem o login inteiro, o
   estado do OAuth, o escape de títulos, o CSV com BOM, o isolamento entre contas, token vencido, pedido de outro
   site, histórico, cabeçalhos de segurança, uma ida e volta por HTTP real (com `HEAD`), a página inicial, os textos
   legais (com escape), o rodapé, a hora do relatório em horário de Brasília, a limpeza diária do histórico, o
   `robots.txt`, a descrição para buscadores, as sessões sem login (prazo e limite), o código novo da sessão depois
   do login, a conexão parada, a palavra sem espaço que quebra no celular, a comparação com o relatório anterior,
-  a busca e o filtro da tabela e o histórico no Firestore (os mesmos testes do SQLite, mais token, prazo para o
-  TTL e Firestore fora do ar).
-- Verificado: 126 testes passam no Python 3.13 e no 3.10 (64 do PC e 62 do site); pyflakes limpo. Quebrar de
+  a busca e o filtro da tabela, a logo, os ícones e a fonte da marca e o histórico no Firestore (os mesmos testes
+  do SQLite, mais token, prazo para o TTL e Firestore fora do ar).
+- Verificado: 127 testes passam no Python 3.13 e no 3.10 (64 do PC e 63 do site); pyflakes limpo. Quebrar de
   propósito a checagem do estado, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a
   limpeza diária, o `HEAD`, o `robots.txt`, o prazo e o limite das sessões sem login, o código novo depois do
   login, o tempo máximo de uma conexão, a escolha do relatório anterior, o escape dos títulos antigos, a página

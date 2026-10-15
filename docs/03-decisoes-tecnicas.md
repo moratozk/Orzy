@@ -14,7 +14,13 @@ Cada decisão com o motivo. Mudar alguma delas é uma conversa, não um detalhe.
 | Visitas = `/items/{id}/visits/time_window` | Uma chamada por anúncio, com o mesmo período do relatório. |
 | No máximo 20 IDs por multiget e modo scan acima de 1000 anúncios | São limites da API (ver [04-api-mercado-livre.md](04-api-mercado-livre.md)). |
 | Erro 429 e instabilidade: espera 2, 4 e 8 segundos e tenta de novo | É o que o Mercado Livre pede quando passa do limite de chamadas. Conexão que cai no meio também tenta de novo. |
-| Limites da classificação: 30 visitas e 1% de conversão | Pontos de partida, ajustáveis no começo do `meus_anuncios.py`. Não são regras do Mercado Livre. |
+| Limites da classificação: 30 visitas e 1% de conversão | Pontos de partida, ajustáveis no começo do `analise.py`. Não são regras do Mercado Livre. |
+| Regras de situação e de sugestão no `analise.py`, separadas da coleta | O `meus_anuncios.py` busca os dados e o `analise.py` decide. O site da fase 3 usa as mesmas regras sem mexer nelas. |
+| Regras de sugestão tiradas da documentação do Mercado Livre sempre que dá | Mínimo de 3 fotos, zoom acima de 800 px, o que não pôr no título e ficha técnica vêm das páginas do Mercado Livre. Os outros limites (título curto abaixo de 60% do limite, ficha com menos da metade preenchida) são pontos de partida. |
+| Sugestões que custam dinheiro (frete grátis, Premium, sair do Grátis) só para anúncio com problema de visita ou de venda | Para um anúncio que já vende bem, o Orzy não manda gastar mais. |
+| Nota de qualidade em `/item/{id}/performance` | A documentação do Mercado Livre (dezembro de 2025) avisa que o `/items/{id}/health` antigo vai ser desligado. |
+| Quando o Mercado Livre pede o mesmo que uma regra do Orzy, fica o texto dele | É ele quem decide a exposição. A sugestão fica com o peso maior dos dois. |
+| A nota de qualidade é um extra | Se ela não puder ser lida (sem permissão, erro), o relatório sai sem ela, com visitas, vendas e as outras sugestões. |
 | CSV com `;` e vírgula decimal, em UTF-8 com BOM | Abre direto no Excel em português, com acentos certos. |
 | Se o CSV estiver aberto no Excel, salva outro com data e hora | O Windows não deixa sobrescrever arquivo aberto. |
 | Todo erro vira mensagem em português com o que fazer | O Nicolas não deve ver erro técnico em inglês. |

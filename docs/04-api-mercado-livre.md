@@ -39,7 +39,10 @@ Legenda: **[doc]** está na documentação oficial · **[código]** é como o pa
 |---|---|---|
 | Quem está conectado | `GET /users/me` | Também confirma que o login funciona. |
 | Lista de anúncios | `GET /users/{id}/items/search?status=active&limit=50&offset=N` | Paginação normal só até 1000 resultados. Acima disso: `search_type=scan` e depois `scroll_id` em cada chamada. **[doc]** |
-| Detalhes dos anúncios | `GET /items?ids=A,B,C&attributes=id,title,...` | No máximo 20 IDs por chamada. Resposta: lista de `{code, body}`. |
+| Detalhes dos anúncios | `GET /items?ids=A,B,C&attributes=id,title,...` | No máximo 20 IDs por chamada. Resposta: lista de `{code, body}`. O parâmetro `attributes` escolhe os campos. **[doc]** A fase 2 pede também `category_id`, `condition`, `listing_type_id` (`free` = Grátis, `gold_special` = Clássico, `gold_pro` = Premium), `pictures` (com `max_size`, ex.: `1200x900`), `attributes` (ficha técnica: `id`, `name`, `value_id`, `value_name`), `shipping.free_shipping` e `tags`. **[a validar]** |
+| Limite do título da categoria | `GET /categories/{id}` | `settings.max_title_length` (o limite muda por categoria). **[doc]** |
+| Campos da ficha técnica | `GET /categories/{id}/attributes` | Cada campo tem `id`, `name`, `relevance` e `tags`: `required` (obrigatório para publicar), `hidden`, `read_only`, `fixed`, `inferred` (o vendedor não preenche), `allow_variations` e `variation_attribute` (ficam nas variações). Campo marcado como "não se aplica": `value_id` "-1" e `value_name` vazio. Anúncio com a tag `incomplete_technical_specs` está perdendo exposição pela ficha. **[doc]** |
+| Nota de qualidade | `GET /item/{id}/performance` (no singular) | `score` de 0 a 100, `level` (Bad, Average, Good) e `level_wording` (no Brasil: Básica, Satisfatória, Profissional). Em `buckets[].variables[].rules[]`, cada regra tem `status` (PENDING ou COMPLETED), `mode` (OPPORTUNITY ou WARNING) e `wordings.title`, o texto do que fazer. 404: a nota ainda não foi calculada. 401: quem pergunta não é o dono do anúncio. Substitui o `/items/{id}/health`, que vai ser desligado. **[doc, dezembro de 2025]** |
 | Visitas | `GET /items/{id}/visits/time_window?last=30&unit=day` | Campo `total_visits`. Período máximo de 150 dias. As visitas podem levar até 48 h para aparecer. **[doc]** |
 | Vendas | `GET /orders/search?seller={id}&order.status=paid&order.date_created.from=...&order.date_created.to=...` | Datas no formato `2015-07-01T00:00:00.000-00:00`. Guarda só os últimos 12 meses. Pedidos cancelados não aparecem para o vendedor. **[doc]** |
 
@@ -55,6 +58,9 @@ Legenda: **[doc]** está na documentação oficial · **[código]** é como o pa
 - [ ] Os nomes das permissões por área no formulário do app (anúncios, vendas, métricas).
 - [ ] As respostas reais batem com os campos que o painel lê (`total_visits`, `order_items[].item.id`, `paging.total`).
 - [ ] Os números do relatório batem com o painel do Mercado Livre no mesmo período.
+- [ ] Fase 2: o multiget devolve `pictures`, `attributes`, `shipping` e `tags` quando pedidos em `attributes=...`.
+- [ ] Fase 2: `/item/{id}/performance` responde para anúncios do Brasil, com os textos em português e com a permissão de leitura que o app já tem.
+- [ ] Fase 2: as fotos trazem `max_size` e a categoria traz `settings.max_title_length`.
 
 ## Fontes
 
@@ -62,3 +68,8 @@ Legenda: **[doc]** está na documentação oficial · **[código]** é como o pa
 - [Gerenciar vendas (orders)](https://developers.mercadolivre.com.br/en_us/manage-sales)
 - [Visitas](https://developers.mercadolibre.com.mx/en_us/visits-resource)
 - [Itens e buscas](https://developers.mercadolivre.com.br/pt-br/itens-e-buscas)
+- [Qualidade dos anúncios, com `/performance`](https://global-selling.mercadolibre.com/devsite/listings-quality-gs) (atualizada em 15/12/2025)
+- [Qualidade dos anúncios, com o `/health` antigo](https://developers.mercadolibre.com.ar/en_us/listings-quality) (de 2022)
+- [Atributos e tags da ficha técnica](https://developers.mercadolivre.com.br/en_us/attributes)
+- [Fotos: tamanho recomendado e zoom](https://developers.mercadolibre.com.ar/en_us/working-with-pictures)
+- [Boas práticas de título](https://developers.mercadolibre.com.ar/devsite/global-listing)

@@ -20,19 +20,18 @@ vende mas pouco visto, vendendo bem).
 - [ ] Conferir visitas e vendas numa conta com mais anúncios e vendas, de um vendedor que autorize o app
   (fica para quando aparecer; não segura a fase 2)
 
-## Fase 2 · Sugestões de verdade para cada anúncio (próxima, plano esperando o ok)
+## Fase 2 · Sugestões de verdade para cada anúncio (feita no simulado, falta o teste real)
 
-Hoje o texto de "o que olhar" é igual para todos os anúncios da mesma situação.
-Nesta fase o programa lê o próprio anúncio e diz o que mudar nele, usando só regras (custo zero):
+Plano aprovado pelo Nicolas em 14/10/2026. Antes, o texto de "o que olhar" era igual para todos os anúncios
+da mesma situação. Agora o programa lê o próprio anúncio e diz o que mudar nele, usando só regras (custo zero).
 
-- tamanho e conteúdo do título
-- quantidade de fotos
-- ficha técnica (atributos) incompleta
-- frete grátis
-- tipo de anúncio (clássico ou premium)
-- a nota de qualidade que o próprio Mercado Livre dá ao anúncio, se a API mostrar
-
-A análise fica separada do CSV, para ser usada do mesmo jeito no site da fase 3.
+- [x] Ler título, fotos, ficha técnica, frete grátis e tipo (Grátis, Clássico ou Premium) de cada anúncio,
+  e os campos da ficha técnica de cada categoria
+- [x] Ler a nota de qualidade que o próprio Mercado Livre dá ao anúncio e o que ele pede para melhorar
+- [x] Regras num arquivo separado (`painel-ml/analise.py`), para o site da fase 3 usar as mesmas
+- [x] Colunas `o_que_mudar` e `qualidade_ml` no CSV, com os anúncios que mais precisam de mudança primeiro
+- [x] Testes com o Mercado Livre simulado
+- [ ] Rodar no anúncio real do Nicolas (o microfone de lapela) e conferir as sugestões com o anúncio no site
 
 ## Fase 3 · Site no orzy.com.br
 

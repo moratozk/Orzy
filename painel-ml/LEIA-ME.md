@@ -1,7 +1,8 @@
 # Painel de anúncios do Mercado Livre (passo 1)
 
 Conecta na sua conta do Mercado Livre e gera um relatório dos seus anúncios ativos com
-**visitas, vendas e conversão** do período, dizendo o que olhar em cada um.
+**visitas, vendas e conversão** do período, a **nota de qualidade** que o Mercado Livre dá a cada um
+e **o que mudar** em cada anúncio.
 Roda no seu computador, não precisa de servidor e não custa nada.
 
 ---
@@ -80,7 +81,31 @@ python meus_anuncios.py
 
 Para outro período: `python meus_anuncios.py --dias 60` (de 1 a 150 dias).
 
-Ele mostra um resumo na tela e salva o **relatorio_anuncios.csv** nesta pasta, que abre direto no Excel.
+Ele faz duas consultas por anúncio (visitas e nota de qualidade): numa conta com muitos anúncios, leva alguns minutos.
+Depois mostra um resumo na tela e salva o **relatorio_anuncios.csv** nesta pasta, que abre direto no Excel.
+
+Na tela aparecem quantos anúncios estão em cada situação, os que mais vendem e, em **Comece por estes**,
+até 10 anúncios, dos que mais precisam de mudança para os que menos precisam. Cada um vem com até 3 sugestões e com
+a nota de qualidade do Mercado Livre, quando ela existir. As outras sugestões ficam no CSV.
+
+### O que tem no CSV
+
+| Coluna | O que tem |
+|---|---|
+| situacao e o_que_olhar | Em que situação o anúncio está e o que costuma resolver (tabela abaixo). |
+| o_que_mudar | As sugestões para este anúncio, numeradas da mais importante para a menos. |
+| qualidade_ml | A nota que o Mercado Livre dá ao anúncio: Básica, Satisfatória ou Profissional, de 0 a 100. "ainda sem nota" quer dizer que ele ainda não calculou. |
+
+### De onde vêm as sugestões
+
+- **Título:** curto para o limite da categoria, palavras que o Mercado Livre pede para não usar (frete grátis,
+  promoção, desconto, usado, lacrado...), estoque no título (pode fazer o anúncio ser moderado) e símbolos.
+- **Fotos:** menos de 3, ou pequenas demais para ter zoom (o Mercado Livre recomenda 1200 x 1200 px).
+- **Ficha técnica:** quantos campos da categoria estão preenchidos e quais faltam, os obrigatórios primeiro.
+- **Frete grátis e tipo de anúncio (Grátis, Clássico, Premium):** como custam dinheiro, só aparecem
+  para anúncios com problema de visita ou de venda.
+- **Pedido do ML:** o que o próprio Mercado Livre pede para melhorar a nota de qualidade. Quando ele pede
+  o mesmo que uma regra do Orzy, fica só o texto dele.
 
 ### O que cada situação quer dizer
 
@@ -92,7 +117,7 @@ Ele mostra um resumo na tela e salva o **relatorio_anuncios.csv** nesta pasta, q
 | VENDE, MAS POUCO VISTO | Quem vê, compra | Ganhar visitas: título melhor ou anúncio pago |
 | VENDENDO BEM | Está funcionando | Use de modelo para os outros |
 
-Os limites (30 visitas e 1% de conversão) ficam no começo do `meus_anuncios.py` e podem ser ajustados.
+Os limites (30 visitas, 1% de conversão, 3 fotos e os outros) ficam no começo do `analise.py` e podem ser ajustados.
 As visitas podem levar até 48 horas para aparecer no Mercado Livre.
 
 ---
@@ -113,6 +138,9 @@ As visitas podem levar até 48 horas para aparecer no Mercado Livre.
   confira as permissões do app (passo 1, item 3) e rode `python conectar.py` de novo.
 - **"Não consegui ler as visitas"**: quase sempre é o app sem permissão de métricas. Acerte no app
   e rode `python conectar.py` de novo.
+- **"Não consegui ler a nota de qualidade"**: o relatório sai do mesmo jeito, só sem a nota. Se o erro disser
+  "Sem permissão", confira as permissões do app (passo 1, item 3) e rode `python conectar.py` de novo.
+- **"Não consegui ler a ficha técnica"**: o relatório sai sem as sugestões de ficha técnica. Tente de novo mais tarde.
 - **"Sem conexão" ou "respondeu algo inesperado"**: confira a internet. Em rede com bloqueio, como a da
   escola ou do trabalho, o Mercado Livre pode estar bloqueado: tente de casa.
 - **"Seu login venceu"**: rode `python conectar.py` de novo. Acontece se você trocar a senha,

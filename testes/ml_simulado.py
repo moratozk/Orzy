@@ -5,9 +5,11 @@ Imita só o pedaço da API que o painel usa:
   - login (OAuth, com PKCE opcional e refresh token de uso único)
   - /users/me
   - busca dos seus anúncios, inclusive o modo "scan" (acima de 1000 anúncios)
-  - multiget de no máximo 20 anúncios por chamada
+  - multiget de no máximo 20 anúncios por chamada, com fotos, ficha técnica, frete e tipo de anúncio
+  - categorias: limite do título e campos da ficha técnica
   - visitas por anúncio
   - busca de pedidos pagos
+  - nota de qualidade do anúncio (/item/{id}/performance)
 Também simula os problemas mais comuns: erro 429 (muitas chamadas), login vencido,
 falta de permissão e falha numa chamada.
 
@@ -30,6 +32,62 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 FORMATO_DATA = "%Y-%m-%dT%H:%M:%S.000-00:00"
 
+# Campos da ficha técnica de uma categoria, com as marcações (tags) que o Mercado Livre usa.
+ATRIBUTOS_PADRAO = [
+    {"id": "BRAND", "name": "Marca", "tags": {"required": True, "catalog_required": True}, "relevance": 1},
+    {"id": "MODEL", "name": "Modelo", "tags": {"required": True, "catalog_required": True}, "relevance": 1},
+    {"id": "LINE", "name": "Linha", "tags": {}, "relevance": 1},
+    {"id": "COLOR", "name": "Cor", "tags": {"allow_variations": True, "defines_picture": True}, "relevance": 1},
+    {"id": "WITH_BLUETOOTH", "name": "Com Bluetooth", "tags": {}, "relevance": 2},
+    {"id": "GTIN", "name": "Código universal de produto", "tags": {"variation_attribute": True}, "relevance": 2},
+    {"id": "SELLER_SKU", "name": "SKU", "tags": {"variation_attribute": True}, "relevance": 2},
+    {"id": "PACKAGE_WEIGHT", "name": "Peso da embalagem", "tags": {"hidden": True, "read_only": True}, "relevance": 2},
+]
+# Ficha técnica completa para a categoria padrão: o anúncio padrão não tem nada a mudar.
+FICHA_COMPLETA = {"BRAND": "Genérica", "MODEL": "Teste", "LINE": "Básica", "WITH_BLUETOOTH": "Sim"}
+
+
+def performance(item_id, nota, nivel, nivel_texto, pendentes=()):
+    """Monta a resposta de /item/{id}/performance como na documentação do Mercado Livre.
+
+    pendentes: lista de (variável, regra, texto) ou (variável, regra, texto, modo); cada um vira
+    uma regra que o anúncio ainda não cumpre. Uma regra cumprida (GTIN) vai junto, como no exemplo.
+    """
+    agora = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    variaveis = {"CHARACTERISTICS": [], "OFFER": []}
+    if not any(p[0] == "GTIN" for p in pendentes):
+        variaveis["CHARACTERISTICS"].append({
+            "key": "GTIN", "status": "COMPLETED", "score": 100, "calculated_at": agora,
+            "title": "Indique o código universal do seu produto",
+            "rules": [{"key": "HAS_GTIN", "status": "COMPLETED", "progress": 1, "mode": "OPPORTUNITY",
+                       "calculated_at": agora, "wordings": {"title": "Código universal completo",
+                                                             "label": "Completar código universal",
+                                                             "link": "https://www.mercadolivre.com.br"}}],
+        })
+    for pendente in pendentes:
+        variavel, regra, texto = pendente[:3]
+        modo = pendente[3] if len(pendente) > 3 else "OPPORTUNITY"
+        grupo = "OFFER" if variavel in ("FREE_SHIPPING", "PRICE") else "CHARACTERISTICS"
+        variaveis[grupo].append({
+            "key": variavel, "status": "PENDING", "score": 0, "calculated_at": agora, "title": texto,
+            "rules": [{"key": regra, "status": "PENDING", "progress": 0, "mode": modo, "calculated_at": agora,
+                       "wordings": {"title": texto, "label": "Corrigir", "link": "https://www.mercadolivre.com.br"}}],
+        })
+    return {
+        "entity_type": "ITEM",
+        "entity_id": item_id,
+        "score": nota,
+        "level": nivel,
+        "level_wording": nivel_texto,
+        "calculated_at": agora,
+        "buckets": [
+            {"key": chave, "type": "", "status": "PENDING" if any(v["status"] == "PENDING" for v in vs) else "COMPLETED",
+             "score": nota, "title": "Dados do produto" if chave == "CHARACTERISTICS" else "Condições de venda",
+             "calculated_at": agora, "variables": vs}
+            for chave, vs in variaveis.items()
+        ],
+    }
+
 
 class MLSimulado:
     def __init__(self, client_id="1234567890", client_secret="segredo-de-teste",
@@ -46,6 +104,8 @@ class MLSimulado:
 
         self.itens = {}          # id -> dados do anúncio
         self.visitas = {}        # id -> total de visitas no período (ou None para dar erro)
+        self.qualidade = {}      # id -> resposta de /item/{id}/performance (sem resposta: nota ainda não calculada)
+        self.categorias = {}     # id -> {"nome", "max_titulo", "atributos"}
         self.pedidos = []
         self.erros_por_rota = {}  # prefixo da rota -> status HTTP para devolver sempre
         # O que fazer nas próximas chamadas, em ordem: um status HTTP (ex.: 429),
@@ -63,7 +123,32 @@ class MLSimulado:
 
     # ------------------------------------------------------------ dados
 
-    def adicionar_item(self, item_id, titulo, preco=100.0, estoque=10, visitas=0, status="active"):
+    def adicionar_categoria(self, categoria_id, nome="Categoria de teste", max_titulo=60, atributos=None):
+        self.categorias[categoria_id] = {
+            "nome": nome,
+            "max_titulo": max_titulo,
+            "atributos": [dict(a) for a in (ATRIBUTOS_PADRAO if atributos is None else atributos)],
+        }
+
+    def adicionar_item(self, item_id, titulo, preco=100.0, estoque=10, visitas=0, status="active",
+                       categoria="MLB1000", fotos=3, largura_fotos=1200, ficha=None, frete_gratis=True,
+                       tipo="gold_special", condicao="new", tags=None, qualidade=None):
+        """Cria um anúncio. Sem dizer nada, ele tem 3 fotos boas, ficha completa, frete grátis e é Clássico.
+
+        ficha: campo -> valor (None quer dizer "não se aplica"). qualidade: resposta de performance().
+        """
+        if categoria not in self.categorias:
+            self.adicionar_categoria(categoria)
+        nomes = {a["id"]: a["name"] for a in self.categorias[categoria]["atributos"]}
+        atributos = []
+        for n, (campo, valor) in enumerate((FICHA_COMPLETA if ficha is None else ficha).items()):
+            atributos.append({
+                "id": campo,
+                "name": nomes.get(campo, campo),
+                "value_id": "-1" if valor is None else str(1000 + n),
+                "value_name": valor,
+                "values": [{"id": "-1" if valor is None else str(1000 + n), "name": valor, "struct": None}],
+            })
         self.itens[item_id] = {
             "id": item_id,
             "title": titulo,
@@ -72,10 +157,25 @@ class MLSimulado:
             "available_quantity": estoque,
             "status": status,
             "permalink": f"https://produto.mercadolivre.com.br/{item_id[:3]}-{item_id[3:]}-teste",
-            "listing_type_id": "gold_special",
-            "pictures": [{"id": "1"}],
+            "category_id": categoria,
+            "condition": condicao,
+            "listing_type_id": tipo,
+            "pictures": [{
+                "id": f"{n}-MLB-teste",
+                "url": f"http://http2.mlstatic.com/D_{item_id}_{n}-O.jpg",
+                "secure_url": f"https://http2.mlstatic.com/D_{item_id}_{n}-O.jpg",
+                "size": f"{min(largura_fotos, 500)}x{min(largura_fotos, 500)}",
+                "max_size": f"{largura_fotos}x{largura_fotos}",
+                "quality": "",
+            } for n in range(fotos)],
+            "attributes": atributos,
+            "shipping": {"mode": "me2", "free_shipping": frete_gratis, "logistic_type": "drop_off",
+                         "tags": [], "local_pick_up": False, "store_pick_up": False},
+            "tags": list(tags or []),
         }
         self.visitas[item_id] = visitas
+        if qualidade is not None:
+            self.qualidade[item_id] = qualidade
 
     def adicionar_pedido(self, item_id, quantidade=1, dias_atras=1, status="paid", seller_id=None):
         criado = datetime.now(timezone.utc) - timedelta(days=dias_atras)
@@ -228,6 +328,12 @@ class MLSimulado:
         m = re.fullmatch(r"/items/([A-Z]{3}\d+)/visits/time_window", caminho)
         if m:
             return self._visitas(req, m.group(1), params)
+        m = re.fullmatch(r"/item/([A-Z]{3}\d+)/performance", caminho)
+        if m:
+            return self._performance(req, m.group(1))
+        m = re.fullmatch(r"/categories/([A-Z]{3}\d+)(/attributes)?", caminho)
+        if m:
+            return self._categoria(req, m.group(1), bool(m.group(2)))
         if caminho == "/orders/search":
             return self._pedidos(req, params)
         return self._erro(req, 404, "not_found", "resource not found")
@@ -374,6 +480,27 @@ class MLSimulado:
             "last": int(params["last"]),
             "unit": "day",
             "results": [],
+        })
+
+    def _performance(self, req, item_id):
+        if item_id not in self.itens:
+            return self._erro(req, 404, "not_found", "item not found")
+        if item_id not in self.qualidade:
+            return self._erro(req, 404, "not_found", "Not found item performance")
+        return self._json(req, 200, self.qualidade[item_id])
+
+    def _categoria(self, req, categoria_id, so_atributos):
+        dados = self.categorias.get(categoria_id)
+        if not dados:
+            return self._erro(req, 404, "not_found", "Category not found")
+        if so_atributos:
+            return self._json(req, 200, [dict(a, value_type="string", hierarchy="ITEM", values=[])
+                                         for a in dados["atributos"]])
+        return self._json(req, 200, {
+            "id": categoria_id,
+            "name": dados["nome"],
+            "path_from_root": [{"id": categoria_id, "name": dados["nome"]}],
+            "settings": {"max_title_length": dados["max_titulo"], "max_pictures_per_item": 12},
         })
 
     def _pedidos(self, req, params):

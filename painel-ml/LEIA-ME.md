@@ -50,8 +50,10 @@ Roda no seu computador, não precisa de servidor e não custa nada.
 
 ## 2. Conecte sua conta
 
-1. Abra esta pasta no Explorador de Arquivos, clique na barra de endereço, digite `cmd` e aperte Enter.
-   Abre um Prompt de Comando já dentro da pasta.
+1. Abra esta pasta (`painel-ml`) no Explorador de Arquivos. Clique na barra de endereço, a faixa no alto
+   da janela que mostra o caminho da pasta, aperte **Ctrl+A** e digite só `cmd`, de modo que a barra fique
+   só com essa palavra. Aperte Enter: abre um Prompt de Comando (uma janela preta) já dentro da pasta.
+   - Outro jeito, no Windows 11: clique com o botão direito num espaço vazio da pasta e escolha **Abrir no Terminal**.
 2. Digite:
 
    ```
@@ -59,7 +61,8 @@ Roda no seu computador, não precisa de servidor e não custa nada.
    ```
 
 3. Ele pede o Client ID, o Client Secret, a Redirect URI (aperte Enter para usar o Google)
-   e se você ativou o PKCE.
+   e se você ativou o PKCE. Para colar, use Ctrl+V ou o botão direito do mouse. O Client Secret não aparece
+   na tela depois de colado: é normal. Mesmo assim, não mande print dessa janela para ninguém.
 4. O navegador abre no Mercado Livre. Entre com a conta **dona dos anúncios** e clique em **Permitir**.
    Se o navegador já estiver logado em outra conta, copie o link que o programa mostrou, abra numa janela
    anônima (Ctrl+Shift+N no Chrome ou no Edge) e faça este passo e o próximo nela.
@@ -96,6 +99,8 @@ As visitas podem levar até 48 horas para aparecer no Mercado Livre.
 
 ## Deu erro?
 
+- **"O Windows não pode localizar '...\painel-ml\cmd'"**: o `cmd` foi digitado no fim do caminho. Na barra de
+  endereço, aperte Ctrl+A antes de digitar `cmd`, para a barra ficar só com essa palavra.
 - **"python não é reconhecido"** ou **digitar `python` abre a Microsoft Store**: reinstale o Python
   marcando "Add python.exe to PATH", ou troque `python` por `py` nos comandos.
 - **Erro de redirect_uri / URL de redirecionamento no navegador**: a Redirect URI do app e a que

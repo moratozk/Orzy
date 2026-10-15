@@ -81,6 +81,7 @@ class Base(unittest.TestCase):
 
         saida = io.StringIO()
         with mock.patch("builtins.input", falso_input), \
+                mock.patch("getpass.getpass", falso_input), \
                 mock.patch("webbrowser.open", lambda url: links.append(url) or True), \
                 mock.patch.object(sys, "argv", list(argv)), \
                 contextlib.redirect_stdout(saida):
@@ -186,6 +187,29 @@ class TestLogin(Base):
         codigo, saida, _ = self.rodar_conectar([CLIENT_ID, SECRET, "", "n", recusou])
         self.assertEqual(codigo, 1)
         self.assertIn("recusou a autorização", saida)
+
+    def test_secret_nao_aparece_na_tela(self):
+        class Teclado:  # um Prompt de Comando de verdade, e não uma entrada redirecionada
+            def isatty(self):
+                return True
+
+        escondidos = []
+
+        def falso_getpass(prompt=""):
+            escondidos.append(prompt)
+            return SECRET
+
+        respostas = iter([CLIENT_ID, "", "n"])
+        with mock.patch.object(sys, "stdin", Teclado()), \
+                mock.patch("builtins.input", lambda prompt="": next(respostas)), \
+                mock.patch("getpass.getpass", falso_getpass), \
+                contextlib.redirect_stdout(io.StringIO()) as saida:
+            config = conectar.configurar()
+        self.assertEqual(config["client_secret"], SECRET)
+        self.assertEqual(len(escondidos), 1)
+        self.assertIn("Client Secret", escondidos[0])
+        self.assertIn("a chave não aparece na tela", saida.getvalue())
+        self.assertNotIn(SECRET, saida.getvalue())
 
     def test_refazer_pergunta_os_dados_de_novo(self):
         self.login()

@@ -206,20 +206,32 @@ def _explicar_erro_token(erro, na_troca):
     return f"Erro ao obter o token: {erro}"
 
 
-def _guardar_resposta_token(resposta, anterior=None):
+def montar_tokens(resposta, anterior=None):
+    """Monta o login a partir da resposta do Mercado Livre. Não grava nada no disco."""
     anterior = anterior or {}
-    tokens = {
+    return {
         "access_token": resposta["access_token"],
         "refresh_token": resposta.get("refresh_token") or anterior.get("refresh_token"),
         "user_id": resposta.get("user_id") or anterior.get("user_id"),
         "scope": resposta.get("scope") or anterior.get("scope"),
         "expira_em": time.time() + int(resposta.get("expires_in") or VALIDADE_PADRAO),
     }
+
+
+def _guardar_resposta_token(resposta, anterior=None):
+    tokens = montar_tokens(resposta, anterior)
     salvar_tokens(tokens)
     return tokens
 
 
-def trocar_code_por_token(config, code, verifier=None):
+def _pedir_token(corpo, na_troca):
+    try:
+        return _requisicao("POST", API_BASE + "/oauth/token", corpo=corpo)
+    except ErroML as e:
+        raise ErroLogin(_explicar_erro_token(e, na_troca=na_troca), e.status, e.codigo) from None
+
+
+def trocar_code_por_token(config, code, verifier=None, gravar=True):
     corpo = {
         "grant_type": "authorization_code",
         "client_id": config["client_id"],
@@ -229,14 +241,11 @@ def trocar_code_por_token(config, code, verifier=None):
     }
     if verifier:
         corpo["code_verifier"] = verifier
-    try:
-        resposta = _requisicao("POST", API_BASE + "/oauth/token", corpo=corpo)
-    except ErroML as e:
-        raise ErroLogin(_explicar_erro_token(e, na_troca=True), e.status, e.codigo) from None
-    return _guardar_resposta_token(resposta)
+    resposta = _pedir_token(corpo, na_troca=True)
+    return _guardar_resposta_token(resposta) if gravar else montar_tokens(resposta)
 
 
-def renovar_token(config, tokens):
+def renovar_token(config, tokens, gravar=True):
     if not tokens.get("refresh_token"):
         raise ErroLogin("Seu login não se renova sozinho (falta marcar 'Refresh Token' em Fluxos OAuth, no app). "
                         "Marque essa opção e rode: python conectar.py")
@@ -246,27 +255,33 @@ def renovar_token(config, tokens):
         "client_secret": config["client_secret"],
         "refresh_token": tokens["refresh_token"],
     }
-    try:
-        resposta = _requisicao("POST", API_BASE + "/oauth/token", corpo=corpo)
-    except ErroML as e:
-        raise ErroLogin(_explicar_erro_token(e, na_troca=False), e.status, e.codigo) from None
-    return _guardar_resposta_token(resposta, anterior=tokens)
+    resposta = _pedir_token(corpo, na_troca=False)
+    if gravar:
+        return _guardar_resposta_token(resposta, anterior=tokens)
+    return montar_tokens(resposta, anterior=tokens)
 
 
 # ---------------------------------------------------------------- cliente
 
-class MercadoLivre:
-    """Cliente da API que renova o login sozinho quando precisa."""
+class ClienteML:
+    """Chamadas à API com o login já carregado. Quem guarda o login (arquivo ou memória) decide o resto."""
 
-    def __init__(self):
-        self.config = carregar_config()
-        self.tokens = carregar_tokens()
-        if not self.config or not self.tokens:
-            raise ErroLogin("Você ainda não conectou sua conta. Rode primeiro: python conectar.py")
+    _mensagem_login = "O Mercado Livre recusou seu login. Entre de novo."
+
+    def __init__(self, config, tokens):
+        self.config = config
+        self.tokens = tokens
+
+    def _renovar(self):
+        # Não grava: quem quiser gravar o login renovado sobrescreve este método (ver MercadoLivre).
+        return renovar_token(self.config, self.tokens, gravar=False)
+
+    def _guardar(self):
+        """Grava o login depois de mudar. Aqui não grava nada."""
 
     def _access_token(self):
         if time.time() > self.tokens.get("expira_em", 0) - MARGEM_RENOVACAO:
-            self.tokens = renovar_token(self.config, self.tokens)
+            self.tokens = self._renovar()
         return self.tokens["access_token"]
 
     def get(self, caminho, params=None):
@@ -280,11 +295,10 @@ class MercadoLivre:
             except ErroML as e:
                 if e.status == 401 and tentativa == 0:
                     # Token recusado antes da hora (ex.: senha trocada). Renova e tenta uma vez.
-                    self.tokens = renovar_token(self.config, self.tokens)
+                    self.tokens = self._renovar()
                     continue
                 if e.status == 401:
-                    raise ErroLogin("O Mercado Livre recusou seu login. Entre de novo com: python conectar.py",
-                                    401, e.codigo) from None
+                    raise ErroLogin(self._mensagem_login, 401, e.codigo) from None
                 if e.status == 403:
                     raise ErroML(f"Sem permissão ({e}). Confira se você entrou com a conta dona "
                                  "dos anúncios, e não com um operador, e se o seu app no Mercado Livre "
@@ -297,5 +311,23 @@ class MercadoLivre:
         eu = self.get("/users/me")
         if eu and eu.get("id") and self.tokens.get("user_id") != eu["id"]:
             self.tokens["user_id"] = eu["id"]
-            salvar_tokens(self.tokens)
+            self._guardar()
         return eu
+
+
+class MercadoLivre(ClienteML):
+    """Cliente do PC: lê config.json e tokens.json e grava o login renovado na mesma pasta."""
+
+    _mensagem_login = "O Mercado Livre recusou seu login. Entre de novo com: python conectar.py"
+
+    def __init__(self):
+        config, tokens = carregar_config(), carregar_tokens()
+        if not config or not tokens:
+            raise ErroLogin("Você ainda não conectou sua conta. Rode primeiro: python conectar.py")
+        super().__init__(config, tokens)
+
+    def _renovar(self):
+        return renovar_token(self.config, self.tokens)
+
+    def _guardar(self):
+        salvar_tokens(self.tokens)

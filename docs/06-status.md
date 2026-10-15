@@ -1,21 +1,21 @@
 # 06 · Status
 
 **Atualizado em:** 15/10/2026
-**Fase atual:** 2, sugestões para cada anúncio: rodou no anúncio real em 15/10/2026. Falta conferir a ficha técnica
-e as sugestões com o anúncio aberto no site ([02-roadmap.md](02-roadmap.md)).
+**Fase atual:** 3, planejamento e código em rascunho do site (PR, sem merge). A fase 2 está concluída.
+Plano e custos em [07-fase-3-plano.md](07-fase-3-plano.md).
 
 ## Onde parou
 
-A fase 2 está pronta no programa do PC. O `meus_anuncios.py` agora lê de cada anúncio o título, as fotos, a ficha
-técnica, o frete grátis e o tipo (Grátis, Clássico ou Premium), lê a nota de qualidade que o Mercado Livre dá ao anúncio
-e diz o que mudar em cada um. As regras ficam no `painel-ml/analise.py`, separadas da coleta, para o site da fase 3
-usar as mesmas.
+A fase 2 está concluída. Em 15/10/2026 o Nicolas rodou no microfone de lapela: a nota de qualidade veio
+(Profissional, 88/100), com o pedido do Mercado Livre em português. A sugestão de fotos saiu duas vezes; isso foi
+corrigido no PR #4, que foi mesclado. O anúncio aberto no site confere com as sugestões: 1 foto, título curto
+e frete grátis, que é o correto para ele.
 
-Em 15/10/2026 o Nicolas rodou no microfone de lapela: a nota de qualidade veio (Profissional, 88/100), com o pedido
-do Mercado Livre em português. A sugestão de fotos saiu duas vezes, a do Orzy e a do Mercado Livre, porque no Brasil
-a regra das fotos não tem o nome da documentação. Isso foi corrigido, e a tela agora mostra também quantas fotos
-e quantos campos da ficha técnica o anúncio tem. Falta rodar de novo para ver a contagem da ficha técnica e conferir
-as sugestões com o anúncio aberto no site.
+Falta uma coisa pequena, que não segura a fase: ver na próxima rodada a contagem da ficha técnica na tela
+("Ficha técnica: X de Y campos").
+
+A fase 3 começou só como planejamento e rascunho, porque o Nicolas pediu para avançar enquanto estava fora.
+Nada foi publicado, contratado nem mudado no app do Mercado Livre. Ele decide hospedagem, app, LGPD e limites.
 
 ## Decisões de 14/10/2026
 
@@ -26,64 +26,47 @@ as sugestões com o anúncio aberto no site.
 - O app do Mercado Livre se chama "OrzyApp" e fica na conta do Nicolas. Ele serve para o teste e é editado na fase 3
   (Redirect URI do site), sem criar outro.
 - O Claude faz o merge dos próprios PRs quando os testes do GitHub passam e avisa o que entrou.
+  Exceção: o PR do site fica em rascunho até o Nicolas aprovar o plano da fase 3.
 
 ## Feito
 
 - Código do painel em `painel-ml/` (veio de uma conversa anterior com o Claude, que não está acessível aqui).
 - Mercado Livre simulado em `testes/ml_simulado.py` e testes automáticos em `testes/test_painel.py`.
-- Correções depois dos testes:
-  - conexão que cai no meio da resposta fechava o programa com erro técnico em inglês: agora tenta de novo e, se não der, explica;
-  - rede com bloqueio (escola, trabalho) que devolve uma página no lugar dos dados também fechava o programa: agora explica;
-  - quando as visitas não podiam ser lidas (por exemplo, app sem permissão de métricas), o relatório saía todo "SEM DADOS" sem dizer por quê: agora mostra o motivo.
-- LEIA-ME com como baixar do GitHub, permissões por área no app e os erros novos.
-- LEIA-ME com o formulário novo do app (informações básicas e a tela "Configuração e scopes") e como autorizar
-  com outra conta numa janela anônima. As mensagens do programa falam em "Refresh Token", o nome novo de "Acesso offline".
-- Testes rodando sozinhos no GitHub a cada PR, no Windows (Python mais recente e 3.10) e no Linux: todos passam.
+- Correções depois dos testes: conexão que cai no meio, rede com bloqueio, relatório "SEM DADOS" sem motivo, e outras
+  (ver o histórico do git).
+- LEIA-ME com como baixar do GitHub, permissões por área no app, o formulário novo do app e os erros novos.
+- Testes rodando sozinhos no GitHub a cada PR, no Windows (Python mais recente e 3.10) e no Linux.
 - Primeiro teste real (14/10/2026): app criado, login e relatório funcionando. Correções que saíram dele:
   - o `conectar.py` não mostra mais o Client Secret depois de colado (a chave apareceu num print do cmd);
-  - se o que foi colado não tem o código, o `conectar.py` pede de novo em vez de fechar (o endereço acabou colado
-    no cmd depois que o programa fechou);
+  - se o que foi colado não tem o código, o `conectar.py` pede de novo em vez de fechar;
   - o LEIA-ME explica melhor a barra de endereço do Explorador e onde achar a Chave secreta;
   - "1 anúncios encontrados" virou "1 anúncio encontrado".
-- Fase 2 (15/10/2026):
-  - `painel-ml/analise.py` com as situações e as regras de sugestão: título (curto para o limite da categoria,
-    palavras que o Mercado Livre pede para não usar, estoque no título, símbolos), fotos (menos de 3, sem zoom),
-    ficha técnica (campos que faltam, obrigatórios primeiro), frete grátis e tipo de anúncio (só para anúncio
-    com problema, porque custam dinheiro) e o que o próprio Mercado Livre pede na nota de qualidade;
-  - o relatório busca os campos novos de cada anúncio, a ficha técnica de cada categoria (uma vez por categoria)
-    e a nota de qualidade (`/item/{id}/performance`, que substitui o `/health` antigo);
-  - CSV com as colunas `o_que_mudar` e `qualidade_ml`, e os anúncios que mais precisam de mudança primeiro
-    dentro de cada situação;
-  - na tela, "Comece por estes" mostra até 10 anúncios com até 3 sugestões cada e a nota do Mercado Livre.
-- Ajustes depois do teste real (15/10/2026):
-  - o pedido de fotos do Mercado Livre, que no Brasil vem com outro nome de regra, não repete mais a sugestão do Orzy;
-  - a tela e o CSV mostram quantas fotos e quantos campos da ficha técnica (preenchidos de total) cada anúncio tem;
-  - se a ficha técnica do anúncio não vier na resposta do Mercado Livre, aparece "?" em vez de acusar campos faltando.
+- Fase 2 (PR #3 e #4, mesclados em 15/10/2026):
+  - `painel-ml/analise.py` com as situações e as regras de sugestão (título, fotos, ficha técnica, frete, tipo de
+    anúncio e a nota de qualidade do próprio Mercado Livre);
+  - o relatório busca os campos novos de cada anúncio, a ficha técnica de cada categoria e a nota de qualidade
+    (`/item/{id}/performance`, que substitui o `/health` antigo);
+  - CSV com as colunas `o_que_mudar`, `qualidade_ml`, `fotos` e `ficha_tecnica`;
+  - na tela, "Comece por estes" mostra até 10 anúncios com até 3 sugestões cada, a nota, as fotos e a ficha técnica;
+  - o pedido de fotos do Mercado Livre, que no Brasil vem com outro nome de regra, não repete mais a sugestão do Orzy.
+- Fase 3, em rascunho (PR, sem merge):
+  - `web/`: o site (login com PKCE, relatório em segundo plano, histórico, páginas e servidor, só biblioteca padrão);
+  - `painel-ml/`: o login e a coleta ganharam versões que o site usa sem gravar em arquivo; o PC continua igual;
+  - `testes/test_site.py`: testes do site contra o Mercado Livre simulado;
+  - `docs/07-fase-3-plano.md`: plano em 5 passos, custos em reais, LGPD e decisões que faltam.
 
 ## O que foi testado (com dados simulados)
 
-- Login com e sem PKCE, colando o endereço inteiro, só o código, ou o endereço sem `https://` e com aspas.
-- Colar o exemplo `code=TG-...` e depois o endereço certo, no mesmo login.
-- Endereço de outra tentativa de login, código usado duas vezes, Secret errado, recusa no navegador.
-- Client Secret escondido ao colar num Prompt de Comando de verdade.
-- Renovação do login: token vencido, token recusado antes da hora, refresh token de uso único salvo na hora.
-- Erro 429, conexão caindo, sem internet, rede com bloqueio, sem permissão.
-- Relatório: as 5 situações, período de 30, 60 e acima de 150 dias, pedidos pagos x cancelados x não pagos,
-  mais de 50 pedidos, até 1000 e mais de 1000 anúncios (modo scan), multiget de no máximo 20,
-  CSV aberto no Excel, conta sem anúncios, login vencido no meio do relatório.
-- Fase 2:
-  - cada regra de título, fotos, ficha técnica, frete e tipo, inclusive títulos que não podem dar falso alarme
-    (100% algodão, -50°C, USB-C, "Descontinuado");
-  - nota do Mercado Livre com regras pendentes e cumpridas, aviso (WARNING), nota ainda não calculada (404);
-  - pedido do Mercado Livre igual a uma regra do Orzy: fica só o texto dele, com o peso maior;
-  - ordem dos anúncios: dentro da mesma situação, quem tem mais para mudar vem antes;
-  - limite do título vindo da categoria e ficha técnica lida uma vez por categoria;
-  - sem permissão para a nota (para no primeiro anúncio e o relatório sai sem ela), 401 na nota (o login é
-    renovado e salvo, e o relatório sai), nota que falha nos 3 primeiros anúncios (para de perguntar),
-    erro ao ler a ficha técnica (o relatório sai sem as sugestões de ficha);
-  - pedido de fotos do Mercado Livre com outro nome de regra, como veio no teste real: não repete a sugestão.
-- Os dois programas rodando de verdade, como no Prompt de Comando, numa cópia da pasta.
-- Testes rodados no Python 3.10, 3.11 e 3.13.
+- Programa do PC: login com e sem PKCE, Client Secret escondido ao colar, renovação do login, erros 429, sem internet,
+  rede com bloqueio, sem permissão, relatórios de 30 a 150 dias, até 1000 e mais de 1000 anúncios (modo scan),
+  CSV aberto no Excel, conta sem anúncios, nota de qualidade com regras pendentes, aviso e ainda não calculada,
+  pedido de fotos com outro nome de regra, ordem dos anúncios e limites de chamadas.
+- Site (fase 3): login inteiro (estado do OAuth, PKCE, retorno), token que não é gravado em disco, relatório
+  com título que tem HTML (sai escapado), CSV com BOM, isolamento entre contas, token vencido sem renovação
+  escondida, pedido de outro site recusado, um relatório por conta, histórico com confirmação para apagar,
+  cabeçalhos de segurança e uma ida e volta por HTTP real.
+- Testes rodados no Python 3.10 e 3.13. Quebrar de propósito a checagem do estado do OAuth e o escape de títulos
+  faz os testes falharem.
 
 ## Validado com dados reais (14 e 15/10/2026)
 
@@ -97,23 +80,25 @@ as sugestões com o anúncio aberto no site.
 - [ ] Rodar numa conta com mais anúncios e vendas (um vendedor que autorize o app).
 - [x] Fase 2: rodar no microfone de lapela (15/10/2026). A nota de qualidade veio (Profissional, 88/100), o pedido
   do Mercado Livre veio em português e as fotos foram lidas (1 foto).
-- [ ] Fase 2: ver a contagem da ficha técnica na tela (linha "Ficha técnica: X de Y campos").
-- [ ] Fase 2: conferir as sugestões com o anúncio aberto no site do Mercado Livre.
+- [x] Fase 2: conferir as sugestões com o anúncio aberto no site (15/10/2026: 1 foto, título curto e frete grátis batem).
+- [ ] Fase 2: ver a contagem da ficha técnica na tela (linha "Ficha técnica: X de Y campos"). Não segura a fase.
+- [ ] Fase 3: o login do site com o Mercado Livre de verdade (depende da Redirect URI do site no app).
 
 ## Próximo passo
 
-1. Nicolas: baixar o ZIP de novo do GitHub. Para não fazer login de novo, copiar o `config.json` e o `tokens.json`
-   da pasta `painel-ml` usada por último para a nova.
-2. Nicolas: rodar `python meus_anuncios.py`, mandar o texto do que apareceu no cmd e conferir, no anúncio aberto
-   no site, o número de fotos e se a ficha técnica está completa.
-3. Claude: ajustar o que precisar e marcar a fase 2 como concluída.
-4. Quando der, rodar numa conta com mais anúncios e vendas, de um vendedor que autorize o app.
+1. Nicolas: responder as decisões de [07-fase-3-plano.md](07-fase-3-plano.md) (hospedagem, app, limites, contato,
+   revisão de advogado, beta ou público). Uma palavra por item basta.
+2. Nicolas: quando puder, baixar o ZIP de novo do GitHub. Para não fazer login de novo, copiar o `config.json` e o
+   `tokens.json` da pasta `painel-ml` usada por último para a nova. Rodar `python meus_anuncios.py` e mandar o
+   texto do que apareceu no cmd (sem print). Ver a linha "Ficha técnica: X de Y campos".
+3. Claude: com o ok do passo 1 e 2 da fase 3, publicar num endereço de teste e testar com a conta do Nicolas.
 
 Na conversa, mandar só o texto do que apareceu no cmd, sem print. **Nunca** mandar o Client Secret,
-o `config.json` nem o `tokens.json`.
+o `config.json`, o `tokens.json` nem o banco do site.
 
 ## Em aberto
 
 - Qual vendedor com mais anúncios vai testar.
 - O que "propósito" e "quantos usuários" do formulário do app mudam: a documentação do Mercado Livre não fala.
+- Os termos do Mercado Livre sobre guardar dados de vendedores: a página não abriu no dia 15/10/2026.
 - Se existirem os arquivos de plano originais da conversa anterior, juntar com estes.

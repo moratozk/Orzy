@@ -1,0 +1,67 @@
+"""Configuração do site, lida das variáveis de ambiente.
+
+O Client Secret do app do Mercado Livre fica só no ambiente do servidor: nunca no código, nunca no GitHub.
+"""
+
+import os
+from dataclasses import dataclass
+from urllib.parse import urlsplit
+
+
+class ErroConfiguracao(Exception):
+    """Falta algo para ligar o site. A mensagem diz o que falta."""
+
+
+@dataclass(frozen=True)
+class Configuracao:
+    client_id: str
+    client_secret: str
+    url_base: str  # endereço público do site, sem barra no final
+    banco: str  # arquivo SQLite do histórico
+    host: str
+    porta: int
+    max_anuncios: int  # quantos anúncios um relatório lê, no máximo
+    horas_sessao: int  # a sessão some depois de tanto tempo sem uso
+
+    @property
+    def redirect_uri(self):
+        return self.url_base + "/retorno"
+
+    @property
+    def origem(self):
+        partes = urlsplit(self.url_base)
+        return f"{partes.scheme}://{partes.netloc}"
+
+    @property
+    def seguro(self):
+        return self.url_base.startswith("https://")
+
+    def app_ml(self):
+        """O que o ml_api precisa para falar com o app: id, segredo e Redirect URI."""
+        return {"client_id": self.client_id, "client_secret": self.client_secret,
+                "redirect_uri": self.redirect_uri}
+
+
+def carregar(ambiente=None):
+    env = os.environ if ambiente is None else ambiente
+    obrigatorias = ("ORZY_ML_CLIENT_ID", "ORZY_ML_CLIENT_SECRET", "ORZY_URL_BASE")
+    faltando = [nome for nome in obrigatorias if not env.get(nome)]
+    if faltando:
+        raise ErroConfiguracao("faltam estas variáveis de ambiente: " + ", ".join(faltando))
+
+    url_base = env["ORZY_URL_BASE"].strip().rstrip("/")
+    # http só para testar no próprio computador (o Mercado Livre não aceita endereço local de verdade).
+    if not url_base.startswith(("https://", "http://127.0.0.1")):
+        raise ErroConfiguracao("ORZY_URL_BASE precisa começar com https:// "
+                               "(para testar aqui, use http://127.0.0.1 com a porta)")
+
+    return Configuracao(
+        client_id=env["ORZY_ML_CLIENT_ID"],
+        client_secret=env["ORZY_ML_CLIENT_SECRET"],
+        url_base=url_base,
+        banco=env.get("ORZY_BANCO", "orzy.db"),
+        host=env.get("ORZY_HOST", "127.0.0.1"),
+        porta=int(env.get("PORT") or env.get("ORZY_PORTA") or 8000),
+        max_anuncios=int(env.get("ORZY_MAX_ANUNCIOS") or 300),
+        horas_sessao=int(env.get("ORZY_HORAS_SESSAO") or 8),
+    )

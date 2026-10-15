@@ -20,7 +20,7 @@ vende mas pouco visto, vendendo bem).
 - [ ] Conferir visitas e vendas numa conta com mais anúncios e vendas, de um vendedor que autorize o app
   (fica para quando aparecer; não segura a fase 2)
 
-## Fase 2 · Sugestões de verdade para cada anúncio (rodou no anúncio real, falta conferir a ficha técnica)
+## Fase 2 · Sugestões de verdade para cada anúncio (concluída em 15/10/2026)
 
 Plano aprovado pelo Nicolas em 14/10/2026. Antes, o texto de "o que olhar" era igual para todos os anúncios
 da mesma situação. Agora o programa lê o próprio anúncio e diz o que mudar nele, usando só regras (custo zero).
@@ -33,11 +33,14 @@ da mesma situação. Agora o programa lê o próprio anúncio e diz o que mudar 
 - [x] Testes com o Mercado Livre simulado
 - [x] Rodar no anúncio real do Nicolas, o microfone de lapela (15/10/2026: a nota do Mercado Livre veio; a sugestão
   de fotos repetida foi corrigida)
-- [ ] Conferir a contagem da ficha técnica e as sugestões com o anúncio aberto no site
+- [x] Conferir as sugestões com o anúncio aberto no site (15/10/2026: 1 foto, título curto e frete grátis batem)
+- [ ] Ver a contagem da ficha técnica na tela ("Ficha técnica: X de Y campos") na próxima rodada. Não segura a fase.
 
-## Fase 3 · Site no orzy.com.br
+## Fase 3 · Site no orzy.com.br (planejamento e rascunho do código, sem publicar)
 
 Decidido pelo Nicolas em 14/10/2026: é aqui que o Orzy vira site, para outros vendedores usarem sem instalar nada.
+Plano em 5 passos, custos, LGPD e decisões em [07-fase-3-plano.md](07-fase-3-plano.md). O código está num PR de
+rascunho: não entra no main nem vai para o ar antes do ok do Nicolas.
 
 - O vendedor entra no orzy.com.br e clica em **Conectar com Mercado Livre**. Ninguém precisa criar app.
 - Um servidor pequeno guarda o Client Secret do app do Orzy. O Secret nunca vai dentro de um programa distribuído.

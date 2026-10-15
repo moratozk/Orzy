@@ -15,6 +15,7 @@ Começa com custo zero e vai virar um pequeno ERP.
 | Pasta | O que tem |
 |---|---|
 | `painel-ml/` | O programa do Mercado Livre |
+| `web/` | O site do orzy.com.br (fase 3, ainda sem publicar; ver [web/LEIA-ME.md](web/LEIA-ME.md)) |
 | `testes/` | Mercado Livre simulado e testes automáticos |
 | `docs/` | Visão geral, roadmap, decisões técnicas, API, custos e status |
 

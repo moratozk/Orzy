@@ -13,7 +13,17 @@
 ## Fase 3 (site)
 
 Hospedagem do site e do servidor que guarda o Client Secret. Existem opções grátis, com limites.
-O plano da fase 3 traz a estimativa em reais por mês antes de qualquer contratação.
+
+Estimativas de 15/10/2026, com US$ 1 = R$ 5,04 (cotação de 14/10/2026). Os preços mudam: conferir antes de contratar.
+
+| Opção | R$ por mês (estimativa) |
+|---|---|
+| Render, plano pago de entrada + 1 GB de disco | cerca de R$ 37 (recomendado para a primeira versão) |
+| Hostinger VPS KVM 1 | de cerca de R$ 35 (promoção) a R$ 98 (preço cheio); precisa de alguém que cuide do Linux |
+| Railway, plano Hobby + uso | de cerca de R$ 35 a R$ 100, conforme o uso |
+| Oracle Cloud, Always Free | R$ 0, com riscos a validar (região e máquina ociosa) |
+
+Nada foi contratado. Detalhes e fontes em [07-fase-3-plano.md](07-fase-3-plano.md).
 
 ## Regras para qualquer custo novo
 

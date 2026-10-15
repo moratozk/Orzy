@@ -121,4 +121,4 @@ Antes de ir à Justiça, se puder, fale com o Orzy: a maioria dos problemas se r
 
 ## 14. Contato
 
-[PREENCHER: e-mail de contato]
+Para dúvidas, pedidos ou reclamações, escreva para [orzy.suporte@gmail.com](mailto:orzy.suporte@gmail.com).

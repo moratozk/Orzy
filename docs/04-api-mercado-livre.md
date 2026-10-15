@@ -59,7 +59,10 @@ Legenda: **[doc]** está na documentação oficial · **[código]** é como o pa
 - [ ] As respostas reais batem com os campos que o painel lê (`total_visits`, `order_items[].item.id`, `paging.total`).
 - [ ] Os números do relatório batem com o painel do Mercado Livre no mesmo período.
 - [ ] Fase 2: o multiget devolve `pictures`, `attributes`, `shipping` e `tags` quando pedidos em `attributes=...`.
-- [ ] Fase 2: `/item/{id}/performance` responde para anúncios do Brasil, com os textos em português e com a permissão de leitura que o app já tem.
+  `pictures` veio no teste de 15/10/2026 (1 foto); a ficha técnica ainda falta conferir.
+- [x] Fase 2: `/item/{id}/performance` responde para anúncios do Brasil, com os textos em português e com a permissão
+  de leitura que o app já tem (15/10/2026: Profissional, 88/100). A regra das fotos não veio com o nome
+  `PICTURES_QUANTITY_MIN` da documentação, então o painel reconhece o pedido pelo grupo `PICTURES`.
 - [ ] Fase 2: as fotos trazem `max_size` e a categoria traz `settings.max_title_length`.
 
 ## Fontes

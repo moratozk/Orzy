@@ -202,7 +202,10 @@ def montar_linhas(ids, detalhes, visitas, vendas, categorias=None, qualidade=Non
         conversao = (s / v) if (v and s is not None) else None
         situacao = analise.classificar(v, s)
         nota = qualidade.get(item_id)
-        sugestoes = analise.sugerir(d, situacao, categorias.get(d.get("category_id")), nota)
+        categoria = categorias.get(d.get("category_id"))
+        sugestoes = analise.sugerir(d, situacao, categoria, nota)
+        ficha = analise.contar_ficha(d, (categoria or {}).get("atributos"))
+        fotos = d.get("pictures")
         linhas.append({
             "id": item_id,
             "titulo": d.get("title") or "",
@@ -216,6 +219,8 @@ def montar_linhas(ids, detalhes, visitas, vendas, categorias=None, qualidade=Non
             "sugestoes": sugestoes,
             "pontos": analise.pontos(sugestoes),
             "qualidade": analise.texto_qualidade(nota),
+            "fotos": len(fotos) if isinstance(fotos, list) else None,
+            "ficha": f"{ficha[0]} de {ficha[1]} campos" if ficha else "?",
             "link": d.get("permalink") or "",
         })
     # Primeiro a situação; dentro dela, quem tem mais coisas importantes para mudar e depois mais visitas.
@@ -243,7 +248,8 @@ def _o_que_mudar(sugestoes):
 
 def salvar_csv(linhas, dias):
     cabecalho = ["id", "titulo", "preco", "estoque", f"visitas_{dias}d", f"vendas_{dias}d",
-                 "conversao_%", "situacao", "o_que_olhar", "o_que_mudar", "qualidade_ml", "link"]
+                 "conversao_%", "situacao", "o_que_olhar", "o_que_mudar", "qualidade_ml", "fotos",
+                 "ficha_tecnica", "link"]
     destino = ARQ_RELATORIO
     try:
         f = open(destino, "w", encoding="utf-8-sig", newline="")
@@ -259,7 +265,8 @@ def salvar_csv(linhas, dias):
                 l["id"], l["titulo"], _num_br(l["preco"]), _texto(l["estoque"]),
                 _texto(l["visitas"]), _texto(l["vendas"]),
                 _num_br(l["conversao"] * 100 if l["conversao"] is not None else None, 1),
-                l["situacao"], l["o_que_olhar"], _o_que_mudar(l["sugestoes"]), l["qualidade"], l["link"],
+                l["situacao"], l["o_que_olhar"], _o_que_mudar(l["sugestoes"]), l["qualidade"],
+                _texto(l["fotos"]), l["ficha"], l["link"],
             ])
     return destino
 
@@ -282,8 +289,8 @@ def mostrar_resumo(linhas, dias):
         for n, l in enumerate(prioridade, 1):
             print(f"  {n:>2}. {_encurtar(l['titulo']):<48} {_texto(l['visitas']):>6} visitas  "
                   f"{_texto(l['vendas']):>4} vendas")
-            if l["qualidade"] not in ("?", "ainda sem nota"):
-                print(f"      Nota de qualidade do Mercado Livre: {l['qualidade']}")
+            print(f"      Nota do ML: {l['qualidade']}  |  Fotos: {_texto(l['fotos'])}  |  "
+                  f"Ficha técnica: {l['ficha']}")
             textos = [s["texto"] for s in l["sugestoes"]] or [l["o_que_olhar"]]
             for texto in textos[:SUGESTOES_NA_TELA]:
                 print(textwrap.fill(texto, width=100, initial_indent="      - ", subsequent_indent="        "))

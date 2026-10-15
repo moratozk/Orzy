@@ -20,7 +20,7 @@ vende mas pouco visto, vendendo bem).
 - [ ] Conferir visitas e vendas numa conta com mais anúncios e vendas, de um vendedor que autorize o app
   (fica para quando aparecer; não segura a fase 2)
 
-## Fase 2 · Sugestões de verdade para cada anúncio (feita no simulado, falta o teste real)
+## Fase 2 · Sugestões de verdade para cada anúncio (rodou no anúncio real, falta conferir a ficha técnica)
 
 Plano aprovado pelo Nicolas em 14/10/2026. Antes, o texto de "o que olhar" era igual para todos os anúncios
 da mesma situação. Agora o programa lê o próprio anúncio e diz o que mudar nele, usando só regras (custo zero).
@@ -31,7 +31,9 @@ da mesma situação. Agora o programa lê o próprio anúncio e diz o que mudar 
 - [x] Regras num arquivo separado (`painel-ml/analise.py`), para o site da fase 3 usar as mesmas
 - [x] Colunas `o_que_mudar` e `qualidade_ml` no CSV, com os anúncios que mais precisam de mudança primeiro
 - [x] Testes com o Mercado Livre simulado
-- [ ] Rodar no anúncio real do Nicolas (o microfone de lapela) e conferir as sugestões com o anúncio no site
+- [x] Rodar no anúncio real do Nicolas, o microfone de lapela (15/10/2026: a nota do Mercado Livre veio; a sugestão
+  de fotos repetida foi corrigida)
+- [ ] Conferir a contagem da ficha técnica e as sugestões com o anúncio aberto no site
 
 ## Fase 3 · Site no orzy.com.br
 

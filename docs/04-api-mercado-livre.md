@@ -22,6 +22,13 @@ Legenda: **[doc]** está na documentação oficial · **[código]** é como o pa
   de uma venda, Métricas do negócio, Promoções, cupons e descontos de uma venda, Venda e envios de um produto.
   O painel pede Leitura em Publicação e sincronização (anúncios), Métricas do negócio (visitas) e Venda e envios
   de um produto (pedidos). **[código]**
+- Pela documentação do Global Selling (developers em global-selling.mercadolibre.com/devsite/create-application):
+  Usuários vem ativo em todo app e inclui a reputação do vendedor; Publicação e sincronização cobre anúncios, fotos,
+  preços e visitas; Métricas do negócio cobre métricas de vendas, estoque e reputação, tendências e visitas;
+  Vendas e envios cobre pedidos, envios, reclamações e devoluções. **[doc]**
+- Depois de criado, o app aparece em Minhas aplicações só com o Client ID. O Secret fica em ⋮ > Editar, como
+  "Chave secreta". A lista mostra "Aplicativo não certificado" e uma nota de "Configuração de segurança" (70 num app
+  novo), que é recomendação. (visto em 14/10/2026)
 - Trocar a senha ou tirar a permissão do app invalida tudo: tem que fazer login de novo. **[doc]**
 - A Redirect URI tem que ser idêntica à cadastrada no app. **[doc]**
 - Erros: `invalid_client` (Client ID ou Secret errado), `invalid_grant` (código ou refresh token vencido, já usado ou com Redirect URI diferente), `local_rate_limited` (429). **[doc]**

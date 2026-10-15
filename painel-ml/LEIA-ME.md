@@ -43,7 +43,10 @@ Roda no seu computador, não precisa de servidor e não custa nada.
      e o resto, Sem acesso.
    - **Tópicos e notificações:** não precisa marcar nada. Se o formulário exigir uma URL de
      notificação, use `https://www.google.com` também.
-4. Salve. Na tela do app, copie o **Client ID** (o número) e o **Client Secret** (a chave).
+4. Salve. Para ver os dados do app, clique nos três pontinhos ⋮ ao lado dele e em **Editar**:
+   o **Client ID** aparece como **ID do aplicativo** e o **Client Secret** como **Chave secreta**
+   (clique no olhinho para ver). Não use a opção de renovar a chave: ela troca o Secret.
+   A nota de "Configuração de segurança" na lista de apps é só uma recomendação.
 
 ## 2. Conecte sua conta
 

@@ -1,7 +1,8 @@
 """Histórico dos relatórios, num arquivo SQLite no servidor.
 
 Guarda só o que o relatório mostra: número e título dos anúncios e os números deles.
-Nada de token e nenhum dado de comprador.
+Nada de token e nenhum dado de comprador. Guarda também as contagens do beta (ver contagens.py): só números por
+dia, sem dizer de qual conta.
 """
 
 import contextlib
@@ -32,6 +33,12 @@ CREATE TABLE IF NOT EXISTS anuncios (
     pontos INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS anuncios_do_relatorio ON anuncios (relatorio_id);
+CREATE TABLE IF NOT EXISTS contagens (
+    dia TEXT NOT NULL,
+    nome TEXT NOT NULL,
+    valor INTEGER NOT NULL,
+    PRIMARY KEY (dia, nome)
+);
 """
 
 COLUNAS_ANUNCIO = ("id", "titulo", "visitas", "vendas", "situacao", "pontos")
@@ -121,3 +128,28 @@ class Historico:
             con.execute("DELETE FROM anuncios WHERE relatorio_id IN "
                         "(SELECT id FROM relatorios WHERE criado_em < ?)", (limite,))
             return con.execute("DELETE FROM relatorios WHERE criado_em < ?", (limite,)).rowcount
+
+    # ------------------------------------------------------------ contagens do beta (ver contagens.py)
+
+    def somar_contagens(self, dia, valores):
+        """Soma às contagens do dia ({"logins": 1}, por exemplo). Só números: nada de conta."""
+        with self._conectar() as con:
+            con.executemany(
+                "INSERT INTO contagens (dia, nome, valor) VALUES (?, ?, ?) "
+                "ON CONFLICT (dia, nome) DO UPDATE SET valor = valor + excluded.valor",
+                [(dia, nome, int(valor)) for nome, valor in valores.items()])
+
+    def ler_contagens(self):
+        """{dia: {nome: valor}} de todos os dias que têm alguma contagem."""
+        dias = {}
+        with self._conectar() as con:
+            for dia, nome, valor in con.execute("SELECT dia, nome, valor FROM contagens"):
+                dias.setdefault(dia, {})[nome] = valor
+        return dias
+
+    def ultimo_total_de_cada_conta(self):
+        """Quantos anúncios tem o último relatório guardado de cada conta, do menor para o maior, sem dizer a conta."""
+        with self._conectar() as con:
+            linhas = con.execute("SELECT total FROM relatorios WHERE id IN "
+                                 "(SELECT MAX(id) FROM relatorios GROUP BY ml_user_id)").fetchall()
+        return sorted(total for total, in linhas)

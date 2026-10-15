@@ -25,6 +25,7 @@ class Configuracao:
     historico: str = "sqlite"  # onde fica o histórico: "sqlite" (arquivo) ou "firestore" (Google Cloud)
     firestore_projeto: str = ""  # id do projeto no Google Cloud, quando o histórico fica no Firestore
     firestore_url: str = ""  # só para o emulador do Firestore; vazio é o Firestore de verdade
+    contas_admin: frozenset = frozenset()  # números das contas do Mercado Livre que abrem a página /contagens
 
     @property
     def redirect_uri(self):
@@ -64,6 +65,10 @@ def carregar(ambiente=None):
     if historico == "firestore" and not env.get("ORZY_FIRESTORE_PROJETO", "").strip():
         raise ErroConfiguracao("com ORZY_HISTORICO=firestore, falta ORZY_FIRESTORE_PROJETO "
                                "(o id do projeto no Google Cloud)")
+    admin = [pedaco.strip() for pedaco in env.get("ORZY_CONTAS_ADMIN", "").split(",") if pedaco.strip()]
+    if not all(pedaco.isascii() and pedaco.isdigit() for pedaco in admin):
+        raise ErroConfiguracao("ORZY_CONTAS_ADMIN precisa ter só o número da conta do Mercado Livre (o ID que o "
+                               "conectar.py mostra); para mais de uma conta, separe com vírgula")
 
     return Configuracao(
         client_id=env["ORZY_ML_CLIENT_ID"],
@@ -77,4 +82,5 @@ def carregar(ambiente=None):
         historico=historico,
         firestore_projeto=env.get("ORZY_FIRESTORE_PROJETO", "").strip(),
         firestore_url=env.get("ORZY_FIRESTORE_URL", "").strip(),
+        contas_admin=frozenset(int(pedaco) for pedaco in admin),
     )

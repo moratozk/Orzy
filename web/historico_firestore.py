@@ -11,6 +11,9 @@ Cada relatório é um documento da coleção "relatorios", com os anúncios dent
 que ele foi criado, em microssegundos: cresce com o tempo, como o número do SQLite. As buscas usam só um campo de cada
 vez ou só igualdades, então não pedem índice composto. O campo expira_em é para a política de TTL do Firestore apagar
 sozinho o que passou do prazo; o servidor também apaga uma vez por dia (apagar_antigos).
+
+As contagens do beta (ver contagens.py) ficam na coleção "contagens", um documento por dia ("2026-10-15"), só com
+números: nenhum campo diz de qual conta. Cada contagem é somada pelo próprio Firestore (increment), sem ler antes.
 """
 
 import json
@@ -27,6 +30,7 @@ from .historico import COLUNAS_ANUNCIO, DIAS_DE_HISTORICO
 URL_FIRESTORE = "https://firestore.googleapis.com/v1"
 URL_TOKEN = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token"
 COLECAO = "relatorios"
+COLECAO_CONTAGENS = "contagens"
 POR_COMMIT = 500  # o Firestore aceita até 500 escritas por commit
 TEMPO_MAXIMO = 20  # segundos por chamada
 MAX_LISTA = 100  # o mesmo limite do SQLite
@@ -123,7 +127,8 @@ class HistoricoFirestore:
 
     def __init__(self, projeto, banco="(default)", url=URL_FIRESTORE, token=None, agora=None,
                  dias_guardar=DIAS_DE_HISTORICO):
-        self._base = f"{url.rstrip('/')}/projects/{projeto}/databases/{banco}/documents"
+        self._nome = f"projects/{projeto}/databases/{banco}/documents"  # como o Firestore chama os documentos
+        self._base = f"{url.rstrip('/')}/{self._nome}"
         self._token = token if token is not None else TokenDoMetadata()
         self._agora = agora or (lambda: datetime.now(timezone.utc))
         self._dias_guardar = dias_guardar
@@ -154,10 +159,14 @@ class HistoricoFirestore:
         except (urllib.error.URLError, OSError) as e:
             raise ErroFirestore(f"não consegui falar com o Firestore ({type(e).__name__})") from None
 
-    def _buscar(self, filtro, campos):
-        """Documentos da coleção que passam no filtro, só com os campos pedidos ("__name__" para só o nome)."""
-        consulta = {"from": [{"collectionId": COLECAO}], "where": filtro,
-                    "select": {"fields": [{"fieldPath": c} for c in campos]}}
+    def _buscar(self, filtro, campos=None, colecao=COLECAO):
+        """Documentos da coleção que passam no filtro (None: todos), só com os campos pedidos ("__name__" para só o
+        nome; None para todos)."""
+        consulta = {"from": [{"collectionId": colecao}]}
+        if filtro is not None:
+            consulta["where"] = filtro
+        if campos is not None:
+            consulta["select"] = {"fields": [{"fieldPath": c} for c in campos]}
         resposta = self._pedir("POST", ":runQuery", {"structuredQuery": consulta}) or []
         return [r["document"] for r in resposta if "document" in r]
 
@@ -236,3 +245,36 @@ class HistoricoFirestore:
     def apagar_antigos(self, dias):
         limite = self._agora() - timedelta(days=dias)
         return self._apagar_documentos(self._buscar(_filtro("criado_em", "LESS_THAN", limite), ("__name__",)))
+
+    # ------------------------------------------------------------ contagens do beta (ver contagens.py)
+
+    def somar_contagens(self, dia, valores):
+        """Soma às contagens do dia ({"logins": 1}, por exemplo). Só números: nada de conta.
+
+        O updateMask vazio cria o documento do dia se ainda não existe e não mexe nos outros campos (sem ele, o
+        Firestore trocaria o documento inteiro e as outras contagens do dia sumiriam). O increment soma no próprio
+        Firestore: dois relatórios terminando juntos não perdem contagem.
+        """
+        escrita = {"update": {"name": f"{self._nome}/{COLECAO_CONTAGENS}/{dia}"},
+                   "updateMask": {"fieldPaths": []},
+                   "updateTransforms": [{"fieldPath": nome, "increment": _valor(int(valor))}
+                                        for nome, valor in valores.items()]}
+        self._pedir("POST", ":commit", {"writes": [escrita]})
+
+    def ler_contagens(self):
+        """{dia: {nome: valor}} de todos os dias que têm alguma contagem."""
+        return {d["name"].rsplit("/", 1)[1]: _campos(d) for d in self._buscar(None, colecao=COLECAO_CONTAGENS)}
+
+    def ultimo_total_de_cada_conta(self):
+        """Quantos anúncios tem o último relatório guardado de cada conta, do menor para o maior, sem dizer a conta.
+
+        Lê dois campos de cada relatório guardado: serve para o beta. Com milhares de relatórios, vale guardar esse
+        número à parte.
+        """
+        ultimos = {}  # conta -> (número do relatório, anúncios nele)
+        for documento in self._buscar(None, ("ml_user_id", "total")):
+            campos, numero = _campos(documento), _numero(documento)
+            conta = campos.get("ml_user_id")
+            if conta not in ultimos or numero > ultimos[conta][0]:
+                ultimos[conta] = (numero, campos.get("total", 0))
+        return sorted(total for _, total in ultimos.values())

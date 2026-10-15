@@ -26,10 +26,10 @@ sys.path.insert(0, str(PASTA_RAIZ / "painel-ml"))
 
 import analise  # noqa: E402
 import ml_api  # noqa: E402
-from firestore_simulado import FirestoreSimulado  # noqa: E402
+from firestore_simulado import CAMINHO_TOKEN, FirestoreSimulado  # noqa: E402
 from ml_simulado import MLSimulado, performance  # noqa: E402
-from web import (app, busca, comparacao, configuracao, historico_firestore, login, relatorios,  # noqa: E402
-                 servidor, sessoes)
+from web import (app, busca, comparacao, configuracao, contagens, historico_firestore, login,  # noqa: E402
+                 paginas, relatorios, servidor, sessoes)
 from web.historico import Historico  # noqa: E402
 
 URL = "https://orzy.test"
@@ -155,6 +155,16 @@ class ConfiguracaoTests(unittest.TestCase):
         emulador = configuracao.carregar(dict(env, ORZY_FIRESTORE_PROJETO="p", ORZY_FIRESTORE_URL="http://127.0.0.1:1"))
         self.assertEqual(app.abrir_historico(emulador)._token(), "", "o emulador não pede login")
 
+    def test_contas_que_abrem_a_pagina_de_contagens(self):
+        env = {"ORZY_ML_CLIENT_ID": "1", "ORZY_ML_CLIENT_SECRET": "s", "ORZY_URL_BASE": "https://orzy.test"}
+        self.assertEqual(configuracao.carregar(env).contas_admin, frozenset(), "sem a variável, ninguém abre")
+        config = configuracao.carregar(dict(env, ORZY_CONTAS_ADMIN=" 123, 456 ,"))
+        self.assertEqual(config.contas_admin, frozenset({123, 456}))
+        for errado in ("LOJA_TESTE", "123;456", "１２３"):
+            with self.assertRaises(configuracao.ErroConfiguracao) as contexto:
+                configuracao.carregar(dict(env, ORZY_CONTAS_ADMIN=errado))
+            self.assertIn("ORZY_CONTAS_ADMIN", str(contexto.exception))
+
 
 class SessoesTests(unittest.TestCase):
     def test_sessao_some_depois_do_prazo_sem_uso(self):
@@ -248,6 +258,22 @@ class ContratoDoHistorico:
         self.assertEqual(self.historico.id_do_anterior(111, terceiro), segundo)
         self.assertIsNone(self.historico.id_do_anterior(222, terceiro), "o relatório pedido não é da conta 222")
 
+    def test_contagens_somam_por_dia(self):
+        self.assertEqual(self.historico.ler_contagens(), {})
+        self.historico.somar_contagens("2026-10-15", {"logins": 1})
+        self.historico.somar_contagens("2026-10-15", {"logins": 2, "relatorios_prontos": 1})
+        self.historico.somar_contagens("2026-10-16", {"anuncios_lidos": 40})
+        self.assertEqual(self.historico.ler_contagens(), {"2026-10-15": {"logins": 3, "relatorios_prontos": 1},
+                                                          "2026-10-16": {"anuncios_lidos": 40}})
+
+    def test_anuncios_do_ultimo_relatorio_de_cada_conta(self):
+        self.assertEqual(self.historico.ultimo_total_de_cada_conta(), [])
+        self.salvar(111, 30)  # 2 anúncios
+        self.relogio += timedelta(minutes=1)
+        self.historico.salvar(111, 60, self.linhas[:1])  # o último da conta 111 tem 1
+        self.salvar(222, 30)
+        self.assertEqual(self.historico.ultimo_total_de_cada_conta(), [1, 2], "um número por conta, sem a conta")
+
 
 class HistoricoTests(ContratoDoHistorico, unittest.TestCase):
     """No SQLite (PC e Render)."""
@@ -318,6 +344,22 @@ class HistoricoFirestoreTests(ContratoDoHistorico, unittest.TestCase):
         self.assertEqual(self.historico.listar(111), [])
         self.assertEqual(sum(1 for _, caminho in self.fs.chamadas if caminho.endswith(":commit")), 3)
 
+    def test_contagens_num_documento_por_dia_somadas_pelo_firestore(self):
+        self.historico.somar_contagens("2026-10-15", {"logins": 1})
+        self.historico.somar_contagens("2026-10-15", {"logins": 1, "anuncios_lidos": 7})
+        self.assertEqual(self.fs.documentos[f"{self.fs.prefixo}/contagens/2026-10-15"]["fields"],
+                         {"anuncios_lidos": {"integerValue": "7"}, "logins": {"integerValue": "2"}})
+        pedidos = [c for c in self.fs.chamadas if c[1] != CAMINHO_TOKEN]
+        self.assertEqual(pedidos, [("POST", f"/v1/{self.fs.prefixo}:commit")] * 2, "soma sem ler antes")
+
+    def test_simulado_troca_o_documento_inteiro_num_update_sem_updatemask(self):
+        # Como o Firestore de verdade. É por isso que somar_contagens manda o updateMask, mesmo vazio.
+        nome = f"{self.fs.prefixo}/contagens/2026-10-15"
+        self.historico.somar_contagens("2026-10-15", {"logins": 1})
+        self.historico._pedir("POST", ":commit", {"writes": [{"update": {"name": nome}, "updateTransforms": [
+            {"fieldPath": "anuncios_lidos", "increment": {"integerValue": "5"}}]}]})
+        self.assertEqual(self.fs.documentos[nome]["fields"], {"anuncios_lidos": {"integerValue": "5"}})
+
     def test_le_data_com_fracao_de_segundo(self):
         self.assertEqual(historico_firestore._do_valor({"timestampValue": "2026-10-15T18:00:00.123456Z"}),
                          "2026-10-15T18:00:00+00:00")
@@ -347,6 +389,25 @@ class ComparacaoTests(unittest.TestCase):
         self.assertEqual(mudou["vendas"], (1, 4))
         self.assertEqual(mudou["antes"]["MLB1"]["titulo"], "Fone")
         self.assertEqual(mudou["anterior"], {"id": 1, "criado_em": "2026-10-01T12:00:00+00:00"})
+
+
+class ContagensTests(unittest.TestCase):
+    def test_dia_no_horario_de_brasilia(self):
+        self.assertEqual(contagens.hoje(datetime(2026, 10, 15, 2, 59, tzinfo=timezone.utc)), "2026-10-14")
+        self.assertEqual(contagens.hoje(datetime(2026, 10, 15, 3, 0, tzinfo=timezone.utc)), "2026-10-15")
+
+    def test_sem_nada_para_contar_nao_grava(self):
+        historico = mock.Mock()
+        contagens.contar(historico)
+        historico.somar_contagens.assert_not_called()
+
+    def test_pagina_sem_nada_contado(self):
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        texto = paginas.contagens(contagens.resumo(Historico(str(Path(temp.name) / "orzy.db")), 300))
+        self.assertIn("<li><span>Contas com relatório guardado</span><strong>0</strong></li>", texto)
+        self.assertIn("Ainda não há relatório guardado.", texto)
+        self.assertIn("Nada contado ainda.", texto)
 
 
 class BuscaTests(unittest.TestCase):
@@ -399,6 +460,7 @@ class LoginTests(SiteBase):
         self.assertEqual(status, 400)
         self.assertIn("não é válido".encode("utf-8"), dados)
         self.assertEqual(self.chamadas_de_token(), [])
+        self.assertEqual(self.site.historico.ler_contagens(), {}, "login que não terminou não conta")
 
     def test_login_guarda_o_token_so_na_sessao(self):
         cookie = self.entrar()
@@ -652,8 +714,8 @@ class HistoricoSiteTests(SiteBase):
         self.assertIn('Suporte de mesa<br><span class="ajuda">Novo neste relatório</span>', texto)
 
 
-class HistoricoSiteFirestoreTests(HistoricoSiteTests):
-    """As mesmas páginas do histórico (herdadas), com o histórico guardado no Firestore simulado."""
+class ComFirestoreSimulado:
+    """Mistura para as classes de teste do site: o histórico (e as contagens) ficam no Firestore simulado."""
 
     def setUp(self):
         super().setUp()
@@ -664,6 +726,10 @@ class HistoricoSiteFirestoreTests(HistoricoSiteTests):
             self.fs.projeto, url=self.fs.url_firestore, token=historico_firestore.TokenDoMetadata(self.fs.url_token))
         self.site = app.Site(configuracao_de_teste(self.pasta / "orzy.db"), historico=historico,
                              pasta_legal=self.pasta_legal)
+
+
+class HistoricoSiteFirestoreTests(ComFirestoreSimulado, HistoricoSiteTests):
+    """As mesmas páginas do histórico (herdadas), com o histórico guardado no Firestore simulado."""
 
     def test_relatorio_sai_mesmo_com_o_firestore_fora_do_ar(self):
         self.semear()
@@ -685,6 +751,80 @@ class HistoricoSiteFirestoreTests(HistoricoSiteTests):
         self.assertEqual(status, 500)
         self.assertIn("Algo deu errado do nosso lado".encode("utf-8"), pagina)
         self.assertIn(("X-Frame-Options", "DENY"), cabecalhos, "a página de erro também leva os cabeçalhos")
+
+
+class ContagensSiteTests(SiteBase):
+    """Contagens do beta: o que o site conta e a página /contagens, que só abre para as contas de ORZY_CONTAS_ADMIN."""
+
+    def contados(self):
+        """As contagens somadas de todos os dias: um teste que passa da meia-noite dá o mesmo total."""
+        dias = self.site.historico.ler_contagens()
+        return {nome: sum(d.get(nome, 0) for d in dias.values()) for nome in contagens.NOMES}
+
+    def test_conta_logins_relatorios_sem_erro_e_com_erro(self):
+        cookie = self.entrar()
+        self.esperar(cookie, self.gerar(cookie))  # a conta ainda não tem anúncios: pronto, sem erro
+        self.semear()
+        self.esperar(cookie, self.gerar(cookie))
+        self.assertEqual(self.contados(), {"logins": 1, "relatorios_prontos": 2, "erros_mercado_livre": 0,
+                                           "erros_inesperados": 0, "anuncios_lidos": 2})
+        self.ml.revogar_access_tokens()  # o login venceu: conta como erro do Mercado Livre
+        self.assertEqual(self.esperar(cookie, self.gerar(cookie)).estado, relatorios.ERRO)
+        with mock.patch.object(relatorios.meus_anuncios, "coletar", side_effect=RuntimeError("falha")), \
+                self.assertLogs(level="ERROR"):
+            self.assertEqual(self.esperar(cookie, self.gerar(cookie)).estado, relatorios.ERRO)
+        self.assertEqual(self.contados(), {"logins": 1, "relatorios_prontos": 2, "erros_mercado_livre": 1,
+                                           "erros_inesperados": 1, "anuncios_lidos": 2})
+        for dia in self.site.historico.ler_contagens().values():
+            self.assertLessEqual(set(dia), set(contagens.NOMES), "só os números da lista, nada de conta")
+
+    def test_contagem_que_falha_nao_atrapalha_login_nem_relatorio(self):
+        self.semear()
+        falha = sqlite3.OperationalError("database is locked")
+        with mock.patch.object(self.site.historico, "somar_contagens", side_effect=falha), \
+                self.assertLogs(level="ERROR") as registro:
+            cookie = self.entrar()  # o login termina e leva ao relatório
+            relatorio = self.esperar(cookie, self.gerar(cookie))
+        self.assertEqual(relatorio.estado, relatorios.PRONTO)
+        self.assertEqual(len(self.site.historico.listar(111222333)), 1, "o relatório foi guardado")
+        self.assertEqual(sum("contagem do beta" in linha for linha in registro.output), 2)
+
+    def test_pagina_so_para_as_contas_de_orzy_contas_admin(self):
+        self.semear()
+        self.assertEqual(self.pedir("GET", "/contagens", origem=None)[0], 404, "sem login")
+        cookie = self.entrar()
+        self.esperar(cookie, self.gerar(cookie))
+        self.assertEqual(self.pedir("GET", "/contagens", cookie=cookie)[0], 404, "conta fora de ORZY_CONTAS_ADMIN")
+
+        # Mais duas contas no histórico: uma com 1 anúncio e outra com 6, o limite do site de agora.
+        linha = {"id": "MLB9", "titulo": "Anúncio de outra conta", "visitas": 1, "vendas": 0,
+                 "situacao": "POUCA VISITA", "pontos": 0}
+        self.site.historico.salvar(987654321, 30, [linha])
+        self.site.historico.salvar(555666777, 30, [linha] * 6)
+        config = configuracao_de_teste(self.pasta / "orzy.db", contas_admin=frozenset({111222333}), max_anuncios=6)
+        self.site = app.Site(config, historico=self.site.historico, pasta_legal=self.pasta_legal)
+        cookie = self.entrar()
+        status, cabecalhos, pagina = self.pedir("GET", "/contagens", cookie=cookie)
+        self.assertEqual(status, 200)
+        self.assertEqual(_cab(cabecalhos, "Cache-Control"), "no-store")
+        texto = pagina.decode("utf-8")
+        self.assertIn("<li><span>Contas com relatório guardado</span><strong>3</strong></li>", texto)
+        self.assertIn("menor 1, média 3, maior 6. Contas no limite de 6 anúncios por relatório: 1.", texto)
+        self.assertIn("<li><span>Logins</span><strong>2</strong></li>", texto)
+        self.assertIn("<li><span>Relatórios sem erro</span><strong>1 de 1 (100%)</strong></li>", texto)
+        self.assertIn("<li><span>Anúncios lidos</span><strong>2</strong></li>", texto)
+        self.assertIn("<th>Dia</th><th class=n>Logins</th>", texto)
+        for dia, valores in self.site.historico.ler_contagens().items():
+            celulas = "".join(f"<td class=n>{valores.get(nome, 0)}</td>" for nome in contagens.NOMES)
+            self.assertIn(f"<tr><td>{datetime.strptime(dia, '%Y-%m-%d'):%d/%m/%Y}</td>{celulas}</tr>", texto)
+        for privado in ("111222333", "987654321", "LOJA_TESTE", "Caixa de som", "MLB1000000002", "outra conta"):
+            self.assertNotIn(privado, texto)
+        self.assertNotIn('href="/contagens"', self.pedir("GET", "/relatorio", cookie=cookie)[2].decode("utf-8"),
+                         "nenhum link leva à página")
+
+
+class ContagensSiteFirestoreTests(ComFirestoreSimulado, ContagensSiteTests):
+    """As mesmas contagens (herdadas), guardadas no Firestore simulado."""
 
 
 class PaginasSimplesTests(SiteBase):

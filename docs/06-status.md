@@ -14,8 +14,8 @@ Agora:
 
 - **Site: código e login**: nesta ordem, a busca e o filtro em "Todos os anúncios" (feito); a logo e as cores da
   Anel no site base (feito: favicon, ícones, imagem de compartilhamento e a fonte Geist servida pelo próprio
-  site); as contagens do beta (contas conectadas, relatórios sem erro e anúncios por conta, só contagens);
-  depois, o visual final que a marca entregar e o Nicolas aprovar. Arquivos: `web/`, `testes/`,
+  site); as contagens do beta (feito: a página `/contagens`, só para a conta do Nicolas); depois, o visual
+  final que a marca entregar e o Nicolas aprovar. Arquivos: `web/`, `testes/`,
   `painel-ml/`, `docs/01` a `docs/07` (menos `docs/legal/`), o README e o PR #5 (rascunho).
 - **Identidade visual e logo**: fecha os arquivos da Anel (favicon, ícones, imagens, cores claro e escuro, guia) e
   avisa a thread do código; depois desenha o visual final das páginas como prévia e CSS prontos, sem estilo ou
@@ -25,8 +25,9 @@ Agora:
 Esperando:
 
 - **Privacidade e termos**: `docs/legal/` (PR #6, #7, #8 e #9, mesclados em 15/10/2026); o site mostra esses
-  textos em `/privacidade` e `/termos`. Quando o site base fechar, reconfere a Política e os Termos contra o código
-  do PR #5. Nome e CPF ou CNPJ quando o Nicolas mandar, e a hospedagem quando for escolhida.
+  textos em `/privacidade` e `/termos`. O site base fechou em 15/10/2026 (busca, filtro, marca e contagens do
+  beta no PR #5): falta reconferir a Política e os Termos contra o código do PR #5. Nome e CPF ou CNPJ quando o
+  Nicolas mandar, e a hospedagem quando for escolhida.
 - **Hospedagem e domínio**: perto do lançamento, prepara no papel o monitoramento, a cópia de segurança do
   histórico e o aviso de falha, com custo em reais. Depois da escolha do Nicolas: deploy, Client Secret no
   servidor, DNS, Redirect URI e logo nova no OrzyApp. A recomendação está em
@@ -35,7 +36,8 @@ Esperando:
 
 Com o Nicolas: a linha "Ficha técnica: X de Y campos" numa rodada do programa do PC (fecha a fase 2); nome e CPF
 ou CNPJ para os textos legais, quando quiser; 3 a 5 vendedores pequenos para o beta; e, perto do lançamento, a
-hospedagem, a mudança no app do Mercado Livre e o advogado.
+hospedagem, a mudança no app do Mercado Livre, o advogado e o ID da conta dele no Mercado Livre (o que o
+`conectar.py` mostra) para a página de contagens.
 
 - Pesquisa anterior de hospedagem e LGPD: `/mnt/project-files/orzy/hospedagem-e-lgpd.md`.
 - Domínio: orzy.com.br responde com uma página temporária que o Nicolas colocou no Firebase (DNS no Registro.br).
@@ -126,6 +128,9 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
   - marca Anel no site base: a logo no topo (muda com o tema), as cores dos temas claro e escuro, o favicon, o
     ícone do iPhone e a fonte Geist, servida pelo próprio site. A imagem de compartilhamento já está em
     `web/static`; as etiquetas que a mostram no WhatsApp entram no lançamento, com o endereço público;
+  - contagens do beta: a página `/contagens`, que só abre para as contas de `ORZY_CONTAS_ADMIN` (a do Nicolas),
+    mostra logins, relatórios sem erro e com erro e anúncios lidos por dia, guardados sem dizer de quem, e as
+    contas com relatório guardado e os anúncios por conta, tirados do histórico na hora em que a página abre;
   - recomendação de hospedagem com custos em reais (thread "Hospedagem e domínio").
 
 ## O que foi testado (com dados simulados)
@@ -150,16 +155,21 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
   histórico e da comparação com ele.
 - Busca e filtro: acento, maiúscula, palavras em qualquer ordem, situação desconhecida (não filtra), texto buscado
   que volta escapado, no resultado e no histórico (SQLite e Firestore).
-- No navegador (Chromium), com login e relatórios simulados: as páginas internas (formulário, andamento, resultado
-  e histórico) de 320 a 1280 px, nos dois temas, sem nada empurrando a página para o lado. O formulário de busca
-  usado de verdade: o endereço guarda a busca, a página volta rolada até a tabela e "Ver todos" mostra a lista
-  inteira.
-- Testes rodados no Python 3.10 e 3.13 (127: 64 do PC e 63 do site). Quebrar de propósito a checagem do estado do
+- Contagens do beta, no SQLite e no Firestore simulado: login, relatório sem erro (também o de conta sem anúncios),
+  erro do Mercado Livre e erro inesperado contados; login que não terminou não conta; uma contagem que falha não
+  atrapalha o login nem o relatório; a página só abre para as contas de `ORZY_CONTAS_ADMIN` e não mostra conta,
+  apelido nem anúncio; e o Firestore soma no próprio servidor, sem apagar as outras contagens do dia.
+- No navegador (Chromium), com login e relatórios simulados: as páginas internas (formulário, andamento, resultado,
+  histórico e contagens) de 320 a 1280 px, nos dois temas, sem nada empurrando a página para o lado. O formulário
+  de busca usado de verdade: o endereço guarda a busca, a página volta rolada até a tabela e "Ver todos" mostra a
+  lista inteira.
+- Testes rodados no Python 3.10 e 3.13 (143: 64 do PC e 79 do site). Quebrar de propósito a checagem do estado do
   OAuth, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a limpeza diária, o `HEAD`, o
   `robots.txt`, o prazo e o limite das sessões sem login, o código novo depois do login, o tempo máximo de uma
   conexão, a escolha do relatório anterior, o escape dos títulos antigos, a página de erro ou, no Firestore, a
-  conta, o período, o prazo do TTL, o token, os lotes de apagar ou a ordem do resumo, ou a busca (acento,
-  maiúscula, ordem das palavras, situação, escape) faz os testes falharem.
+  conta, o período, o prazo do TTL, o token, os lotes de apagar ou a ordem do resumo, a busca (acento,
+  maiúscula, ordem das palavras, situação, escape) ou as contagens do beta (o que conta, o dia de Brasília, somar
+  em vez de trocar, o último relatório de cada conta, quem abre a página) faz os testes falharem.
 
 ## Validado com dados reais (14 e 15/10/2026)
 
@@ -184,9 +194,10 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
 2. Nicolas: quando puder, baixar o ZIP de novo do GitHub. Para não fazer login de novo, copiar o `config.json` e o
    `tokens.json` da pasta `painel-ml` usada por último para a nova. Rodar `python meus_anuncios.py` e mandar o
    texto do que apareceu no cmd (sem print). Ver a linha "Ficha técnica: X de Y campos".
-3. Site: os passos que o Nicolas aprovou em 15/10/2026 estão prontos (segurança, páginas internas no celular,
-   comparação de relatórios e histórico no Firestore), e a busca, o filtro e a marca Anel no site base também.
-   Próximos, pela divisão de 15/10/2026: as contagens do beta e, depois, o visual final que o Nicolas aprovar.
+3. Site: o site base está pronto. Os passos que o Nicolas aprovou em 15/10/2026 (segurança, páginas internas no
+   celular, comparação de relatórios e histórico no Firestore), a busca, o filtro, a marca Anel e as contagens do
+   beta estão no PR #5. Próximo, pela divisão de 15/10/2026: o visual final, quando a thread da marca entregar a
+   prévia e o Nicolas aprovar.
    A hospedagem e o que vem com ela (monitoramento e cópia de segurança) ficam para perto de lançar.
 
 Na conversa, mandar só o texto do que apareceu no cmd, sem print. **Nunca** mandar o Client Secret,

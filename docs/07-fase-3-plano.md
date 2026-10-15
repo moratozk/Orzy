@@ -27,6 +27,10 @@ estão em [docs/legal/](legal/LEIA-ME.md). A recomendação de hospedagem, com c
   no rodapé de todas as páginas e o aviso de aceite junto de cada botão Conectar. Tem cabeçalhos de segurança.
 - Para buscadores: descrição da página (o resumo que o Google e o WhatsApp mostram) e `robots.txt`, que deixa os
   robôs só nas páginas públicas, para não ligarem o servidor à toa.
+- Contagens para o beta: a página `/contagens`, que só abre para a conta do Nicolas (`ORZY_CONTAS_ADMIN`), mostra
+  logins, relatórios sem erro e com erro e anúncios lidos por dia, guardados sem dizer de quem, e as contas com
+  relatório guardado e os anúncios por conta, tirados do histórico na hora em que a página abre. Nada novo do
+  vendedor é guardado.
 
 Fica de fora (ver o [02-roadmap.md](02-roadmap.md)): alertas automáticos e a Orzy Intelligence (fase 4), custos e
 margem (fase 5), alterar anúncios (fase 6), Shopee (fase 7), cobrança e cadastro com senha (o login é só pelo
@@ -53,20 +57,23 @@ Mercado Livre). As sugestões do relatório são regras fixas: o site não as ch
   O PC continua igual: os 64 testes antigos passam sem mudança.
 - `testes/firestore_simulado.py`: Firestore e servidor de metadados do Google simulados, para testar o histórico
   no Firestore sem conta e sem internet.
-- `testes/test_site.py`: 63 testes contra o Mercado Livre e o Firestore simulados. Cobrem o login inteiro, o
+- `testes/test_site.py`: 79 testes contra o Mercado Livre e o Firestore simulados. Cobrem o login inteiro, o
   estado do OAuth, o escape de títulos, o CSV com BOM, o isolamento entre contas, token vencido, pedido de outro
   site, histórico, cabeçalhos de segurança, uma ida e volta por HTTP real (com `HEAD`), a página inicial, os textos
   legais (com escape), o rodapé, a hora do relatório em horário de Brasília, a limpeza diária do histórico, o
   `robots.txt`, a descrição para buscadores, as sessões sem login (prazo e limite), o código novo da sessão depois
   do login, a conexão parada, a palavra sem espaço que quebra no celular, a comparação com o relatório anterior,
-  a busca e o filtro da tabela, a logo, os ícones e a fonte da marca e o histórico no Firestore (os mesmos testes
-  do SQLite, mais token, prazo para o TTL e Firestore fora do ar).
-- Verificado: 127 testes passam no Python 3.13 e no 3.10 (64 do PC e 63 do site); pyflakes limpo. Quebrar de
+  a busca e o filtro da tabela, a logo, os ícones e a fonte da marca, o histórico no Firestore (os mesmos testes
+  do SQLite, mais token, prazo para o TTL e Firestore fora do ar) e as contagens do beta (o que conta, nos dois
+  históricos, a página só para quem pode e uma contagem que falha sem atrapalhar o login nem o relatório).
+- Verificado: 143 testes passam no Python 3.13 e no 3.10 (64 do PC e 79 do site); pyflakes limpo. Quebrar de
   propósito a checagem do estado, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a
   limpeza diária, o `HEAD`, o `robots.txt`, o prazo e o limite das sessões sem login, o código novo depois do
   login, o tempo máximo de uma conexão, a escolha do relatório anterior, o escape dos títulos antigos, a página
-  de erro, a busca (acento, maiúscula, ordem das palavras, situação, escape) ou, no Firestore, a conta, o
-  período, o prazo do TTL, o token, os lotes de apagar ou a ordem do resumo faz os testes falharem.
+  de erro, a busca (acento, maiúscula, ordem das palavras, situação, escape), as contagens do beta (o que conta,
+  o dia de Brasília, somar em vez de trocar, o último relatório de cada conta, quem abre a página) ou, no
+  Firestore, a conta, o período, o prazo do TTL, o token, os lotes de apagar, a ordem do resumo ou a máscara que
+  não deixa uma contagem apagar as outras faz os testes falharem.
 
 Limites da primeira versão (propostos, a confirmar):
 - **Uma instância só**: as sessões e os relatórios em andamento ficam na memória do servidor.
@@ -78,10 +85,10 @@ Limites da primeira versão (propostos, a confirmar):
   1000 de uma vez. Quem entra ganha um código de sessão novo, e uma conexão parada fecha em 60 segundos.
 
 Conferido no navegador (Chromium), com login e relatórios simulados: as páginas internas (formulário, andamento,
-resultado e histórico) de 320 a 1280 px, nos dois temas. Nada empurra a página para o lado, e as tabelas largas
-rolam dentro da própria caixa. O formulário de busca foi usado de verdade: o endereço guarda a busca, a página
-volta rolada até a tabela e "Ver todos" mostra a lista inteira. Só funcionamento: o visual final vem depois,
-com a identidade escolhida.
+resultado, histórico e contagens) de 320 a 1280 px, nos dois temas. Nada empurra a página para o lado, e as
+tabelas largas rolam dentro da própria caixa. O formulário de busca foi usado de verdade: o endereço guarda a
+busca, a página volta rolada até a tabela e "Ver todos" mostra a lista inteira. Só funcionamento: o visual final
+vem depois, com a identidade escolhida.
 
 Não testado ainda: o site falando com o Mercado Livre de verdade (depende da Redirect URI cadastrada, passo 3),
 o Firestore de verdade (só o simulado), HTTPS e domínio e carga com muitos anúncios.

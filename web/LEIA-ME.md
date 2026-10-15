@@ -18,6 +18,10 @@ Plano, custos e decisões em [docs/07-fase-3-plano.md](../docs/07-fase-3-plano.m
 5. **Privacidade e Termos:** `/privacidade` e `/termos` mostram os textos de `docs/legal/`, que são de outra frente do
    projeto. O site lê o arquivo a cada pedido: mudar o texto não pede mudança no código. O rodapé de todas as páginas
    leva aos dois, e junto de cada botão Conectar aparece o aviso de que, ao conectar, a pessoa aceita os Termos.
+6. **Contagens do beta:** `/contagens` mostra quantos logins e relatórios (sem erro e com erro) o site teve por dia
+   e quantos anúncios leu, guardados sem dizer de quem, e quantas contas têm relatório guardado e quantos anúncios
+   cada uma tem (menor, média e maior), tirados do histórico na hora em que a página abre. Só abre para as contas
+   de `ORZY_CONTAS_ADMIN`: para as outras, a página não existe (404), e nenhum link leva a ela.
 
 O site usa as mesmas regras e a mesma coleta do PC (`painel-ml/analise.py` e `painel-ml/meus_anuncios.py`).
 
@@ -39,6 +43,7 @@ O site usa as mesmas regras e a mesma coleta do PC (`painel-ml/analise.py` e `pa
 | `ORZY_HORAS_SESSAO` | não | Depois de quantas horas sem uso a sessão some (padrão: 8) |
 | `ORZY_HISTORICO` | não | Onde fica o histórico: `sqlite` (padrão, no arquivo de `ORZY_BANCO`) ou `firestore` (Google Cloud, para o Cloud Run) |
 | `ORZY_FIRESTORE_PROJETO` | com `firestore` | Id do projeto no Google Cloud |
+| `ORZY_CONTAS_ADMIN` | não | Números das contas do Mercado Livre que abrem `/contagens`, separados por vírgula. É o ID que o `conectar.py` do PC mostra em "Conectado como ... (ID ...)". Sem ela, ninguém abre |
 | `ORZY_FIRESTORE_URL` | não | Só para testar com o emulador do Firestore (ex.: `http://127.0.0.1:8080/v1`). Sem ela, usa o Firestore de verdade, com o login da conta de serviço do Cloud Run |
 
 O redirect do login é sempre `ORZY_URL_BASE` + `/retorno`. Ele precisa ser igual ao cadastrado no app do Mercado Livre.
@@ -70,7 +75,9 @@ de internet.
   Cloud: banco do Firestore no modo nativo em São Paulo (`southamerica-east1`); a conta de serviço do Cloud Run com
   o papel Cloud Datastore User (`roles/datastore.user`); política de TTL no campo `expira_em` da coleção
   `relatorios` (apaga o que passou de 365 dias, além da limpeza diária do servidor); e, de preferência, os campos
-  `anuncios` e `resumo` sem índice (a busca não usa esses campos, e cada índice custa uma escrita a mais).
+  `anuncios` e `resumo` sem índice (a busca não usa esses campos, e cada índice custa uma escrita a mais). As
+  contagens do beta ficam na coleção `contagens`, um documento por dia, só com números; essa coleção não tem TTL.
+- **`ORZY_CONTAS_ADMIN`** com o ID da conta do Nicolas no Mercado Livre, para ele abrir `/contagens`.
 - **HTTPS na frente** (a hospedagem resolve), e a Redirect URI do site cadastrada no app.
 - **Política de Privacidade e Termos de Uso completos** (rascunhos em `docs/legal/`; o que falta preencher está em
   `docs/legal/LEIA-ME.md`) e canal de contato definido.
@@ -84,8 +91,9 @@ de internet.
 | `login.py` | Entrar com o Mercado Livre (PKCE e conferência do estado) |
 | `sessoes.py` | Sessões na memória, com prazo (8 horas com login, 15 minutos sem), limite para as sem login e código novo depois do login |
 | `relatorios.py` | Gera o relatório em segundo plano e guarda o andamento |
-| `historico.py` | Histórico em SQLite: salvar, listar, ver, achar o anterior, apagar e apagar os antigos |
-| `historico_firestore.py` | O mesmo histórico, no Firestore (Cloud Run), pela API REST e com o login do servidor de metadados |
+| `historico.py` | Histórico em SQLite: salvar, listar, ver, achar o anterior, apagar e apagar os antigos; e as contagens do beta |
+| `historico_firestore.py` | O mesmo histórico e as mesmas contagens, no Firestore (Cloud Run), pela API REST e com o login do servidor de metadados |
+| `contagens.py` | Contagens do beta: o que se conta por dia, sem dizer de quem, e o resumo da página `/contagens` |
 | `comparacao.py` | O que mudou entre dois relatórios do histórico (mesma conta e mesmo período) |
 | `busca.py` | Busca pelo título e filtro por situação na tabela "Todos os anúncios" (resultado e histórico) |
 | `paginas.py` | HTML das páginas (todo texto do Mercado Livre passa por escape) |

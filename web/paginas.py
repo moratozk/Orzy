@@ -620,6 +620,58 @@ Mostra como os anúncios estavam nesse dia: não é atualizado depois.</p>
     return _pagina("Histórico", corpo, logado=True)
 
 
+def _dia(iso):
+    """"2026-10-15" vira "15/10/2026"."""
+    try:
+        return datetime.strptime(iso, "%Y-%m-%d").strftime("%d/%m/%Y")
+    except ValueError:
+        return "?"
+
+
+def contagens(dados):
+    """Contagens do beta (/contagens, ver contagens.py), só para as contas de ORZY_CONTAS_ADMIN. Só números: nenhuma
+    conta, apelido ou anúncio entra nesta página."""
+    colunas, totais = dados["colunas"], dados["totais"]
+    anuncios = dados["anuncios"]
+    if anuncios:
+        por_conta = (f"<p>Anúncios por conta, no último relatório guardado de cada uma: menor {anuncios['menor']}, "
+                     f"média {anuncios['media']}, maior {anuncios['maior']}. Contas no limite de "
+                     f"{dados['max_anuncios']} anúncios por relatório: {anuncios['no_limite']}.</p>")
+    else:
+        por_conta = '<p class="ajuda">Ainda não há relatório guardado.</p>'
+    if dados["desde"]:
+        mostrar = {nome: str(n) for nome, n in totais.items()}
+        sem_erro = totais["relatorios_prontos"]
+        feitos = sem_erro + totais["erros_mercado_livre"] + totais["erros_inesperados"]
+        if feitos:
+            mostrar["relatorios_prontos"] = f"{sem_erro} de {feitos} ({round(100 * sem_erro / feitos)}%)"
+        itens = "".join(f"<li><span>{escape(rotulo)}</span><strong>{mostrar[nome]}</strong></li>"
+                        for nome, rotulo in colunas)
+        cabecalho = "".join(f"<th class=n>{escape(rotulo)}</th>" for _, rotulo in colunas)
+        linhas = "".join(f"<tr><td>{_dia(dia)}</td>"
+                         + "".join(f"<td class=n>{valores[nome]}</td>" for nome, _ in colunas) + "</tr>"
+                         for dia, valores in dados["dias"])
+        por_dia = f"""<p class="ajuda">Desde {_dia(dados['desde'])}, o primeiro dia contado.</p>
+<ul class="resumo">{itens}</ul>
+<div class="tabela"><table><thead><tr><th>Dia</th>{cabecalho}</tr></thead>
+<tbody>{linhas}</tbody></table></div>
+<p class="ajuda">Os dias seguem o horário de Brasília. Erro do Mercado Livre: ele recusou ou não respondeu, ou o login
+da pessoa venceu. Erro inesperado: o detalhe fica no registro do servidor.</p>"""
+    else:
+        por_dia = '<p class="ajuda">Nada contado ainda.</p>'
+    corpo = f"""
+<h1>Contagens do beta</h1>
+<p class="ajuda">Só números: nenhuma conta, apelido ou anúncio aparece aqui. Esta página só abre para as contas de
+ORZY_CONTAS_ADMIN.</p>
+<h2>Contas e anúncios</h2>
+<ul class="resumo"><li><span>Contas com relatório guardado</span><strong>{dados['contas']}</strong></li></ul>
+{por_conta}
+<p class="ajuda">Saem do histórico na hora em que esta página abre: quem apaga o histórico sai destes números.</p>
+<h2>Logins e relatórios</h2>
+{por_dia}"""
+    return _pagina("Contagens do beta", corpo, logado=True)
+
+
 def texto_legal(titulo, html_do_texto):
     """Política de Privacidade ou Termos de Uso, já convertidos de docs/legal/ (ver legal.py)."""
     return _pagina(titulo, f'<article class="legal">{html_do_texto}</article>')

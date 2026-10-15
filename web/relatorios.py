@@ -1,6 +1,7 @@
 """Relatórios gerados em segundo plano. A página pergunta o andamento enquanto o relatório roda.
 
-O resultado fica na memória da sessão (para ver e baixar o CSV) e no histórico.
+O resultado fica na memória da sessão (para ver e baixar o CSV) e no histórico. Cada relatório que termina entra nas
+contagens do beta (ver contagens.py): só se deu certo ou não e quantos anúncios leu, sem dizer de quem.
 """
 
 import logging
@@ -10,6 +11,8 @@ from datetime import datetime, timezone
 
 import meus_anuncios
 import ml_api
+
+from . import contagens
 
 GERANDO = "gerando"
 PRONTO = "pronto"
@@ -85,11 +88,13 @@ class Relatorios:
         return relatorio
 
     def _executar(self, relatorio, cliente):
+        contar = {}
         try:
             dados = meus_anuncios.coletar(cliente, relatorio.ml_user_id, relatorio.dias, limite=self._max,
                                           etapa=relatorio.andar, progresso=relatorio.progredir)
             if not dados["ids"]:
                 relatorio.terminar([], "Nenhum anúncio ativo nessa conta.")
+                contar = {"relatorios_prontos": 1}
                 return
             linhas = meus_anuncios.montar_linhas(**dados)
             if len(dados["ids"]) >= self._max:
@@ -100,11 +105,15 @@ class Relatorios:
             except Exception:
                 logging.exception("Não consegui salvar o histórico de um relatório")
             relatorio.terminar(linhas)
+            contar = {"relatorios_prontos": 1, "anuncios_lidos": len(linhas)}
         except ml_api.ErroML as e:
             relatorio.falhar(str(e))
+            contar = {"erros_mercado_livre": 1}
         except Exception:
             logging.exception("Falha ao gerar um relatório")
             relatorio.falhar(MENSAGEM_INESPERADA)
+            contar = {"erros_inesperados": 1}
         finally:
             with self._trava:
                 self._rodando -= 1
+            contagens.contar(self._historico, **contar)  # depois de o resultado aparecer: não atrasa a página

@@ -2,9 +2,10 @@
 internet. Só biblioteca padrão, como o resto.
 
 Imita o pedaço da API REST v1 que o site usa: criar documento (com documentId), ler (com mask), runQuery (fieldFilter
-EQUAL e LESS_THAN, compositeFilter AND, select e limit) e commit (delete). Como o Firestore de verdade, pede o token
-que o servidor de metadados entregou, recusa criar um documento que já existe e aceita até 500 escritas por commit.
-orderBy fica de fora de propósito: junto de um filtro em outro campo, o Firestore pediria um índice composto.
+EQUAL e LESS_THAN, compositeFilter AND, select e limit) e commit (delete, e update com updateMask e increment). Como o
+Firestore de verdade, pede o token que o servidor de metadados entregou, recusa criar um documento que já existe,
+aceita até 500 escritas por commit, aplica o commit inteiro ou nada e, num update sem updateMask, troca o documento
+inteiro. orderBy fica de fora de propósito: junto de um filtro em outro campo, o Firestore pediria um índice composto.
 """
 
 import json
@@ -19,6 +20,7 @@ TIPOS = {"nullValue", "booleanValue", "integerValue", "doubleValue", "timestampV
          "arrayValue"}
 DATA_RFC3339 = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,9})?Z$")
 TAMANHO_MAXIMO = 1_048_576  # 1 MiB por documento
+CAMPO_SIMPLES = re.compile(r"[A-Za-z_][A-Za-z_0-9]*")  # caminho de campo que não precisa de crase
 
 
 class ErroAPI(Exception):
@@ -233,8 +235,55 @@ class FirestoreSimulado:
     def _commit(self, escritas):
         if len(escritas) > self.max_escritas:
             raise ErroAPI(400, "INVALID_ARGUMENT", f"mais de {self.max_escritas} escritas num commit")
+        for escrita in escritas:  # confere tudo antes de mudar algo: o commit vale inteiro ou nada
+            self._conferir_escrita(escrita)
         for escrita in escritas:
-            if set(escrita) != {"delete"}:
-                raise ErroAPI(400, "INVALID_ARGUMENT", "só delete é simulado")
-            self.documentos.pop(escrita["delete"], None)  # apagar o que não existe não é erro
+            if "delete" in escrita:
+                self.documentos.pop(escrita["delete"], None)  # apagar o que não existe não é erro
+            else:
+                self._atualizar(escrita)
         return {"writeResults": [{} for _ in escritas], "commitTime": _agora()}
+
+    def _conferir_escrita(self, escrita):
+        if set(escrita) == {"delete"}:
+            return
+        if "update" not in escrita or not set(escrita) <= {"update", "updateMask", "updateTransforms"}:
+            raise ErroAPI(400, "INVALID_ARGUMENT", f"escrita não simulada: {sorted(escrita)}")
+        nome = escrita["update"]["name"]
+        if not nome.startswith(self.prefixo + "/") or len(nome[len(self.prefixo) + 1:].split("/")) != 2:
+            raise ErroAPI(400, "INVALID_ARGUMENT", f"nome de documento inválido: {nome}")
+        for valor in (escrita["update"].get("fields") or {}).values():
+            _conferir_valor(valor)
+        for transformacao in escrita.get("updateTransforms") or []:
+            if set(transformacao) != {"fieldPath", "increment"}:
+                raise ErroAPI(400, "INVALID_ARGUMENT", "só increment é simulado")
+            if not CAMPO_SIMPLES.fullmatch(transformacao["fieldPath"]):
+                raise ErroAPI(400, "INVALID_ARGUMENT", f"caminho de campo não simulado: {transformacao['fieldPath']}")
+            _conferir_valor(transformacao["increment"])
+            if "integerValue" not in transformacao["increment"]:
+                raise ErroAPI(400, "INVALID_ARGUMENT", "só increment de inteiro é simulado")
+
+    def _atualizar(self, escrita):
+        """update: sem updateMask, o documento inteiro vira o que veio; com ele, só os campos da máscara mudam (os da
+        máscara que não vieram somem). Depois, cada increment soma no campo (campo que não existe vira o valor)."""
+        nome = escrita["update"]["name"]
+        novos = escrita["update"].get("fields") or {}
+        agora = _agora()
+        documento = self.documentos.get(nome) or {"name": nome, "createTime": agora}
+        if "updateMask" in escrita:
+            campos = dict(documento.get("fields") or {})
+            for caminho in escrita["updateMask"].get("fieldPaths") or []:
+                if caminho in novos:
+                    campos[caminho] = novos[caminho]
+                else:
+                    campos.pop(caminho, None)
+        else:
+            campos = dict(novos)
+        for transformacao in escrita.get("updateTransforms") or []:
+            atual = campos.get(transformacao["fieldPath"]) or {}
+            if "doubleValue" in atual:
+                raise ErroAPI(400, "INVALID_ARGUMENT", "increment em campo double não é simulado")
+            soma = int(transformacao["increment"]["integerValue"]) + int(atual.get("integerValue", 0))
+            campos[transformacao["fieldPath"]] = {"integerValue": str(soma)}
+        documento.update({"fields": _campos_guardados(campos), "updateTime": agora})
+        self.documentos[nome] = documento

@@ -64,6 +64,9 @@ de agora, inclusive o da página inicial, é só uma base, nada perto do modelo 
 - [x] Busca pelo título e filtro por situação na tabela "Todos os anúncios" (do plano de 15/10/2026)
 - [x] Identidade visual: o Nicolas escolheu a Anel em 15/10/2026 (thread "Identidade visual e logo"). No site base
   entraram só a logo, as cores, os ícones e a fonte Geist
+- [x] Contagens do beta no site: a página `/contagens`, só para a conta do Nicolas, mostra contas com relatório
+  guardado, anúncios por conta, logins e relatórios sem erro e com erro (só contagens, sem guardar dado novo do
+  vendedor). Com isso, o site base está pronto
 - [ ] Visual final: refazer as páginas com a identidade escolhida, até um site realmente bonito
 - [ ] Escolher a hospedagem e adaptar o código a ela
 - [ ] Antes de abrir ao público: monitoramento do servidor, cópia de segurança do histórico e aviso de falha

@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 import meus_anuncios
-from . import busca, comparacao, legal, login, paginas
+from . import busca, comparacao, contagens, legal, login, paginas
 from .historico import Historico
 from .historico_firestore import URL_FIRESTORE, HistoricoFirestore
 from .relatorios import ERRO, GERANDO, PRONTO, ErroRelatorio, Relatorios
@@ -82,6 +82,7 @@ class Site:
             ("POST", "/sair"): lambda: self._sair(cabecalhos),
             ("GET", "/privacidade"): lambda: self._texto_legal("privacidade"),
             ("GET", "/termos"): lambda: self._texto_legal("termos"),
+            ("GET", "/contagens"): lambda: self._contagens(cabecalhos),
             ("GET", "/saude"): self._saude,
             ("GET", "/robots.txt"): self._robots,
         }
@@ -122,6 +123,7 @@ class Site:
             sessao.cliente, sessao.usuario = login.concluir(self.config, sessao, parametros)
         except login.ErroLoginSite as e:
             return self._html(400, paginas.erro(str(e)))
+        contagens.contar(self.historico, logins=1)
         # Código novo depois do login: quem soubesse o código de antes (o do /entrar) não entra na conta.
         sessao = self.sessoes.trocar_id(sessao.id)
         if sessao is None:  # a pessoa saiu (em outra aba) enquanto o login terminava
@@ -229,6 +231,15 @@ class Site:
         # Tira da sessão os relatórios já prontos; um que ainda está sendo gerado continua até terminar.
         sessao.relatorios = {i: r for i, r in sessao.relatorios.items() if r.estado == GERANDO}
         return self._redirect("/historico", status=303)
+
+    # ------------------------------------------------------------ contagens do beta
+
+    def _contagens(self, cabecalhos):
+        sessao = self._logada(cabecalhos)
+        # Para quem não está em ORZY_CONTAS_ADMIN, a página não existe: o mesmo 404 de um endereço errado.
+        if sessao is None or int(sessao.usuario["id"]) not in self.config.contas_admin:
+            return self._nao_encontrado()
+        return self._html(200, paginas.contagens(contagens.resumo(self.historico, self.config.max_anuncios)))
 
     # ------------------------------------------------------------ páginas simples
 

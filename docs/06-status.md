@@ -125,8 +125,9 @@ o `config.json`, o `tokens.json` nem o banco do site.
 
 - Qual vendedor com mais anúncios vai testar.
 - O que "propósito" e "quantos usuários" do formulário do app mudam: a documentação do Mercado Livre não fala.
-- Hospedagem: Firebase + Cloud Run + Firestore (recomendado, R$ 0 no teste) ou Render (cerca de R$ 37/mês). Decide na
-  hora de lançar.
+- Hospedagem: Google, com Cloud Run e Firestore em São Paulo (recomendado, R$ 0 no teste), ou Render (cerca de
+  R$ 37/mês). No Google, falta escolher a porta de entrada; o Firebase Hosting do orzy.com.br fica fora das cláusulas
+  da ANPD. Decide na hora de lançar.
 - Termos do Mercado Livre para desenvolvedores (lidos em 15/10/2026): não fixam prazo para guardar dados. O histórico
   de 12 meses, privado e que o vendedor apaga, é compatível na leitura mais razoável; confirmar com advogado.
 - Se existirem os arquivos de plano originais da conversa anterior, juntar com estes.

@@ -50,7 +50,7 @@ ao ar quando estiver quase pronto (95%), sem endereço temporário.
 - [ ] Identidade visual: logo e cores
 - [ ] Escolher a hospedagem e adaptar o código a ela
 - [ ] Preencher os textos legais (responsável e contato) e, se o Nicolas quiser, revisão de advogado
-- [ ] Cadastrar a Redirect URI do site no OrzyApp e lançar no orzy.com.br, testando primeiro com a conta do Nicolas
+- [ ] Cadastrar a Redirect URI do site no OrzyApp e lançar, testando primeiro com a conta do Nicolas
 - [ ] Beta fechado com 3 a 5 vendedores
 
 - O vendedor entra no orzy.com.br e clica em **Conectar com Mercado Livre**. Ninguém precisa criar app.

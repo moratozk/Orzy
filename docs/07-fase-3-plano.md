@@ -29,8 +29,8 @@ Fica de fora: alterar anúncios, IA, Shopee, cobrança e cadastro com senha (o l
 2. **Hospedagem:** escolher uma opção da tabela de custos abaixo e adaptar o código a ela.
 3. **App do Mercado Livre:** cadastrar a Redirect URI do site, gerar o Client Secret que vai só para o servidor e
    revisar os campos do formulário (quantos usuários, propósito). Isso muda o app, então só com o ok.
-4. **Lançar no orzy.com.br:** com os textos legais preenchidos (e revisados por advogado, se ele quiser), testar
-   primeiro com a conta do Nicolas e um anúncio.
+4. **Lançar:** com os textos legais preenchidos (e revisados por advogado, se ele quiser), testar primeiro com a
+   conta do Nicolas e um anúncio, no endereço escolhido (o do próprio servidor no beta fechado, ou o orzy.com.br).
 5. **Beta fechado:** 3 a 5 vendedores convidados, acompanhar erros; só depois aberto ao público.
 
 ## O que já está no código (PR de rascunho)
@@ -66,31 +66,38 @@ conferir na hora de contratar. Nada foi contratado.
 
 | Opção | Estimativa (R$/mês) | Prós | Contras |
 |---|---|---|---|
-| **Firebase + Cloud Run + Firestore** (Google; recomendação da thread "Hospedagem e domínio") | R$ 0 no teste (até 66 horas de servidor ligado no mês); até R$ 0,35 por hora além disso; teto de cerca de R$ 225 | O orzy.com.br já aponta para esse Firebase; o servidor só liga quando alguém usa; o contrato do Google já traz as cláusulas da ANPD; histórico guardado em São Paulo | Exige o plano Blaze (cartão); o código precisa das mudanças da seção abaixo; o servidor fica nos EUA |
-| **Render**, plano pago de entrada (US$ 7/mês, 512 MB de RAM) + disco persistente (US$ 0,25/GB/mês) | cerca de R$ 37 (com 1 GB de disco) | Roda o código quase como está; o Client Secret fica no painel do serviço | Cobra desde o primeiro mês; o contrato não fala de LGPD, então só a região de Frankfurt (União Europeia) evita as cláusulas da ANPD |
+| **Google: Cloud Run + Firestore em São Paulo** (recomendação da thread "Hospedagem e domínio") | R$ 0 no teste (até 55 horas de servidor ligado no mês); até R$ 0,42 por hora além disso; teto de cerca de R$ 276. Mais a porta de entrada: R$ 0 (A ou B) ou cerca de R$ 92 (C) | O servidor só liga quando alguém usa; servidor e histórico no Brasil; o contrato do Google Cloud já traz as cláusulas da ANPD | Exige o plano Blaze (cartão); o código precisa das mudanças da seção abaixo |
+| **Render**, plano pago de entrada (US$ 7/mês, 512 MB de RAM) + disco persistente (US$ 0,25/GB/mês) | cerca de R$ 37 (com 1 GB de disco) | Roda o código quase como está; o Client Secret fica no painel do serviço | Cobra desde o primeiro mês; sem região no Brasil; o contrato não fala de LGPD, então só a região de Frankfurt (União Europeia) evita as cláusulas da ANPD |
 | **Hostinger VPS KVM 1** (1 vCPU, 4 GB, 50 GB) | cerca de R$ 35 (promoção de US$ 6,99 no 1º ano) a R$ 98 (preço cheio de US$ 19,49) | Sempre ligado; controle total | Alguém precisa cuidar do Linux (atualizações, cópia de segurança); datacenter no Brasil não confirmado |
 | **Railway**, plano Hobby (US$ 5/mês + uso de CPU e RAM) | estimativa de R$ 35 a R$ 100, conforme o uso real | Deploy simples; disco (volume) persistente | Cobra pelo uso: difícil prever o mês |
 
-**Recomendação (thread "Hospedagem e domínio"):** Firebase com Cloud Run e Firestore, porque o teste sai de graça,
-o contrato já cobre a LGPD e o domínio já está lá. O Render é a alternativa se ele preferir um valor fixo e o código
-quase sem mudança. A escolha fica para a hora de lançar.
+**Recomendação (thread "Hospedagem e domínio"):** o servidor no Cloud Run e o histórico no Firestore, os dois em São
+Paulo, porque o teste sai de graça e o contrato do Google Cloud cobre a LGPD. O Render é a alternativa se ele preferir
+um valor fixo e o código quase sem mudança. A escolha fica para a hora de lançar.
 
-## Se a hospedagem for Firebase + Cloud Run: o que muda no código
+A porta de entrada (quem recebe as visitas) também fica para a hora de lançar:
+- **A. Endereço do próprio Cloud Run** (`....run.app`): R$ 0, coberto pelo contrato. Serve para o beta fechado.
+- **B. Firebase Hosting no orzy.com.br** (onde está a página temporária): R$ 0, mas fica fora das cláusulas da ANPD.
+  Só com o ok de um advogado.
+- **C. Balanceador de carga do Google no orzy.com.br:** cerca de R$ 92/mês, coberto pelo contrato.
+
+## Se a hospedagem for o Google: o que muda no código
 
 Da recomendação da thread de hospedagem. Entra quando o Nicolas escolher a hospedagem, não antes.
 
-1. **Cookie `__session`:** o Firebase apaga qualquer outro cookie antes de repassar o pedido ao servidor.
-2. **Histórico no Firestore:** o disco do Cloud Run apaga a cada reinício. A thread de hospedagem pode entregar o
-   módulo (só biblioteca padrão, com testes).
-3. **Páginas públicas como arquivos:** início, privacidade, termos e `robots.txt` saem direto do Firebase, sem
-   ligar o servidor. Hoje a página inicial muda com o login (mostra "Ver meu relatório" a quem já entrou): como
-   arquivo, mostraria sempre "Conectar". Decidir na hora se isso basta.
-4. **Sessão some depois de 15 minutos sem uso:** o servidor desliga, e quem estava conectado conecta de novo. Os
-   relatórios salvos continuam no histórico.
+1. **Histórico no Firestore** (A, B e C): o disco do Cloud Run apaga a cada reinício. A thread de hospedagem pode
+   entregar o módulo (só biblioteca padrão, com testes).
+2. **Cookie `__session`** (só na B): o Firebase apaga qualquer outro cookie antes de repassar o pedido ao servidor.
+3. **Páginas públicas como arquivos** (só na B): início, privacidade, termos e `robots.txt` saem direto do Firebase,
+   sem ligar o servidor. Hoje a página inicial muda com o login (mostra "Ver meu relatório" a quem já entrou):
+   como arquivo, mostraria sempre "Conectar". Decidir na hora se isso basta.
+4. **Sessão some depois de 15 minutos sem uso** (A, B e C): o servidor desliga, e quem estava conectado conecta de
+   novo. Os relatórios salvos continuam no histórico.
 
 ## Mercado Livre: o que o app precisa
 
-1. **Redirect URI:** incluir a do site (`https://orzy.com.br/retorno`) e manter a do PC (`https://www.google.com`).
+1. **Redirect URI:** incluir a do site (`https://orzy.com.br/retorno`, ou a do endereço escolhido para o beta) e
+   manter a do PC (`https://www.google.com`).
 2. **Client Secret:** o Mercado Livre tem um só por app. Gerar um novo invalida o atual, então o PC precisa rodar
    `python conectar.py --refazer` de novo (com o segredo novo). O segredo do site fica só no painel de hospedagem.
    Isso segue a decisão de 14/10: um app só, o "OrzyApp".
@@ -117,8 +124,9 @@ Texto da Resolução CD/ANPD nº 2/2022, lido em 15/10/2026:
 O que o site guarda: o número e o apelido do vendedor (durante a sessão), e o histórico com títulos e números
 dos anúncios. Tokens: só na memória. Dados de compradores: nenhum.
 
-Servidor fora do Brasil: a transferência precisa das cláusulas-padrão da ANPD no contrato (o do Google Cloud tem;
-o do Render não) ou de um país que a ANPD reconhece como adequado (a União Europeia, pela Resolução CD/ANPD nº 32/2026).
+Dados fora do Brasil: a transferência precisa das cláusulas-padrão da ANPD no contrato (o do Google Cloud tem; o do
+Render e o do Firebase Hosting não) ou de um país que a ANPD reconhece como adequado (a União Europeia, pela Resolução
+CD/ANPD nº 32/2026).
 
 Antes de abrir ao público: Política de Privacidade e Termos de Uso preenchidos (rascunhos em `docs/legal/`, que o
 site mostra em `/privacidade` e `/termos`), canal de contato, responsável identificado, e uma conversa com advogado.
@@ -128,8 +136,8 @@ Não tenho preço confiável de advogado: pedir orçamento.
 
 Nenhuma é urgente: todas ficam para quando o site estiver quase pronto.
 
-1. Hospedagem: Firebase + Cloud Run + Firestore (recomendado: R$ 0 no teste, teto de cerca de R$ 225/mês, plano
-   Blaze com cartão) ou Render (cerca de R$ 37/mês fixos).
+1. Hospedagem: Google, com Cloud Run e Firestore em São Paulo (recomendado: R$ 0 no teste, teto de cerca de R$ 276/mês,
+   plano Blaze com cartão), ou Render (cerca de R$ 37/mês fixos). Com o Google, também a porta de entrada: A, B ou C.
 2. Aprovar o passo 3 (mudança no app do Mercado Livre e novo Client Secret, com o PC rodando `--refazer`).
 3. Limites da primeira versão: 300 anúncios por relatório, histórico por 12 meses, uma instância.
 4. Nome e contato do responsável e um e-mail de contato para a Política de Privacidade e os Termos.

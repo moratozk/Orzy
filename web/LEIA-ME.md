@@ -58,8 +58,8 @@ Os testes do site (`testes/test_site.py`) usam o Mercado Livre simulado e não p
 ## Antes de publicar
 
 - **Uma instância só.** Sessões e relatórios em andamento ficam na memória do servidor.
-- **Banco em disco persistente** (`ORZY_BANCO`). No Firebase com Cloud Run, a hospedagem recomendada, o disco apaga
-  a cada reinício: o histórico vai para o Firestore, uma das mudanças listadas em `docs/07-fase-3-plano.md`.
+- **Banco em disco persistente** (`ORZY_BANCO`). No Cloud Run, a hospedagem recomendada, o disco apaga a cada
+  reinício: o histórico vai para o Firestore, uma das mudanças listadas em `docs/07-fase-3-plano.md`.
 - **HTTPS na frente** (a hospedagem resolve), e a Redirect URI do site cadastrada no app.
 - **Política de Privacidade e Termos de Uso completos** (rascunhos em `docs/legal/`; o que falta preencher está em
   `docs/legal/LEIA-ME.md`) e canal de contato definido.

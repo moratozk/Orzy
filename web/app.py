@@ -184,10 +184,10 @@ class Site:
     # ------------------------------------------------------------ páginas simples
 
     def _texto_legal(self, rota):
-        texto = legal.carregar(rota, self.pasta_legal)
-        if texto is None:
+        html = legal.carregar(rota, self.pasta_legal)
+        if html is None:
             return self._html(200, paginas.texto_legal_ausente(legal.NOMES[rota]))
-        return self._html(200, paginas.texto_legal(*texto))
+        return self._html(200, paginas.texto_legal(legal.NOMES[rota], html))
 
     def _saude(self):
         return 200, [("Content-Type", "text/plain; charset=utf-8"), ("Cache-Control", "no-store")], b"ok"

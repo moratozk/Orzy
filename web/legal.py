@@ -22,13 +22,12 @@ _NEGRITO = re.compile(r"\*\*(.+?)\*\*")
 
 
 def carregar(rota, pasta=PASTA_LEGAL):
-    """(título, html) do texto da rota ("privacidade" ou "termos"), ou None se o arquivo ainda não existe."""
+    """HTML do texto da rota ("privacidade" ou "termos"), ou None se o arquivo ainda não existe."""
     try:
         texto = (Path(pasta) / TEXTOS[rota]).read_text(encoding="utf-8")
     except FileNotFoundError:
         return None
-    titulo = next((linha[2:].strip() for linha in texto.splitlines() if linha.startswith("# ")), NOMES[rota])
-    return titulo, para_html(texto)
+    return para_html(texto)
 
 
 def _link(achado):

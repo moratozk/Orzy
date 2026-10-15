@@ -399,7 +399,7 @@ class PaginasSimplesTests(SiteBase):
         status, _, pagina = self.pedir("GET", "/termos", origem=None)
         texto = pagina.decode("utf-8")
         self.assertEqual(status, 200)
-        self.assertIn("<title>Termos de Uso do Orzy · Orzy</title>", texto)
+        self.assertIn("<title>Termos de Uso · Orzy</title>", texto)
         self.assertIn("<h1>Termos de Uso do Orzy</h1>", texto)
         self.assertIn("<blockquote><p><strong>Rascunho.</strong> O que falta está no LEIA-ME.</p></blockquote>", texto)
         self.assertNotIn("<script>alert", texto)

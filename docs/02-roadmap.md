@@ -7,7 +7,7 @@ com vendedores que autorizem o app.
 Cada fase só começa quando a anterior estiver funcionando com dados reais.
 Antes de escrever código grande numa fase, o plano dela (3 a 6 passos) é mostrado e espera o ok do Nicolas.
 
-## Fase 1 · Painel do Mercado Livre funcionando (em andamento)
+## Fase 1 · Painel do Mercado Livre funcionando (concluída em 14/10/2026)
 
 Conectar na conta e gerar o relatório de anúncios ativos com visitas, vendas e conversão,
 separando os anúncios em 5 situações (visita sem venda, converte pouco, pouca visita,
@@ -17,10 +17,10 @@ vende mas pouco visto, vendendo bem).
 - [x] Testes com Mercado Livre simulado (`testes/`)
 - [x] Criar o app "OrzyApp" no Mercado Livre, na conta do Nicolas, e conectar (14/10/2026)
 - [x] Rodar o relatório numa conta real (1 anúncio ativo, 14/10/2026)
-- [ ] Conferir os números com o painel do Mercado Livre
-- [ ] Rodar numa conta com mais anúncios e vendas, de um vendedor que autorize o app
+- [ ] Conferir visitas e vendas numa conta com mais anúncios e vendas, de um vendedor que autorize o app
+  (fica para quando aparecer; não segura a fase 2)
 
-## Fase 2 · Sugestões de verdade para cada anúncio
+## Fase 2 · Sugestões de verdade para cada anúncio (próxima, plano esperando o ok)
 
 Hoje o texto de "o que olhar" é igual para todos os anúncios da mesma situação.
 Nesta fase o programa lê o próprio anúncio e diz o que mudar nele, usando só regras (custo zero):

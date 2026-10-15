@@ -1,7 +1,7 @@
 # 06 · Status
 
 **Atualizado em:** 14/10/2026
-**Fase atual:** 1, painel do Mercado Livre funcionando ([02-roadmap.md](02-roadmap.md))
+**Fase atual:** 1 concluída. Próxima: 2, sugestões para cada anúncio ([02-roadmap.md](02-roadmap.md))
 
 ## Onde parou
 
@@ -9,7 +9,9 @@ Primeiro teste com dados reais feito em 14/10/2026, no Windows de casa. O app "O
 o `conectar.py` fez o login (com PKCE e Refresh Token) e o `meus_anuncios.py` leu 1 anúncio ativo da conta
 conectada, com visitas e vendas sem erro (resultado: POUCA VISITA).
 
-Falta trocar a chave secreta, que apareceu em prints durante o teste, e conferir os números com o painel do Mercado Livre.
+A chave secreta, que apareceu em prints durante o teste, já foi trocada, e o login foi refeito com a chave nova.
+O CSV saiu certo no Excel: o anúncio (um microfone de lapela, R$ 79,90, 10 em estoque) teve 0 visitas e 0 vendas
+em 30 dias. Com números zerados, a conferência das visitas e vendas fica para uma conta com movimento.
 
 ## Decisões de 14/10/2026
 
@@ -58,22 +60,19 @@ Falta trocar a chave secreta, que apareceu em prints durante o teste, e conferir
 - [x] `python conectar.py`: o Google mantém o código no endereço e o login dá certo, com PKCE e Refresh Token.
 - [x] `python meus_anuncios.py`: roda sem erro, lê anúncios, visitas e vendas e salva o CSV.
 - [x] Rodar no Windows de casa.
-- [ ] Os números do CSV batem com o painel do Mercado Livre.
-- [ ] Trocar a chave secreta e entrar de novo com `python conectar.py --refazer`.
+- [x] Trocar a chave secreta e entrar de novo com `python conectar.py --refazer`.
+- [x] Abrir o CSV no Excel: colunas certas, preço com vírgula, link do anúncio.
+- [ ] Conferir visitas e vendas com o painel do Mercado Livre numa conta com movimento.
 - [ ] Rodar numa conta com mais anúncios e vendas (um vendedor que autorize o app).
 
 ## Próximo passo
 
-Nicolas:
+1. Nicolas: fazer o merge do PR #2 (correções do primeiro teste e plano novo).
+2. Claude: mostrar o plano da fase 2 e esperar o ok antes de escrever o código.
+3. Quando der, rodar numa conta com mais anúncios e vendas, de um vendedor que autorize o app.
 
-1. No app do Mercado Livre (⋮ > Editar), renovar a Chave secreta agora e conferir que Client Credentials está desmarcado.
-2. `python conectar.py --refazer` com a chave nova e, depois, `python meus_anuncios.py`.
-3. Abrir o `relatorio_anuncios.csv` no Excel e conferir visitas e vendas com o painel do Mercado Livre.
-4. Fazer o merge do PR #2 e baixar o Orzy de novo, para ter as correções do primeiro teste.
-5. Mandar na conversa só o texto do que apareceu, sem print do cmd. **Nunca** mandar o Client Secret,
-   o `config.json` nem o `tokens.json`.
-
-Com a fase 1 conferida, o Claude mostra o plano da fase 2 (sugestões por anúncio) e espera o ok.
+Na conversa, mandar só o texto do que apareceu no cmd, sem print. **Nunca** mandar o Client Secret,
+o `config.json` nem o `tokens.json`.
 
 ## Em aberto
 

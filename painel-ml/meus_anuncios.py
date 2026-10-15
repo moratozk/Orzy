@@ -251,7 +251,8 @@ def main():
         if not ids:
             print("Nenhum anúncio ativo nessa conta.")
             return
-        print(f"  {len(ids)} anúncios encontrados. Buscando detalhes...")
+        achados = "1 anúncio encontrado" if len(ids) == 1 else f"{len(ids)} anúncios encontrados"
+        print(f"  {achados}. Buscando detalhes...")
         detalhes = buscar_detalhes(cliente, ids)
 
         print("Buscando visitas (uma consulta por anúncio, pode levar um tempinho)...")

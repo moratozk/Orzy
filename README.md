@@ -1,7 +1,8 @@
 # Orzy
 
-Programa que roda no seu PC, se conecta à sua conta do Mercado Livre (e depois à Shopee),
+Programa para vendedores do Mercado Livre (e depois da Shopee): se conecta à conta do vendedor,
 mostra quais anúncios vendem e quais não vendem e sugere o que mudar em cada um.
+Hoje roda no PC; na fase 3 vira um site em orzy.com.br.
 Começa com custo zero e vai virar um pequeno ERP.
 
 ## Por onde começar
@@ -24,6 +25,8 @@ Não precisam de conta nem de internet. Na pasta do Orzy, no Prompt de Comando:
 ```
 python -m unittest discover -s testes -v
 ```
+
+O GitHub também roda esses testes sozinho a cada PR, no Windows e no Linux.
 
 ## Segurança
 

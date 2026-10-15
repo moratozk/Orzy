@@ -12,7 +12,23 @@ Legenda: **[doc]** está na documentação oficial · **[código]** é como o pa
   - código: `grant_type=authorization_code`, `client_id`, `client_secret`, `code`, `redirect_uri` (e `code_verifier` com PKCE)
   - renovação: `grant_type=refresh_token`, `client_id`, `client_secret`, `refresh_token`
 - O access token vale 6 horas (o exemplo da documentação mostra 3 horas, então o painel usa o `expires_in` da resposta). **[doc]**
-- O refresh token é de uso único (cada renovação devolve um novo) e vence em 6 meses. Precisa do escopo `offline_access`. **[doc]**
+- O refresh token é de uso único (cada renovação devolve um novo) e vence em 6 meses. Precisa do escopo `offline_access` **[doc]**,
+  que no formulário novo do app aparece como o fluxo **Refresh Token**.
+- Formulário novo do app (visto em 14/10/2026): nome único com pelo menos 5 caracteres, descrição de até 150 caracteres
+  (aparece na autorização), propósito, quantos usuários e logotipo PNG obrigatório. Depois, na tela "Configuração e scopes":
+  URIs de redirect, Fluxos OAuth (Authorization Code, Client Credentials, Refresh Token), PKCE, unidades de negócio
+  (Mercado Livre, VIS) e permissões por área, cada uma com Sem acesso, Leitura ou Leitura e escrita: Usuários (fixo em
+  Leitura e escrita), Comunicações pré e pós-vendas, Publicação e sincronização, Publicidade de um produto, Faturamento
+  de uma venda, Métricas do negócio, Promoções, cupons e descontos de uma venda, Venda e envios de um produto.
+  O painel pede Leitura em Publicação e sincronização (anúncios), Métricas do negócio (visitas) e Venda e envios
+  de um produto (pedidos). **[código]**
+- Pela documentação do Global Selling (developers em global-selling.mercadolibre.com/devsite/create-application):
+  Usuários vem ativo em todo app e inclui a reputação do vendedor; Publicação e sincronização cobre anúncios, fotos,
+  preços e visitas; Métricas do negócio cobre métricas de vendas, estoque e reputação, tendências e visitas;
+  Vendas e envios cobre pedidos, envios, reclamações e devoluções. **[doc]**
+- Depois de criado, o app aparece em Minhas aplicações só com o Client ID. O Secret fica em ⋮ > Editar, como
+  "Chave secreta". A lista mostra "Aplicativo não certificado" e uma nota de "Configuração de segurança" (70 num app
+  novo), que é recomendação. (visto em 14/10/2026)
 - Trocar a senha ou tirar a permissão do app invalida tudo: tem que fazer login de novo. **[doc]**
 - A Redirect URI tem que ser idêntica à cadastrada no app. **[doc]**
 - Erros: `invalid_client` (Client ID ou Secret errado), `invalid_grant` (código ou refresh token vencido, já usado ou com Redirect URI diferente), `local_rate_limited` (429). **[doc]**

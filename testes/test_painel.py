@@ -81,6 +81,7 @@ class Base(unittest.TestCase):
 
         saida = io.StringIO()
         with mock.patch("builtins.input", falso_input), \
+                mock.patch("getpass.getpass", falso_input), \
                 mock.patch("webbrowser.open", lambda url: links.append(url) or True), \
                 mock.patch.object(sys, "argv", list(argv)), \
                 contextlib.redirect_stdout(saida):
@@ -152,6 +153,14 @@ class TestLogin(Base):
         codigo, saida, _ = self.rodar_conectar([CLIENT_ID, SECRET, "", "n", colado_torto])
         self.assertEqual(codigo, 0, saida)
 
+    def test_colou_errado_e_pode_colar_de_novo(self):
+        # Foi o que aconteceu no primeiro teste de verdade: digitou o exemplo do passo a passo.
+        codigo, saida, _ = self.rodar_conectar([CLIENT_ID, SECRET, "", "n", "code=TG-...", self.ml.autorizar])
+        self.assertEqual(codigo, 0, saida)
+        self.assertIn("Não achei o código", saida)
+        self.assertIn("O login continua esperando", saida)
+        self.assertIn("Pronto! Conectado como LOJA_TESTE", saida)
+
     def test_endereco_de_outra_tentativa_e_recusado(self):
         def outro_state(link):
             return self.ml.autorizar(link).replace("state=", "state=x")
@@ -186,6 +195,29 @@ class TestLogin(Base):
         codigo, saida, _ = self.rodar_conectar([CLIENT_ID, SECRET, "", "n", recusou])
         self.assertEqual(codigo, 1)
         self.assertIn("recusou a autorização", saida)
+
+    def test_secret_nao_aparece_na_tela(self):
+        class Teclado:  # um Prompt de Comando de verdade, e não uma entrada redirecionada
+            def isatty(self):
+                return True
+
+        escondidos = []
+
+        def falso_getpass(prompt=""):
+            escondidos.append(prompt)
+            return SECRET
+
+        respostas = iter([CLIENT_ID, "", "n"])
+        with mock.patch.object(sys, "stdin", Teclado()), \
+                mock.patch("builtins.input", lambda prompt="": next(respostas)), \
+                mock.patch("getpass.getpass", falso_getpass), \
+                contextlib.redirect_stdout(io.StringIO()) as saida:
+            config = conectar.configurar()
+        self.assertEqual(config["client_secret"], SECRET)
+        self.assertEqual(len(escondidos), 1)
+        self.assertIn("Client Secret", escondidos[0])
+        self.assertIn("a chave não aparece na tela", saida.getvalue())
+        self.assertNotIn(SECRET, saida.getvalue())
 
     def test_refazer_pergunta_os_dados_de_novo(self):
         self.login()
@@ -461,6 +493,11 @@ class TestSemLogin(Base):
 
 # ================================================================ como a pessoa usa
 
+# Roda o conectar.py de verdade, mas sem abrir o navegador: o "clique em Permitir" é feito pelo simulado.
+CONECTAR_SEM_NAVEGADOR = ("import runpy, webbrowser; webbrowser.open = lambda *a, **k: True; "
+                          "runpy.run_path('conectar.py', run_name='__main__')")
+
+
 class TestComoNoPrompt(unittest.TestCase):
     """Roda os dois programas de verdade, como no Prompt de Comando, numa cópia da pasta."""
 
@@ -478,10 +515,10 @@ class TestComoNoPrompt(unittest.TestCase):
         shutil.copytree(PASTA_PAINEL, self.pasta, ignore=shutil.ignore_patterns(
             "__pycache__", "config.json", "tokens.json", "relatorio_anuncios*.csv"))
         self.env = dict(os.environ, ML_API_BASE=base, ML_AUTH_URL=base + "/authorization",
-                        BROWSER="true", PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
+                        PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
 
     def test_conectar_e_gerar_relatorio(self):
-        proc = subprocess.Popen([sys.executable, "conectar.py"], cwd=self.pasta, env=self.env,
+        proc = subprocess.Popen([sys.executable, "-c", CONECTAR_SEM_NAVEGADOR], cwd=self.pasta, env=self.env,
                                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                 text=True, encoding="utf-8")
         relogio = threading.Timer(60, proc.kill)

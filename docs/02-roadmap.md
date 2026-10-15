@@ -1,9 +1,13 @@
 # 02 · Roadmap
 
-Cada fase só começa quando a anterior estiver funcionando na conta real.
+O Orzy é para vendedores do Mercado Livre (e depois da Shopee) analisarem os próprios anúncios.
+O Nicolas desenvolve e testa com a conta conectada no PC dele e, para ter mais números,
+com vendedores que autorizem o app.
+
+Cada fase só começa quando a anterior estiver funcionando com dados reais.
 Antes de escrever código grande numa fase, o plano dela (3 a 6 passos) é mostrado e espera o ok do Nicolas.
 
-## Fase 1 · Painel do Mercado Livre funcionando (em andamento)
+## Fase 1 · Painel do Mercado Livre funcionando (concluída em 14/10/2026)
 
 Conectar na conta e gerar o relatório de anúncios ativos com visitas, vendas e conversão,
 separando os anúncios em 5 situações (visita sem venda, converte pouco, pouca visita,
@@ -11,10 +15,12 @@ vende mas pouco visto, vendendo bem).
 
 - [x] Código do painel no repositório (`painel-ml/`)
 - [x] Testes com Mercado Livre simulado (`testes/`)
-- [ ] Criar o app no Mercado Livre e conectar a conta real
-- [ ] Rodar o relatório na conta real e conferir os números com o painel do Mercado Livre
+- [x] Criar o app "OrzyApp" no Mercado Livre, na conta do Nicolas, e conectar (14/10/2026)
+- [x] Rodar o relatório numa conta real (1 anúncio ativo, 14/10/2026)
+- [ ] Conferir visitas e vendas numa conta com mais anúncios e vendas, de um vendedor que autorize o app
+  (fica para quando aparecer; não segura a fase 2)
 
-## Fase 2 · Sugestões de verdade para cada anúncio
+## Fase 2 · Sugestões de verdade para cada anúncio (próxima, plano esperando o ok)
 
 Hoje o texto de "o que olhar" é igual para todos os anúncios da mesma situação.
 Nesta fase o programa lê o próprio anúncio e diz o que mudar nele, usando só regras (custo zero):
@@ -26,11 +32,24 @@ Nesta fase o programa lê o próprio anúncio e diz o que mudar nele, usando só
 - tipo de anúncio (clássico ou premium)
 - a nota de qualidade que o próprio Mercado Livre dá ao anúncio, se a API mostrar
 
-## Fase 3 · Tela no navegador e histórico
+A análise fica separada do CSV, para ser usada do mesmo jeito no site da fase 3.
 
-- Trocar o CSV por uma página que abre no navegador do PC.
-- Guardar cada relatório num banco SQLite local, para ver se um anúncio melhorou depois de uma mudança.
-- Esse histórico é a base do ERP.
+## Fase 3 · Site no orzy.com.br
+
+Decidido pelo Nicolas em 14/10/2026: é aqui que o Orzy vira site, para outros vendedores usarem sem instalar nada.
+
+- O vendedor entra no orzy.com.br e clica em **Conectar com Mercado Livre**. Ninguém precisa criar app.
+- Um servidor pequeno guarda o Client Secret do app do Orzy. O Secret nunca vai dentro de um programa distribuído.
+- O app "OrzyApp" do teste é o mesmo: ganha o Redirect URI do site e um Client Secret novo, que só o servidor conhece.
+- O relatório e as sugestões aparecem no navegador, no lugar do CSV.
+- Cada relatório fica guardado, para ver se um anúncio melhorou depois de uma mudança. Esse histórico é a base do ERP.
+
+Antes de começar, o plano da fase mostra:
+
+- onde hospedar o site e o servidor, com o custo em reais por mês (existem opções grátis, com limites);
+- como cuidar dos dados dos vendedores (LGPD e política de privacidade);
+- se o app "OrzyApp" continua na conta do Nicolas ou passa para uma conta de empresa: o Mercado Livre recomenda
+  criar o app na conta dona da solução, de preferência de empresa, para evitar problema de transferência depois.
 
 ## Fase 4 · Shopee
 

@@ -6,6 +6,7 @@ Como usar (no Prompt de Comando, dentro desta pasta):
     python conectar.py --refazer   para digitar o Client ID e o Secret de novo
 """
 
+import getpass
 import secrets
 import sys
 import webbrowser
@@ -24,11 +25,23 @@ def perguntar(texto, padrao=None):
         print("  Esse campo é obrigatório.")
 
 
+def perguntar_secreto(texto):
+    """Como perguntar(), mas sem mostrar o que foi colado, para a chave não aparecer num print da tela."""
+    if not sys.stdin.isatty():
+        return perguntar(texto)
+    print("  Ao colar, a chave não aparece na tela. É normal: cole e aperte Enter.")
+    while True:
+        resposta = getpass.getpass(f"{texto}: ").strip()
+        if resposta:
+            return resposta
+        print("  Esse campo é obrigatório.")
+
+
 def configurar():
     print("\n=== Dados do seu app no Mercado Livre ===")
     print("Estão em developers.mercadolivre.com.br > Minhas aplicações > seu app.\n")
     client_id = perguntar("Client ID (o número do app)")
-    client_secret = perguntar("Client Secret (a chave secreta)")
+    client_secret = perguntar_secreto("Client Secret (a chave secreta)")
     redirect = perguntar("Redirect URI (idêntica à cadastrada no app)", ml_api.REDIRECT_PADRAO)
     pkce = perguntar("Você ativou o PKCE no app? (s/n)", "n").lower().startswith("s")
     config = {
@@ -61,9 +74,18 @@ def main():
     print(url + "\n")
     webbrowser.open(url)
 
-    colado = perguntar("Cole aqui o endereço")
+    while True:
+        colado = perguntar("Cole aqui o endereço")
+        try:
+            code = ml_api.extrair_code(colado, state)
+            break
+        except ml_api.ErroColagem as e:
+            # Sem fechar o programa: se fechasse, a pessoa colaria o endereço no cmd, que tenta rodar como comando.
+            print(f"\n{e}\nO login continua esperando: cole aqui o endereço que começa com {config['redirect_uri']}\n")
+        except ml_api.ErroML as e:
+            print("\nNão deu certo:", e)
+            sys.exit(1)
     try:
-        code = ml_api.extrair_code(colado, state)
         tokens = ml_api.trocar_code_por_token(config, code, verifier)
         eu = ml_api.MercadoLivre().obter_usuario()
     except ml_api.ErroML as e:
@@ -74,13 +96,13 @@ def main():
     if tokens.get("refresh_token"):
         print("O login se renova sozinho. Agora rode: python meus_anuncios.py")
     else:
-        print("Atenção: o app está sem 'Acesso offline', então este login vale só 6 horas.\n"
-              "Marque essa opção no app e rode python conectar.py de novo.")
+        print("Atenção: o app está sem o fluxo 'Refresh Token', então este login vale só 6 horas.\n"
+              "Marque Refresh Token em Fluxos OAuth, no app, e rode python conectar.py de novo.")
 
 
 if __name__ == "__main__":
     try:
         main()
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, EOFError):
         print("\nCancelado.")
         sys.exit(1)

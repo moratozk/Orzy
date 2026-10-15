@@ -5,6 +5,8 @@ from html import escape
 
 import analise
 
+from .busca import MAX_BUSCA, filtrar
+
 BRASILIA = timezone(timedelta(hours=-3))  # o Brasil não tem horário de verão desde 2019
 # Resumo que o Google e o WhatsApp mostram junto do link.
 DESCRICAO = ("Conecte sua conta do Mercado Livre e veja quais anúncios vendem, quais não vendem e o que mudar em "
@@ -409,15 +411,47 @@ def _tabela(linhas):
     return f'<div class="tabela"><table><thead>{cabecalho}</thead><tbody>{corpo}</tbody></table></div>'
 
 
-def resultado(relatorio, ver_mudancas=None):
-    """ver_mudancas: endereço da comparação com o relatório anterior do histórico, quando existe."""
+def _todos_os_anuncios(endereco, anuncios, busca, situacao, tabela):
+    """A seção "Todos os anúncios": busca pelo título, filtro por situação e a tabela só com os que passam.
+
+    É um formulário GET, sem JavaScript: o endereço com a busca pode ser guardado nos favoritos.
+    tabela: a função que monta a tabela da página com os anúncios que passaram.
+    """
+    titulo = '<h2 id="todos">Todos os anúncios</h2>'
+    if not anuncios:
+        return titulo
+    contagem = {s: sum(1 for a in anuncios if a["situacao"] == s) for s in analise.ORDEM}
+    escolhas = "".join(
+        f'<option value="{escape(s)}"{" selected" if s == situacao else ""}>{escape(s)} ({n})</option>'
+        for s, n in contagem.items() if n or s == situacao)
+    achados = filtrar(anuncios, busca, situacao)
+    quantos = ""
+    if busca or situacao:
+        texto = (f"Mostrando {len(achados)} de {len(anuncios)} anúncios." if achados
+                 else "Nenhum anúncio com essa busca.")
+        quantos = f'<p class="ajuda">{texto} <a href="{endereco}#todos">Ver todos</a></p>'
+    return f"""{titulo}
+<form class="cartao filtro" method="get" action="{endereco}#todos" role="search">
+  <label for="busca">Buscar pelo título</label>
+  <input type="search" id="busca" name="busca" value="{escape(busca)}" maxlength="{MAX_BUSCA}">
+  <label for="situacao">Situação</label>
+  <select id="situacao" name="situacao"><option value="">Todas as situações</option>{escolhas}</select>
+  <p><button class="botao secundario" type="submit">Filtrar</button></p>
+</form>
+{quantos}
+{tabela(achados) if achados else ""}"""
+
+
+def resultado(relatorio, ver_mudancas=None, busca="", situacao=""):
+    """ver_mudancas: endereço da comparação com o relatório anterior do histórico, quando existe.
+    busca e situacao: o filtro da tabela "Todos os anúncios" (ver busca.py)."""
     linhas = relatorio.linhas
     contagem = {s: sum(1 for l in linhas if l["situacao"] == s) for s in analise.ORDEM}
     com_problema = analise.PROBLEMA_DE_VENDA | analise.PROBLEMA_DE_VISITA
     prioridade = [l for l in linhas if l["sugestoes"] or l["situacao"] in com_problema][:MAX_PRIORIDADES]
     cartoes = "".join(_cartao_anuncio(l) for l in prioridade) or \
         '<p class="ajuda">Nenhum anúncio com sugestão de mudança neste período.</p>'
-    tabela = _tabela(linhas) if linhas else ""
+    todos = _todos_os_anuncios(f"/relatorio/{escape(relatorio.id)}", linhas, busca, situacao, _tabela)
     # Os termos do Mercado Livre (5.3) pedem que o aplicativo diga quando os dados foram atualizados.
     gerado = ""
     if relatorio.gerado_em is not None:
@@ -438,8 +472,7 @@ def resultado(relatorio, ver_mudancas=None):
 <a class="botao secundario" href="/relatorio">Gerar outro</a></p>
 <h2>Comece por estes</h2>
 {cartoes}
-<h2>Todos os anúncios</h2>
-{tabela}"""
+{todos}"""
     return _pagina("Relatório", corpo, logado=True)
 
 
@@ -548,19 +581,25 @@ mudou, não o porquê: visitas e vendas mudam por muitos motivos, como época do
 {sairam}"""
 
 
-def historico_relatorio(dados, comparacao=None):
-    """Um relatório guardado. comparacao: o que comparacao.comparar() devolve, ou None se não há anterior."""
+def historico_relatorio(dados, comparacao=None, busca="", situacao=""):
+    """Um relatório guardado. comparacao: o que comparacao.comparar() devolve, ou None se não há anterior.
+    busca e situacao: o filtro da tabela "Todos os anúncios" (ver busca.py)."""
     antes = comparacao["antes"] if comparacao else {}
-    linhas = "".join(_linha_do_historico(a, antes.get(a["id"]), comparacao is not None) for a in dados["anuncios"])
+
+    def tabela(anuncios):
+        linhas = "".join(_linha_do_historico(a, antes.get(a["id"]), comparacao is not None) for a in anuncios)
+        return ('<div class="tabela"><table><thead><tr><th>Anúncio</th><th>Situação</th><th class=n>Visitas</th>'
+                '<th class=n>Vendas</th><th class=n>Sugestões</th></tr></thead>'
+                f'<tbody>{linhas}</tbody></table></div>')
+
+    todos = _todos_os_anuncios(f"/historico/{dados['id']}", dados["anuncios"], busca, situacao, tabela)
     corpo = f"""
 <h1>Relatório de {_data(dados['criado_em'])}</h1>
 <p class="ajuda">Últimos {dados['dias']} dias · {dados['total']} anúncios.
 Mostra como os anúncios estavam nesse dia: não é atualizado depois.</p>
 <ul class="resumo">{_resumo_html(dados['resumo'])}</ul>
 {_mudancas(dados, comparacao)}
-<h2>Todos os anúncios</h2>
-<div class="tabela"><table><thead><tr><th>Anúncio</th><th>Situação</th><th class=n>Visitas</th>
-<th class=n>Vendas</th><th class=n>Sugestões</th></tr></thead><tbody>{linhas}</tbody></table></div>
+{todos}
 <p><a href="/historico">Voltar ao histórico</a></p>"""
     return _pagina("Histórico", corpo, logado=True)
 

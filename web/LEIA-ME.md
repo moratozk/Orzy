@@ -87,6 +87,7 @@ de internet.
 | `historico.py` | Histórico em SQLite: salvar, listar, ver, achar o anterior, apagar e apagar os antigos |
 | `historico_firestore.py` | O mesmo histórico, no Firestore (Cloud Run), pela API REST e com o login do servidor de metadados |
 | `comparacao.py` | O que mudou entre dois relatórios do histórico (mesma conta e mesmo período) |
+| `busca.py` | Busca pelo título e filtro por situação na tabela "Todos os anúncios" (resultado e histórico) |
 | `paginas.py` | HTML das páginas (todo texto do Mercado Livre passa por escape) |
 | `legal.py` | Mostra a Política de Privacidade e os Termos de Uso a partir do Markdown de `docs/legal/`, com escape |
 | `app.py` | Rotas, cookies, cabeçalhos de segurança e conferência da origem dos pedidos |

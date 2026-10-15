@@ -4,16 +4,39 @@
 **Fase atual:** 3, construindo o site (código em rascunho no PR #5, sem merge). A fase 2 está concluída.
 Plano e custos em [07-fase-3-plano.md](07-fase-3-plano.md). Nada vai ao ar antes de o site estar quase pronto.
 
-## Quem faz o quê (15/10/2026)
+## Quem faz o quê (15/10/2026, nova divisão)
 
-- **Site: código e login**: `web/`, `testes/test_site.py`, `docs/07-fase-3-plano.md`, este arquivo e o PR #5 (rascunho).
+Dividido de novo a pedido do Nicolas em 15/10/2026 (texto completo em
+`/mnt/project-files/orzy/plano/divisao-das-tarefas.md`). Duas frentes não mexem nos mesmos arquivos ao mesmo
+tempo, e poucas ficam ativas de cada vez, porque cada thread ativa gasta o limite de uso do plano do Nicolas.
+
+Agora:
+
+- **Site: código e login**: nesta ordem, a busca e o filtro em "Todos os anúncios"; a logo e as cores da Anel no
+  site base quando a thread da marca avisar (favicon, ícones, imagem de compartilhamento e a fonte Geist servida
+  pelo próprio site); as contagens do beta (contas conectadas, relatórios sem erro e anúncios por conta, só
+  contagens); depois, o visual final que a marca entregar e o Nicolas aprovar. Arquivos: `web/`, `testes/`,
+  `painel-ml/`, `docs/01` a `docs/07` (menos `docs/legal/`), o README e o PR #5 (rascunho).
+- **Identidade visual e logo**: fecha os arquivos da Anel (favicon, ícones, imagens, cores claro e escuro, guia) e
+  avisa a thread do código; depois desenha o visual final das páginas como prévia e CSS prontos, sem estilo ou
+  script dentro do HTML e sem nada de fora (tudo sai de `/static`). Arquivos em `/mnt/project-files/orzy/marca/`;
+  não mexe em `web/`. A troca no site espera o ok do Nicolas na prévia.
+
+Esperando:
+
+- **Privacidade e termos**: `docs/legal/` (PR #6, #7, #8 e #9, mesclados em 15/10/2026); o site mostra esses
+  textos em `/privacidade` e `/termos`. Quando o site base fechar, reconfere a Política e os Termos contra o código
+  do PR #5. Nome e CPF ou CNPJ quando o Nicolas mandar, e a hospedagem quando for escolhida.
+- **Hospedagem e domínio**: perto do lançamento, prepara no papel o monitoramento, a cópia de segurança do
+  histórico e o aviso de falha, com custo em reais. Depois da escolha do Nicolas: deploy, Client Secret no
+  servidor, DNS, Redirect URI e logo nova no OrzyApp. A recomendação está em
+  `/mnt/project-files/orzy/hospedagem-recomendacao.md`. Nada pago, de DNS ou de mudança no app sem o ok dele.
 - **Página inicial do site**: entregou a página, que já está no PR #5. Thread encerrada.
-- **Privacidade e termos**: `docs/legal/` (PR #6, #7, #8 e #9, mesclados em 15/10/2026). O site mostra esses textos
-  em `/privacidade` e `/termos`.
-- **Identidade visual e logo**: três direções de logo, com cores e letras, em `/mnt/project-files/orzy/marca/`.
-  Depois que o Nicolas escolher uma, o visual final entra no site pela thread do código.
-- **Hospedagem e domínio**: hospedagem, deploy, DNS, Redirect URI e Client Secret do OrzyApp. A recomendação está em
-  `/mnt/project-files/orzy/hospedagem-recomendacao.md`; o resto espera o lançamento e o ok do Nicolas.
+
+Com o Nicolas: a linha "Ficha técnica: X de Y campos" numa rodada do programa do PC (fecha a fase 2); nome e CPF
+ou CNPJ para os textos legais, quando quiser; 3 a 5 vendedores pequenos para o beta; e, perto do lançamento, a
+hospedagem, a mudança no app do Mercado Livre e o advogado.
+
 - Pesquisa anterior de hospedagem e LGPD: `/mnt/project-files/orzy/hospedagem-e-lgpd.md`.
 - Domínio: orzy.com.br responde com uma página temporária que o Nicolas colocou no Firebase (DNS no Registro.br).
 
@@ -98,6 +121,8 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
   - histórico no Firestore, para o Cloud Run (`ORZY_HISTORICO=firestore`), testado contra um Firestore simulado;
     o SQLite continua no PC e no Render;
   - um erro inesperado (o histórico fora do ar, por exemplo) mostra uma página de erro, em vez de cortar a conexão;
+  - busca pelo título (sem diferença de acento nem de maiúscula, palavras em qualquer ordem) e filtro por situação
+    na tabela "Todos os anúncios", no resultado e no histórico;
   - recomendação de hospedagem com custos em reais (thread "Hospedagem e domínio").
 
 ## O que foi testado (com dados simulados)
@@ -120,13 +145,18 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
   e pedido de novo perto de vencer (ou sem resposta), dois relatórios no mesmo instante, apagar em lotes, o
   Firestore fora do ar (o relatório sai mesmo assim, e a página do histórico mostra um erro claro) e as páginas do
   histórico e da comparação com ele.
+- Busca e filtro: acento, maiúscula, palavras em qualquer ordem, situação desconhecida (não filtra), texto buscado
+  que volta escapado, no resultado e no histórico (SQLite e Firestore).
 - No navegador (Chromium), com login e relatórios simulados: as páginas internas (formulário, andamento, resultado
-  e histórico) de 320 a 1280 px, nos dois temas, sem nada empurrando a página para o lado.
-- Testes rodados no Python 3.10 e 3.13 (121: 64 do PC e 57 do site). Quebrar de propósito a checagem do estado do
+  e histórico) de 320 a 1280 px, nos dois temas, sem nada empurrando a página para o lado. O formulário de busca
+  usado de verdade: o endereço guarda a busca, a página volta rolada até a tabela e "Ver todos" mostra a lista
+  inteira.
+- Testes rodados no Python 3.10 e 3.13 (126: 64 do PC e 62 do site). Quebrar de propósito a checagem do estado do
   OAuth, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a limpeza diária, o `HEAD`, o
   `robots.txt`, o prazo e o limite das sessões sem login, o código novo depois do login, o tempo máximo de uma
   conexão, a escolha do relatório anterior, o escape dos títulos antigos, a página de erro ou, no Firestore, a
-  conta, o período, o prazo do TTL, o token, os lotes de apagar ou a ordem do resumo faz os testes falharem.
+  conta, o período, o prazo do TTL, o token, os lotes de apagar ou a ordem do resumo, ou a busca (acento,
+  maiúscula, ordem das palavras, situação, escape) faz os testes falharem.
 
 ## Validado com dados reais (14 e 15/10/2026)
 
@@ -152,9 +182,10 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
    `tokens.json` da pasta `painel-ml` usada por último para a nova. Rodar `python meus_anuncios.py` e mandar o
    texto do que apareceu no cmd (sem print). Ver a linha "Ficha técnica: X de Y campos".
 3. Site: os passos que o Nicolas aprovou em 15/10/2026 estão prontos (segurança, páginas internas no celular,
-   comparação de relatórios e histórico no Firestore). Próximo, do roadmap: busca e filtro na tabela de anúncios.
-   Depois, o visual final com a identidade que ele escolher. As mudanças da hospedagem entram quando ela for
-   escolhida.
+   comparação de relatórios e histórico no Firestore), e a busca e o filtro também. Próximos, pela divisão de
+   15/10/2026: a logo e as cores da Anel no site base quando a thread da marca avisar, as contagens do beta e,
+   depois, o visual final que o Nicolas aprovar. A hospedagem e o que vem com ela (monitoramento e cópia de
+   segurança) ficam para perto de lançar.
 
 Na conversa, mandar só o texto do que apareceu no cmd, sem print. **Nunca** mandar o Client Secret,
 o `config.json`, o `tokens.json` nem o banco do site.

@@ -53,19 +53,20 @@ Mercado Livre). As sugestões do relatório são regras fixas: o site não as ch
   O PC continua igual: os 64 testes antigos passam sem mudança.
 - `testes/firestore_simulado.py`: Firestore e servidor de metadados do Google simulados, para testar o histórico
   no Firestore sem conta e sem internet.
-- `testes/test_site.py`: 57 testes contra o Mercado Livre e o Firestore simulados. Cobrem o login inteiro, o
+- `testes/test_site.py`: 62 testes contra o Mercado Livre e o Firestore simulados. Cobrem o login inteiro, o
   estado do OAuth, o escape de títulos, o CSV com BOM, o isolamento entre contas, token vencido, pedido de outro
   site, histórico, cabeçalhos de segurança, uma ida e volta por HTTP real (com `HEAD`), a página inicial, os textos
   legais (com escape), o rodapé, a hora do relatório em horário de Brasília, a limpeza diária do histórico, o
   `robots.txt`, a descrição para buscadores, as sessões sem login (prazo e limite), o código novo da sessão depois
-  do login, a conexão parada, a palavra sem espaço que quebra no celular, a comparação com o relatório anterior e
-  o histórico no Firestore (os mesmos testes do SQLite, mais token, prazo para o TTL e Firestore fora do ar).
-- Verificado: 121 testes passam no Python 3.13 e no 3.10 (64 do PC e 57 do site); pyflakes limpo. Quebrar de
+  do login, a conexão parada, a palavra sem espaço que quebra no celular, a comparação com o relatório anterior,
+  a busca e o filtro da tabela e o histórico no Firestore (os mesmos testes do SQLite, mais token, prazo para o
+  TTL e Firestore fora do ar).
+- Verificado: 126 testes passam no Python 3.13 e no 3.10 (64 do PC e 62 do site); pyflakes limpo. Quebrar de
   propósito a checagem do estado, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a
   limpeza diária, o `HEAD`, o `robots.txt`, o prazo e o limite das sessões sem login, o código novo depois do
   login, o tempo máximo de uma conexão, a escolha do relatório anterior, o escape dos títulos antigos, a página
-  de erro ou, no Firestore, a conta, o período, o prazo do TTL, o token, os lotes de apagar ou a ordem do resumo
-  faz os testes falharem.
+  de erro, a busca (acento, maiúscula, ordem das palavras, situação, escape) ou, no Firestore, a conta, o
+  período, o prazo do TTL, o token, os lotes de apagar ou a ordem do resumo faz os testes falharem.
 
 Limites da primeira versão (propostos, a confirmar):
 - **Uma instância só**: as sessões e os relatórios em andamento ficam na memória do servidor.
@@ -78,7 +79,9 @@ Limites da primeira versão (propostos, a confirmar):
 
 Conferido no navegador (Chromium), com login e relatórios simulados: as páginas internas (formulário, andamento,
 resultado e histórico) de 320 a 1280 px, nos dois temas. Nada empurra a página para o lado, e as tabelas largas
-rolam dentro da própria caixa. Só funcionamento: o visual final vem depois, com a identidade escolhida.
+rolam dentro da própria caixa. O formulário de busca foi usado de verdade: o endereço guarda a busca, a página
+volta rolada até a tabela e "Ver todos" mostra a lista inteira. Só funcionamento: o visual final vem depois,
+com a identidade escolhida.
 
 Não testado ainda: o site falando com o Mercado Livre de verdade (depende da Redirect URI cadastrada, passo 3),
 o Firestore de verdade (só o simulado), HTTPS e domínio e carga com muitos anúncios.

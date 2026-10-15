@@ -28,7 +28,8 @@ import analise  # noqa: E402
 import ml_api  # noqa: E402
 from firestore_simulado import FirestoreSimulado  # noqa: E402
 from ml_simulado import MLSimulado, performance  # noqa: E402
-from web import app, comparacao, configuracao, historico_firestore, login, relatorios, servidor, sessoes  # noqa: E402
+from web import (app, busca, comparacao, configuracao, historico_firestore, login, relatorios,  # noqa: E402
+                 servidor, sessoes)
 from web.historico import Historico  # noqa: E402
 
 URL = "https://orzy.test"
@@ -348,6 +349,28 @@ class ComparacaoTests(unittest.TestCase):
         self.assertEqual(mudou["anterior"], {"id": 1, "criado_em": "2026-10-01T12:00:00+00:00"})
 
 
+class BuscaTests(unittest.TestCase):
+    def test_le_a_busca_e_a_situacao_do_endereco(self):
+        self.assertEqual(busca.ler("busca=+C%C3%A2mera++Sony+&situacao=VENDENDO+BEM"), ("Câmera Sony", "VENDENDO BEM"))
+        self.assertEqual(busca.ler("situacao=QUALQUER+COISA"), ("", ""), "situação desconhecida vale como todas")
+        self.assertEqual(busca.ler(""), ("", ""))
+        self.assertEqual(len(busca.ler("busca=" + "a" * 500)[0]), busca.MAX_BUSCA)
+
+    def test_acha_sem_acento_sem_maiuscula_e_em_qualquer_ordem(self):
+        anuncios = [{"titulo": "Câmera Digital Sony", "situacao": "VENDENDO BEM"},
+                    {"titulo": "Capa para CÂMERA", "situacao": "POUCA VISITA"},
+                    {"titulo": None, "situacao": "SEM DADOS"}]
+
+        def titulos(texto, situacao=""):
+            return [a["titulo"] for a in busca.filtrar(anuncios, texto, situacao)]
+
+        self.assertEqual(titulos("camera"), ["Câmera Digital Sony", "Capa para CÂMERA"])
+        self.assertEqual(titulos("sony câmera"), ["Câmera Digital Sony"], "as palavras em qualquer ordem")
+        self.assertEqual(titulos("camera", "POUCA VISITA"), ["Capa para CÂMERA"])
+        self.assertEqual(titulos("", "SEM DADOS"), [None])
+        self.assertEqual(titulos(""), [a["titulo"] for a in anuncios])
+
+
 class ClienteDaSessaoTests(unittest.TestCase):
     def test_nao_renova_o_login_sozinho(self):
         cliente = login.ClienteDaSessao({"client_id": "1", "client_secret": "s", "redirect_uri": "x"},
@@ -446,6 +469,39 @@ class RelatorioTests(SiteBase):
         self.assertEqual(len(guardado), 1)
         self.assertEqual(guardado[0]["total"], 2)
 
+    def test_busca_e_filtro_na_tabela_de_todos_os_anuncios(self):
+        self.semear()
+        cookie = self.entrar()
+        relatorio_id = self.gerar(cookie)
+        self.esperar(cookie, relatorio_id)
+
+        def todos(consulta):
+            pagina = self.pedir("GET", f"/relatorio/{relatorio_id}?{consulta}", cookie=cookie)[2].decode("utf-8")
+            return pagina.split('<h2 id="todos">', 1)[1]  # só a seção da tabela, sem "Comece por estes"
+
+        texto = todos("")
+        self.assertIn(f'action="/relatorio/{relatorio_id}#todos"', texto)
+        self.assertIn("Fone de Ouvido", texto)
+        self.assertIn("Caixa de som", texto)
+        self.assertNotIn("Mostrando", texto)
+
+        texto = todos("busca=FONE+bluetooth")
+        self.assertIn("Fone de Ouvido", texto)
+        self.assertNotIn("Caixa de som", texto)
+        self.assertIn("Mostrando 1 de 2 anúncios.", texto)
+        self.assertIn('value="FONE bluetooth"', texto)
+        self.assertIn(f'<a href="/relatorio/{relatorio_id}#todos">Ver todos</a>', texto)
+
+        texto = todos("situacao=POUCA+VISITA")
+        self.assertIn('<option value="POUCA VISITA" selected>POUCA VISITA (1)</option>', texto)
+        self.assertIn("Fone de Ouvido", texto)
+        self.assertNotIn("Caixa de som", texto)
+
+        self.assertIn("Nenhum anúncio com essa busca.", todos("busca=geladeira"))
+        texto = todos("busca=%3Cscript%3E%22")
+        self.assertIn('value="&lt;script&gt;&quot;"', texto, "o que a pessoa digitou volta escapado")
+        self.assertNotIn("<script>", texto)
+
     def test_andamento_em_json_enquanto_roda(self):
         self.semear()
         cookie = self.entrar()
@@ -538,6 +594,19 @@ class HistoricoSiteTests(SiteBase):
         status, cabecalhos, _ = self.pedir("POST", "/historico/apagar", cookie=cookie, corpo=b"confirmo=on")
         self.assertEqual(status, 303)
         self.assertEqual(self.site.historico.listar(111222333), [])
+
+    def test_busca_e_filtro_no_relatorio_guardado(self):
+        self.semear()
+        cookie = self.entrar()
+        self.esperar(cookie, self.gerar(cookie))
+        guardado = self.site.historico.listar(111222333)[0]["id"]
+        pagina = self.pedir("GET", f"/historico/{guardado}?busca=caixa&situacao=XYZ", cookie=cookie)[2]
+        texto = pagina.decode("utf-8").split('<h2 id="todos">', 1)[1]
+        self.assertIn(f'action="/historico/{guardado}#todos"', texto)
+        self.assertIn("Caixa de som", texto)
+        self.assertNotIn("Fone de Ouvido", texto)
+        self.assertIn("Mostrando 1 de 2 anúncios.", texto, "situação desconhecida não filtra")
+        self.assertIn(f'<a href="/historico/{guardado}#todos">Ver todos</a>', texto)
 
     def test_compara_com_o_relatorio_anterior_do_mesmo_periodo(self):
         self.semear()

@@ -61,7 +61,7 @@ de agora, inclusive o da página inicial, é só uma base, nada perto do modelo 
   - [x] páginas internas funcionando no celular
   - [x] comparação de relatórios no histórico (o que mudou em cada anúncio desde o relatório anterior)
   - [x] histórico no Firestore (testado com um Firestore simulado; o de verdade, só na hora de publicar)
-- [ ] Busca pelo título e filtro por situação na tabela "Todos os anúncios" (do plano de 15/10/2026)
+- [x] Busca pelo título e filtro por situação na tabela "Todos os anúncios" (do plano de 15/10/2026)
 - [ ] Identidade visual: logo, cores e letras (thread "Identidade visual e logo"). Depois que o Nicolas escolher uma
   direção, só a logo e as cores entram no site base
 - [ ] Visual final: refazer as páginas com a identidade escolhida, até um site realmente bonito

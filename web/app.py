@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 import meus_anuncios
-from . import comparacao, legal, login, paginas
+from . import busca, comparacao, legal, login, paginas
 from .historico import Historico
 from .historico_firestore import URL_FIRESTORE, HistoricoFirestore
 from .relatorios import ERRO, GERANDO, PRONTO, ErroRelatorio, Relatorios
@@ -86,9 +86,9 @@ class Site:
             if partes[1] == "static":
                 return self._arquivo(partes[2])
             if partes[1] == "relatorio":
-                return self._ver_relatorio(partes[2], cabecalhos)
+                return self._ver_relatorio(partes[2], cabecalhos, url.query)
             if partes[1] == "historico":
-                return self._ver_historico(partes[2], cabecalhos)
+                return self._ver_historico(partes[2], cabecalhos, url.query)
         if metodo == "GET" and len(partes) == 4 and partes[1] == "relatorio":
             if partes[3] == "andamento.json":
                 return self._andamento(partes[2], cabecalhos)
@@ -150,7 +150,7 @@ class Site:
             return self._html(200, paginas.formulario(sessao.usuario, OPCOES_DIAS, aviso=str(e)))
         return self._redirect(f"/relatorio/{relatorio.id}", status=303)
 
-    def _ver_relatorio(self, relatorio_id, cabecalhos):
+    def _ver_relatorio(self, relatorio_id, cabecalhos, consulta):
         relatorio = self._relatorio_da_sessao(relatorio_id, cabecalhos)
         if relatorio is None:
             return self._nao_encontrado()
@@ -158,7 +158,8 @@ class Site:
             return self._html(200, paginas.andamento(relatorio))
         if relatorio.estado == ERRO:
             return self._html(200, paginas.relatorio_com_erro(relatorio))
-        return self._html(200, paginas.resultado(relatorio, self._endereco_das_mudancas(relatorio)))
+        return self._html(200, paginas.resultado(relatorio, self._endereco_das_mudancas(relatorio),
+                                                 *busca.ler(consulta)))
 
     def _endereco_das_mudancas(self, relatorio):
         """Onde ver o que mudou desde o relatório anterior, se este foi guardado e há um anterior para comparar."""
@@ -195,7 +196,7 @@ class Site:
             return self._redirect("/")
         return self._html(200, paginas.historico(self.historico.listar(sessao.usuario["id"])))
 
-    def _ver_historico(self, relatorio_id, cabecalhos):
+    def _ver_historico(self, relatorio_id, cabecalhos, consulta):
         sessao = self._logada(cabecalhos)
         if sessao is None:
             return self._redirect("/")
@@ -207,7 +208,7 @@ class Site:
         anterior_id = self.historico.id_do_anterior(sessao.usuario["id"], dados["id"])
         anterior = self.historico.ver(sessao.usuario["id"], anterior_id) if anterior_id is not None else None
         mudancas = comparacao.comparar(anterior, dados) if anterior is not None else None
-        return self._html(200, paginas.historico_relatorio(dados, mudancas))
+        return self._html(200, paginas.historico_relatorio(dados, mudancas, *busca.ler(consulta)))
 
     def _apagar_historico(self, cabecalhos, corpo):
         sessao = self._logada(cabecalhos)

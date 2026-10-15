@@ -126,8 +126,9 @@ th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--bor
 th { font-weight: 600; color: var(--fraco); }
 td.n, th.n, .n { text-align: right; white-space: nowrap; }
 
-select, input[type="checkbox"] { font: inherit; }
-select {
+select, input[type="checkbox"], input[type="search"] { font: inherit; }
+select, input[type="search"] {
+  max-width: 100%;  /* um nome de situação comprido não passa da caixa num celular */
   padding: 8px;
   border-radius: 8px;
   border: 1px solid var(--borda);
@@ -136,6 +137,7 @@ select {
 }
 
 label { display: block; font-weight: 600; margin-bottom: 6px; }
+.filtro input[type="search"] { width: 100%; max-width: 360px; margin-bottom: 12px; }
 label input { margin-right: 6px; }
 
 .resumo {

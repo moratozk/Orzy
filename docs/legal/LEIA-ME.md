@@ -8,8 +8,9 @@ Não é parecer jurídico: antes de abrir o site ao público, o ideal é um advo
 | [politica-de-privacidade.md](politica-de-privacidade.md) | Quais dados o site usa, para que, por quanto tempo e os direitos do vendedor (LGPD) |
 | [termos-de-uso.md](termos-de-uso.md) | As regras de uso do site: o que ele faz, o que não faz, responsabilidades e lei aplicável |
 
-Os textos descrevem o site como ele está no PR #5 (rascunho, commit `1f70f1d`). Se o código mudar nos pontos da
-tabela "De onde vem cada frase", os textos mudam junto.
+Os textos descrevem o site como ele está no PR #5 (rascunho, commit `2c35b04`, conferido em 15/10/2026). Se o código
+mudar nos pontos da tabela "De onde vem cada frase", os textos mudam junto. Duas frases ainda esperam um ajuste no
+código: ver "Falta no código" abaixo.
 
 Para achar o que falta, procure por `[PREENCHER` (só o Nicolas sabe) e `[CONFIRMAR` (depende de outra frente).
 
@@ -61,7 +62,10 @@ quanto tempo ela guarda registros de acesso e cópias de segurança (itens 2.4 e
   servidor desliga; os registros do servidor (IP, data e página) ficam 30 dias no Cloud Logging, que por padrão guarda
   "em qualquer centro de dados do mundo", então ou a configuração os põe em São Paulo, ou a Política diz que eles podem
   ir para fora do Brasil com as cláusulas da ANPD; a exclusão nos sistemas do Google termina em até 180 dias; e, só com
-  o Firebase Hosting, o cookie passa a se chamar `__session`.
+  o Firebase Hosting, o cookie passa a se chamar `__session`. Os registros de pedidos do Cloud Run guardam o endereço
+  completo, com o que vem depois do `?` (a busca de anúncios e o `?code=` da volta do Mercado Livre), além do IP e do
+  navegador. A Política (item 2.4) já conta a busca; o `code` sozinho não abre a conta, porque o login usa PKCE e o
+  Client Secret, mas a hospedagem pode deixar esses registros de fora se preferir.
 
 **Site: código e login:** os itens da seção seguinte.
 
@@ -74,7 +78,7 @@ de estatística (Google Analytics e parecidos) ou outros cookies. Se entrar algu
 
 ## O que o site precisa ter para os textos valerem
 
-Já feito no PR #5 (commit `1f70f1d`, ainda em rascunho):
+Já feito no PR #5 (commit `2c35b04`, ainda em rascunho):
 
 1. Páginas `/privacidade` e `/termos`, que mostram os arquivos desta pasta.
 2. Junto de cada botão **Conectar com Mercado Livre**: "Ao conectar, você aceita os Termos de Uso e confirma que leu a
@@ -85,6 +89,23 @@ Já feito no PR #5 (commit `1f70f1d`, ainda em rascunho):
    mostra os anúncios como estavam naquele dia. Os termos do Mercado Livre (5.3) pedem que o aplicativo diga com que
    frequência os dados são atualizados, e os Termos (item 6) prometem isso.
 5. Relatórios com mais de 12 meses apagados ao ligar o servidor e depois a cada 24 horas.
+6. O e-mail de contato no rodapé de todas as páginas.
+7. Sessão sem login (de quem clicou em Conectar e não voltou do Mercado Livre) apagada depois de 15 minutos, com no
+   máximo 1000 de uma vez, e código novo da sessão depois do login.
+8. Contagens do beta só em números por dia, e a página `/contagens` só para as contas de `ORZY_CONTAS_ADMIN`, sem
+   mostrar de quem são os números.
+
+Falta no código (pedido à thread do código pela coordenação em 15/10/2026):
+
+- **A sessão com login acabar no servidor 8 horas depois do login.** Hoje o servidor apaga a sessão 8 horas depois do
+  último uso (`web/sessoes.py:68` a `72`), e o cookie vence 8 horas depois do login. Quem usa o site até o cookie vencer
+  deixa o código de acesso, o apelido e o relatório na memória por até mais 8 horas, mas a Política (itens 2.4 e 6)
+  promete "no máximo 8 horas depois de você entrar".
+- **As contagens do beta apagadas depois de 12 meses**, como o histórico. Hoje elas não têm prazo. Não dizem de quem
+  são, mas com poucos vendedores no beta um dia pode apontar para uma pessoa se for cruzado com o histórico (o único
+  login do dia, por exemplo), e a LGPD só deixa de valer para dados que não dá para ligar de volta à pessoa com esforço
+  razoável (art. 12). Por isso a Política conta que as contagens existem, dá a base legal (legítimo interesse) e promete
+  12 meses (item 6).
 
 Regras que continuam valendo:
 
@@ -135,6 +156,7 @@ US$ 2,5 milhões por mês no Brasil, e uma avaliação de segurança. "Aplicativ
 | Transferência internacional com mecanismo válido, dizendo finalidade, duração, país e direitos (art. 33; Resoluções CD/ANPD nº 19/2024 e 32/2026) | Política item 5, conforme a hospedagem |
 | Segurança e comunicação de incidentes (arts. 46 e 48; Resolução CD/ANPD nº 15/2024) | Política item 7 |
 | Canal de comunicação no lugar do encarregado (Resolução CD/ANPD nº 2/2022, art. 11) | Política item 1 |
+| Dado anonimizado só deixa de ser pessoal se não der para voltar à pessoa com esforço razoável (art. 12) | Contagens do beta: Política itens 2.4, 3 e 6 |
 
 O Orzy cabe como **agente de tratamento de pequeno porte** (Resolução CD/ANPD nº 2/2022): pessoa física ou empresa
 pequena, sem tratamento de alto risco, porque não usa dados sensíveis nem de crianças, trata poucos vendedores e as
@@ -159,26 +181,31 @@ comunicar incidentes (art. 14). Os textos prometem o prazo normal de 15 dias, qu
 
 ## De onde vem cada frase
 
-Código do PR #5 (commit `1f70f1d`, branch `claude/project-thread-y5cpt9`):
+Código do PR #5 (commit `2c35b04`, branch `claude/project-thread-y5cpt9`):
 
 | O que os textos dizem | Onde está no código |
 |---|---|
-| O código de acesso fica só na memória do servidor | `web/sessoes.py:18` e `web/login.py` |
+| O código de acesso fica só na memória do servidor | `web/sessoes.py:21` e `web/login.py` |
 | O código de renovação é descartado | `web/login.py:52` |
 | De `/users/me` ficam só o número e o apelido | `web/login.py:60` |
-| O que o histórico guarda | `web/historico.py:15` a `30` |
-| Histórico apagado com mais de 12 meses, ao ligar e depois a cada 24 horas | `web/servidor.py:13` e `47` a `61` |
-| Cookie `orzy_sessao`: HttpOnly, SameSite=Lax, Secure em HTTPS, dura 8 horas | `web/app.py:84` e `219` a `223`; `web/configuracao.py:66` |
-| Até 300 anúncios por relatório | `web/configuracao.py:65` |
-| Um relatório por vez em cada conexão | `web/relatorios.py:75` a `76` |
-| O registro do servidor anota só o caminho, sem o código do Mercado Livre | `web/servidor.py:42` a `44` |
+| O que o histórico guarda (SQLite no PC e no Render; Firestore no Cloud Run, com os mesmos campos) | `web/historico.py:17` a `34`; `web/historico_firestore.py:188` a `199` |
+| Histórico apagado com mais de 12 meses, ao ligar e depois a cada 24 horas | `web/historico.py:15`; `web/servidor.py:55` a `69` e `81` a `82`; no Firestore, também o campo `expira_em` (`web/historico_firestore.py:193`) |
+| O que mudou desde o relatório anterior do mesmo período, sem dizer por quê | `web/comparacao.py`; `web/historico.py:105` a `116`; `web/paginas.py:593` a `594` |
+| Cookie `orzy_sessao`: HttpOnly, SameSite=Lax, Secure em HTTPS, dura 8 horas | `web/app.py:115`, `131` e `283` a `287`; `web/configuracao.py:81` |
+| Sessão sem login apagada depois de 15 minutos; código novo depois do login | `web/sessoes.py:12` a `13`, `47` a `54` e `68` a `72`; `web/app.py:128` |
+| Até 300 anúncios por relatório | `web/configuracao.py:80` |
+| Um relatório por vez em cada conexão | `web/relatorios.py:79` a `80` |
+| O registro do servidor anota só o caminho, sem o código do Mercado Livre nem a busca | `web/servidor.py:48` a `52`; `web/app.py:66` |
+| Contagens do beta: só números por dia, sem conta, apelido nem anúncio | `web/contagens.py:14` a `20`; `web/relatorios.py:91` a `119`; `web/app.py:126`; `web/historico.py:36` a `41` e `134` a `140` |
+| Página `/contagens` só para as contas de `ORZY_CONTAS_ADMIN`, sem mostrar de quem são os números | `web/app.py:237` a `242`; `web/configuracao.py:68` a `72`; `web/historico.py:150` a `155` |
 | O que o relatório lê de cada anúncio | `painel-ml/meus_anuncios.py:28` |
 | Dos pedidos, só o anúncio e a quantidade | `painel-ml/meus_anuncios.py:137` a `159` |
-| "Não somos o Mercado Livre" e os links para os dois textos no rodapé | `web/paginas.py:61` a `62` |
-| Aviso de aceite junto de cada botão Conectar | `web/paginas.py:79` a `81` |
-| Data e hora em que os dados foram buscados | `web/relatorios.py:52` e `web/paginas.py:416` a `418` |
-| O histórico mostra como os anúncios estavam no dia | `web/paginas.py:475` |
-| O site mostra os textos desta pasta | `web/legal.py:12` a `13` e `web/app.py:54` a `55` |
+| "Não somos o Mercado Livre", os links para os dois textos e o e-mail de contato no rodapé | `web/paginas.py:14` e `85` a `86` |
+| Aviso de aceite junto de cada botão Conectar | `web/paginas.py:104` a `105` |
+| Data e hora em que os dados foram buscados | `web/relatorios.py:56` e `web/paginas.py:471` a `475` |
+| O histórico mostra como os anúncios estavam no dia | `web/paginas.py:517` e `615` |
+| Fonte, ícones e imagens saem do próprio site, sem serviço de fora na página | `web/app.py:19` a `27` e `37` a `38` |
+| O site mostra os textos desta pasta | `web/legal.py:12` a `13` e `web/app.py:83` a `84` |
 
 ## Fontes
 
@@ -207,4 +234,5 @@ Consultadas em 15/10/2026.
 - [Política de Privacidade do Google: "servidores em todo o mundo"](https://policies.google.com/privacy?hl=pt-BR)
   e [estruturas de transferência de dados](https://policies.google.com/privacy/frameworks?hl=pt-BR) (cláusulas da
   ANPD nos contratos de serviços comerciais, como o Google Workspace)
+- [Campos dos registros de pedidos no Cloud Logging: `requestUrl` inclui a parte depois do `?`](https://docs.cloud.google.com/dotnet/docs/reference/Google.Cloud.Logging.Type/latest/Google.Cloud.Logging.Type.HttpRequest)
 - [Declaração de Privacidade do Mercado Livre](https://www.mercadolivre.com.br/privacidade/declaracao-privacidade)

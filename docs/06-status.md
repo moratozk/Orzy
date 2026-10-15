@@ -8,8 +8,10 @@ Plano e custos em [07-fase-3-plano.md](07-fase-3-plano.md). Nada vai ao ar antes
 
 - **Site: código e login**: `web/`, `testes/test_site.py`, `docs/07-fase-3-plano.md`, este arquivo e o PR #5 (rascunho).
 - **Página inicial do site**: entregou a página, que já está no PR #5. Thread encerrada.
-- **Privacidade e termos**: `docs/legal/` (PR #6, mesclado em 15/10/2026). O site mostra esses textos em `/privacidade`
+- **Privacidade e termos**: `docs/legal/` (PR #6, #7 e #8, mesclados em 15/10/2026). O site mostra esses textos em `/privacidade`
   e `/termos`.
+- **Identidade visual e logo**: três direções de logo, com cores e letras, em `/mnt/project-files/orzy/marca/`.
+  Depois que o Nicolas escolher uma, o visual final entra no site pela thread do código.
 - **Hospedagem e domínio**: hospedagem, deploy, DNS, Redirect URI e Client Secret do OrzyApp. A recomendação está em
   `/mnt/project-files/orzy/hospedagem-recomendacao.md`; o resto espera o lançamento e o ok do Nicolas.
 - Pesquisa anterior de hospedagem e LGPD: `/mnt/project-files/orzy/hospedagem-e-lgpd.md`.
@@ -31,6 +33,10 @@ Nada foi publicado, contratado nem mudado no app do Mercado Livre. Ele decide ho
 Em 15/10/2026 o Nicolas aprovou a página inicial como primeiro protótipo (logo e cores vêm depois) e decidiu que o
 site só vai ao ar quando estiver quase pronto ("95% concluído"), sem endereço temporário. O foco agora é construir
 o site e o servidor.
+
+Ordem decidida pelo Nicolas em 15/10/2026: primeiro o **site base**, funcionando; depois aprimorar até um site
+realmente bonito, com a identidade visual (logo, cores e letras) da thread "Identidade visual e logo". O visual
+de agora, inclusive o da página inicial, é só uma base, nada perto do modelo final: não vale gastar tempo polindo.
 
 ## Decisões de 14/10/2026
 
@@ -76,6 +82,8 @@ o site e o servidor.
   - o histórico com mais de 365 dias é apagado todo dia, e não só quando o servidor liga;
   - descrição da página para o Google e o WhatsApp, `robots.txt` que deixa os robôs só nas páginas públicas,
     resposta a `HEAD` (verificadores de link) e cor dos links com contraste suficiente para leitura;
+  - segurança: quem abre o login e não volta perde a sessão em 15 minutos (no máximo 1000 sessões assim; sai a
+    mais antiga), o código da sessão muda depois do login e uma conexão parada fecha em 60 segundos;
   - recomendação de hospedagem com custos em reais (thread "Hospedagem e domínio").
 
 ## O que foi testado (com dados simulados)
@@ -89,10 +97,13 @@ o site e o servidor.
   escondida, pedido de outro site recusado, um relatório por vez em cada conexão, histórico com confirmação para
   apagar, cabeçalhos de segurança, uma ida e volta por HTTP real, página inicial com e sem login, textos legais
   lidos de `docs/legal/` (com escape), rodapé com os dois textos, data do relatório em horário de Brasília, limpeza
-  diária do histórico que continua depois de um erro, `HEAD` sem corpo, `robots.txt` e descrição para buscadores.
-- Testes rodados no Python 3.10 e 3.13 (96: 64 do PC e 32 do site). Quebrar de propósito a checagem do estado do
-  OAuth, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a limpeza diária, o `HEAD` ou o
-  `robots.txt` faz os testes falharem.
+  diária do histórico que continua depois de um erro, `HEAD` sem corpo, `robots.txt`, descrição para buscadores,
+  sessão sem login que some em 15 minutos e o limite delas, código novo da sessão depois do login e conexão parada
+  que fecha sem erro.
+- Testes rodados no Python 3.10 e 3.13 (99: 64 do PC e 35 do site). Quebrar de propósito a checagem do estado do
+  OAuth, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a limpeza diária, o `HEAD`, o
+  `robots.txt`, o prazo e o limite das sessões sem login, o código novo depois do login ou o tempo máximo de uma
+  conexão faz os testes falharem.
 
 ## Validado com dados reais (14 e 15/10/2026)
 
@@ -117,8 +128,9 @@ o site e o servidor.
 2. Nicolas: quando puder, baixar o ZIP de novo do GitHub. Para não fazer login de novo, copiar o `config.json` e o
    `tokens.json` da pasta `painel-ml` usada por último para a nova. Rodar `python meus_anuncios.py` e mandar o
    texto do que apareceu no cmd (sem print). Ver a linha "Ficha técnica: X de Y campos".
-3. Site: seguir construindo o que não depende de decisão. As mudanças da hospedagem entram quando ela for escolhida,
-   e a identidade visual (logo e cores) quando o Nicolas trouxer.
+3. Site: terminar o site base, nos passos que o Nicolas aprovou em 15/10/2026 (segurança, páginas internas no
+   celular, comparação de relatórios e histórico no Firestore). Depois, o visual final com a identidade que ele
+   escolher. As mudanças da hospedagem entram quando ela for escolhida.
 
 Na conversa, mandar só o texto do que apareceu no cmd, sem print. **Nunca** mandar o Client Secret,
 o `config.json`, o `tokens.json` nem o banco do site.

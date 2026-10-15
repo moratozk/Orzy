@@ -1,6 +1,8 @@
 # Site do Orzy (fase 3)
 
 Site para o vendedor entrar com a conta do Mercado Livre e ver o relatório no navegador. Ainda não está publicado.
+O visual de agora é uma base: o final vem com a identidade visual do Orzy (ordem em
+[docs/02-roadmap.md](../docs/02-roadmap.md), fase 3).
 Plano, custos e decisões em [docs/07-fase-3-plano.md](../docs/07-fase-3-plano.md).
 
 ## Como funciona
@@ -71,11 +73,11 @@ Os testes do site (`testes/test_site.py`) usam o Mercado Livre simulado e não p
 |---|---|
 | `configuracao.py` | Lê as variáveis de ambiente e avisa o que falta |
 | `login.py` | Entrar com o Mercado Livre (PKCE e conferência do estado) |
-| `sessoes.py` | Sessões na memória, com prazo |
+| `sessoes.py` | Sessões na memória, com prazo (8 horas com login, 15 minutos sem), limite para as sem login e código novo depois do login |
 | `relatorios.py` | Gera o relatório em segundo plano e guarda o andamento |
 | `historico.py` | Histórico em SQLite: salvar, listar, ver, apagar e apagar os antigos |
 | `paginas.py` | HTML das páginas (todo texto do Mercado Livre passa por escape) |
 | `legal.py` | Mostra a Política de Privacidade e os Termos de Uso a partir do Markdown de `docs/legal/`, com escape |
 | `app.py` | Rotas, cookies, cabeçalhos de segurança e conferência da origem dos pedidos |
-| `servidor.py` | Liga o servidor HTTP, não registra a busca (`?code=...`) no log e apaga o histórico antigo todo dia |
+| `servidor.py` | Liga o servidor HTTP, não registra a busca (`?code=...`) no log, fecha conexões paradas depois de 60 segundos e apaga o histórico antigo todo dia |
 | `static/` | Folha de estilo e o script da página de andamento |

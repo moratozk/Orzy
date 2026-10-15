@@ -11,7 +11,8 @@ estão em [docs/legal/](legal/LEIA-ME.md). A recomendação de hospedagem, com c
 
 ## O que o site faz na primeira versão
 
-- Página inicial que explica o Orzy, aprovada pelo Nicolas como primeiro protótipo (logo e cores vêm depois).
+- Página inicial que explica o Orzy. É uma base (primeiro protótipo, aprovado em 15/10/2026), nada perto do
+  visual final.
 - O vendedor clica em **Conectar com Mercado Livre** e entra com a própria conta. Ninguém cria app.
 - O Client Secret do app fica só no servidor, numa variável de ambiente.
 - Gera o relatório em segundo plano, com página de andamento. Quem fechar a página pode voltar depois.
@@ -28,7 +29,9 @@ Mercado Livre). As sugestões do relatório são regras fixas: o site não as ch
 
 ## Plano em 5 passos (espera o ok do Nicolas)
 
-1. **Construir o site (agora):** código, página inicial, textos legais e, depois, a identidade visual (logo e cores).
+1. **Construir o site (agora):** primeiro o site base, funcionando (código, páginas, textos legais, segurança e
+   histórico); depois aprimorar até um site realmente bonito, com a identidade visual (logo, cores e letras) da
+   thread "Identidade visual e logo". Ordem decidida pelo Nicolas em 15/10/2026.
 2. **Hospedagem:** escolher uma opção da tabela de custos abaixo e adaptar o código a ela.
 3. **App do Mercado Livre:** cadastrar a Redirect URI do site, gerar o Client Secret que vai só para o servidor e
    revisar os campos do formulário (quantos usuários, propósito). Isso muda o app, então só com o ok.
@@ -43,14 +46,16 @@ Mercado Livre). As sugestões do relatório são regras fixas: o site não as ch
 - `painel-ml/`: a mesma coleta e as mesmas regras do PC. O que mudou para o site: o login passou a ter uma
   versão que não grava em arquivo, e a coleta ganhou etapas e andamento que o PC também usa.
   O PC continua igual: os 64 testes antigos passam sem mudança.
-- `testes/test_site.py`: 32 testes contra o Mercado Livre simulado. Cobrem o login inteiro, o estado do OAuth,
+- `testes/test_site.py`: 35 testes contra o Mercado Livre simulado. Cobrem o login inteiro, o estado do OAuth,
   o escape de títulos, o CSV com BOM, o isolamento entre contas, token vencido, pedido de outro site, histórico,
   cabeçalhos de segurança, uma ida e volta por HTTP real (com `HEAD`), a página inicial, os textos legais (com
-  escape), o rodapé, a hora do relatório em horário de Brasília, a limpeza diária do histórico, o `robots.txt` e
-  a descrição para buscadores.
-- Verificado: 96 testes passam no Python 3.13 e no 3.10 (64 do PC e 32 do site); pyflakes limpo. Quebrar de
+  escape), o rodapé, a hora do relatório em horário de Brasília, a limpeza diária do histórico, o `robots.txt`, a
+  descrição para buscadores, as sessões sem login (prazo e limite), o código novo da sessão depois do login e a
+  conexão parada.
+- Verificado: 99 testes passam no Python 3.13 e no 3.10 (64 do PC e 35 do site); pyflakes limpo. Quebrar de
   propósito a checagem do estado, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a
-  limpeza diária, o `HEAD` ou o `robots.txt` faz os testes falharem.
+  limpeza diária, o `HEAD`, o `robots.txt`, o prazo e o limite das sessões sem login, o código novo depois do
+  login ou o tempo máximo de uma conexão faz os testes falharem.
 
 Limites da primeira versão (propostos, a confirmar):
 - **Uma instância só**: as sessões e os relatórios em andamento ficam na memória do servidor.
@@ -58,6 +63,8 @@ Limites da primeira versão (propostos, a confirmar):
 - **Dois relatórios ao mesmo tempo** no servidor inteiro, e um por vez em cada conexão (sessão).
 - **Histórico apagado após 365 dias** (o servidor confere ao ligar e depois uma vez por dia).
 - **Sem refresh token**: quando o login vence (6 horas), a pessoa entra de novo.
+- **Sessões sem login** (quem clicou em Conectar e não voltou do Mercado Livre) somem em 15 minutos, no máximo
+  1000 de uma vez. Quem entra ganha um código de sessão novo, e uma conexão parada fecha em 60 segundos.
 
 Não testado ainda: o site falando com o Mercado Livre de verdade (depende da Redirect URI cadastrada, passo 3),
 HTTPS e domínio, carga com muitos anúncios e as páginas internas no celular (a página inicial foi conferida de
@@ -151,7 +158,8 @@ Nenhuma é urgente: todas ficam para quando o site estiver quase pronto.
 ## Próximo passo
 
 - Nicolas: nada agora. As decisões acima ficam para quando o site estiver quase pronto.
-- Site (thread "Site: código e login"): seguir construindo o que não depende de decisão. As mudanças da hospedagem
-  entram quando ela for escolhida, e a identidade visual quando o Nicolas trouxer logo e cores.
+- Site (thread "Site: código e login"): terminar o site base, nos passos aprovados em 15/10/2026 (segurança,
+  páginas internas no celular, comparação de relatórios e histórico no Firestore). Depois, o visual final com a
+  identidade que o Nicolas escolher. As mudanças da hospedagem entram quando ela for escolhida.
 - Hospedagem e domínio: parada até o lançamento. Nada de DNS, cobrança ou mudança no app sem o ok dele.
 - Privacidade e termos: preencher os campos marcados quando o Nicolas mandar os dados.

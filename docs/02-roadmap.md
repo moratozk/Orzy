@@ -43,11 +43,18 @@ Plano em 5 passos, custos, LGPD e decisões em [07-fase-3-plano.md](07-fase-3-pl
 rascunho: não entra no main nem vai para o ar antes do ok do Nicolas. Decidido por ele em 15/10/2026: o site só vai
 ao ar quando estiver quase pronto (95%), sem endereço temporário.
 
+Ordem decidida pelo Nicolas em 15/10/2026: primeiro o **site base**, funcionando; depois aprimorar até um site
+realmente bonito, com a identidade visual (logo, cores e letras) da thread "Identidade visual e logo". O visual
+de agora, inclusive o da página inicial, é só uma base, nada perto do modelo final: não vale gastar tempo polindo.
+
 - [x] Código do site em rascunho (`web/`): login, relatório, histórico e testes com o Mercado Livre simulado
-- [x] Página inicial (primeiro protótipo, aprovado em 15/10/2026)
+- [x] Página inicial base (primeiro protótipo, aprovado em 15/10/2026; não é o visual final)
 - [x] Política de Privacidade e Termos de Uso em rascunho (`docs/legal/`), já mostrados no site
 - [x] Recomendação de hospedagem com custos em reais
-- [ ] Identidade visual: logo e cores
+- [ ] Terminar o site base (aprovado em 15/10/2026): segurança das sessões, páginas internas funcionando no
+  celular, comparação de relatórios no histórico e histórico no Firestore
+- [ ] Identidade visual: logo, cores e letras (thread "Identidade visual e logo"; o Nicolas escolhe uma direção)
+- [ ] Visual final: refazer as páginas com a identidade escolhida, até um site realmente bonito
 - [ ] Escolher a hospedagem e adaptar o código a ela
 - [ ] Preencher os textos legais (responsável e contato) e, se o Nicolas quiser, revisão de advogado
 - [ ] Cadastrar a Redirect URI do site no OrzyApp e lançar, testando primeiro com a conta do Nicolas

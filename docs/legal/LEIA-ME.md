@@ -6,7 +6,7 @@ Não é parecer jurídico: antes de abrir o site ao público, o ideal é um advo
 | Arquivo | O que é |
 |---|---|
 | [politica-de-privacidade.md](politica-de-privacidade.md) | Quais dados o site usa, para que, por quanto tempo e os direitos do vendedor (LGPD) |
-| [termos-de-uso.md](termos-de-uso.md) | As regras de uso do site: o que ele faz, o que não faz, responsabilidades e foro |
+| [termos-de-uso.md](termos-de-uso.md) | As regras de uso do site: o que ele faz, o que não faz, responsabilidades e lei aplicável |
 
 Os textos descrevem o site como ele está no PR #5 (rascunho, commit `1f70f1d`). Se o código mudar nos pontos da
 tabela "De onde vem cada frase", os textos mudam junto.
@@ -26,7 +26,6 @@ linha horizontal nem imagem. Os links para `politica-de-privacidade.md` e `termo
 | Nome completo do responsável, ou nome da empresa | Política (item 1) e Termos (início) | É quem responde pelos dados perante a lei. Precisa ser maior de 18 anos (ou emancipado), ou uma empresa. |
 | CPF ou CNPJ | Política (item 1) e Termos (início) | Enquanto o Orzy for grátis, a LGPD pede a identificação do responsável; publicar o CPF não parece obrigatório (confirmar com advogado). Quando cobrar, o Decreto nº 7.962/2013 exige CPF ou CNPJ e endereço no site. |
 | E-mail de contato | Política (itens 1 e 8) e Termos (item 14) | É o canal da LGPD. Alguém precisa ler: pedidos sobre dados têm resposta em até 15 dias. Pode ser um Gmail só do Orzy, de graça. |
-| Cidade e estado | Termos (item 13) | Foro para quem não é consumidor. |
 | Data de publicação | Os dois | Muda a cada versão. |
 
 Já perguntado no thread "Site: código e login": se haverá revisão de advogado antes do público.

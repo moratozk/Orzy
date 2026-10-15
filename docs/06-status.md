@@ -86,10 +86,10 @@ o site e o servidor.
   pedido de fotos com outro nome de regra, ordem dos anúncios e limites de chamadas.
 - Site (fase 3): login inteiro (estado do OAuth, PKCE, retorno), token que não é gravado em disco, relatório
   com título que tem HTML (sai escapado), CSV com BOM, isolamento entre contas, token vencido sem renovação
-  escondida, pedido de outro site recusado, um relatório por conta, histórico com confirmação para apagar,
-  cabeçalhos de segurança, uma ida e volta por HTTP real, página inicial com e sem login, textos legais lidos de
-  `docs/legal/` (com escape), rodapé com os dois textos, data do relatório em horário de Brasília, limpeza diária
-  do histórico que continua depois de um erro, `HEAD` sem corpo, `robots.txt` e descrição para buscadores.
+  escondida, pedido de outro site recusado, um relatório por vez em cada conexão, histórico com confirmação para
+  apagar, cabeçalhos de segurança, uma ida e volta por HTTP real, página inicial com e sem login, textos legais
+  lidos de `docs/legal/` (com escape), rodapé com os dois textos, data do relatório em horário de Brasília, limpeza
+  diária do histórico que continua depois de um erro, `HEAD` sem corpo, `robots.txt` e descrição para buscadores.
 - Testes rodados no Python 3.10 e 3.13 (96: 64 do PC e 32 do site). Quebrar de propósito a checagem do estado do
   OAuth, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a limpeza diária, o `HEAD` ou o
   `robots.txt` faz os testes falharem.

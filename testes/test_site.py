@@ -282,7 +282,7 @@ class RelatorioTests(SiteBase):
         self.assertEqual(status, 200)
         self.assertIn(b'"estado": "pronto"', dados)
 
-    def test_um_relatorio_por_vez_por_conta(self):
+    def test_um_relatorio_por_vez_em_cada_sessao(self):
         cookie = self.entrar()
         sessao = self.site.sessoes.obter(_id_da_sessao(cookie))
         sessao.relatorios["parado"] = relatorios.Relatorio(111222333, 30)  # ainda rodando

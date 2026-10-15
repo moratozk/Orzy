@@ -54,7 +54,7 @@ Fica de fora: alterar anúncios, IA, Shopee, cobrança e cadastro com senha (o l
 Limites da primeira versão (propostos, a confirmar):
 - **Uma instância só**: as sessões e os relatórios em andamento ficam na memória do servidor.
 - **Até 300 anúncios por relatório**, com aviso na tela quando passa disso.
-- **Dois relatórios ao mesmo tempo** no servidor inteiro, e um por conta.
+- **Dois relatórios ao mesmo tempo** no servidor inteiro, e um por vez em cada conexão (sessão).
 - **Histórico apagado após 365 dias** (o servidor confere ao ligar e depois uma vez por dia).
 - **Sem refresh token**: quando o login vence (6 horas), a pessoa entra de novo.
 

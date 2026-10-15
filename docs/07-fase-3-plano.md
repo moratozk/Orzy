@@ -90,6 +90,8 @@ dos anúncios. Tokens: só na memória. Dados de compradores: nenhum.
 Antes de abrir ao público: política de privacidade revisada (rascunho em `/privacidade`), canal de contato,
 responsável identificado, e uma conversa com advogado. Não tenho preço confiável de advogado: pedir orçamento.
 
+Ainda não li os termos do Mercado Livre sobre guardar dados de vendedores: as páginas de desenvolvedores falharam no ambiente (15/10/2026). Ler antes de abrir ao público e confirmar se o histórico de 12 meses é permitido.
+
 ## Decisões que o Nicolas precisa tomar
 
 1. Hospedagem: Render (recomendado, ~R$ 37/mês), VPS Hostinger ou Railway.

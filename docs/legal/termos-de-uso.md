@@ -22,8 +22,8 @@ O Orzy se conecta à sua conta de vendedor do Mercado Livre, com permissão só 
 
 O Orzy não altera anúncios, preços nem estoque, não responde perguntas e não mexe em vendas nem em pagamentos.
 
-O Orzy está em **fase de testes**. Nesta versão, cada relatório lê até 300 anúncios e cada conta gera um relatório por
-vez. Funções podem mudar, ficar fora do ar ou ter erros.
+O Orzy está em **fase de testes**. Nesta versão, cada relatório lê até 300 anúncios e cada conexão gera um relatório
+por vez. Funções podem mudar, ficar fora do ar ou ter erros.
 
 ## 2. O Orzy não é o Mercado Livre
 

@@ -23,7 +23,8 @@ estão em [docs/legal/](legal/LEIA-ME.md). A recomendação de hospedagem, com c
 - Para buscadores: descrição da página (o resumo que o Google e o WhatsApp mostram) e `robots.txt`, que deixa os
   robôs só nas páginas públicas, para não ligarem o servidor à toa.
 
-Fica de fora: alterar anúncios, IA, Shopee, cobrança e cadastro com senha (o login é só pelo Mercado Livre).
+Fica de fora: alterar anúncios, a Orzy Intelligence (IA), Shopee, cobrança e cadastro com senha (o login é só pelo
+Mercado Livre). As sugestões do relatório são regras fixas: o site não as chama de IA nem de inteligência artificial.
 
 ## Plano em 5 passos (espera o ok do Nicolas)
 

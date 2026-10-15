@@ -72,5 +72,8 @@ Conectar a conta da Shopee e trazer os mesmos números e sugestões, quando o Me
 
 ## Depois (sem ordem definida ainda)
 
-- **Módulo de IA (opcional, pago):** reescrever título e descrição. Regras de custo em [05-custos.md](05-custos.md).
+- **Orzy Intelligence (o módulo de IA, opcional, pago):** reescrever título e descrição. Regras de custo em
+  [05-custos.md](05-custos.md). Até ela existir, as sugestões do relatório são regras fixas e o site não as chama de
+  IA. Antes de ligar, a Política de Privacidade precisa dizer qual empresa faz a IA, em que país e com quais
+  cláusulas da ANPD.
 - **ERP:** estoque, custo e margem por anúncio, pedidos, contas a pagar e a receber.

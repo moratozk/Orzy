@@ -31,7 +31,7 @@ Nada foi contratado. Detalhes e fontes em [07-fase-3-plano.md](07-fase-3-plano.m
 2. Preferir sempre a opção grátis que resolva.
 3. Hospedagem ou servidor só a partir da fase 3, com o plano de custos aprovado.
 
-## IA (quando existir o módulo)
+## Orzy Intelligence, a IA do Orzy (quando existir o módulo)
 
 - Usar o modelo mais barato que resolva: **Haiku** para triagem e volume, **Sonnet** só para reescrita detalhada.
 - Usar o modo **Batch** quando o resultado não for urgente (sai mais barato).

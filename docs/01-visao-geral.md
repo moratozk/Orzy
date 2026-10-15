@@ -11,8 +11,8 @@ Começa como um MVP de custo zero e, aos poucos, vira um pequeno ERP para a loja
 ## Para quem
 
 - **Usuários:** vendedores do Mercado Livre que querem saber o que mudar nos próprios anúncios.
-- **Quem desenvolve:** Nicolas. Ele não tem conta com anúncios: testa o login com a conta dele e os números
-  com um vendedor que autoriza o app.
+- **Quem desenvolve:** Nicolas. Ele testa com a conta conectada no PC dele e, para ter mais números,
+  com vendedores que autorizem o app.
 - **Ambiente de desenvolvimento:** Windows, Prompt de Comando, Python 3.
 - **Programação:** ele roda os comandos seguindo o passo a passo. Instruções precisam dizer exatamente o que digitar.
 

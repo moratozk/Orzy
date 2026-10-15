@@ -18,12 +18,21 @@ Estimativas de 15/10/2026, com US$ 1 = R$ 5,04 (cotação de 14/10/2026). Os pre
 
 | Opção | R$ por mês (estimativa) |
 |---|---|
-| Render, plano pago de entrada + 1 GB de disco | cerca de R$ 37 (recomendado para a primeira versão) |
+| **Google: Cloud Run + Firestore em São Paulo** (recomendado pela thread "Hospedagem e domínio") | R$ 0 no teste (até 55 horas de servidor ligado no mês); até R$ 0,42 por hora além disso; teto de cerca de R$ 276. A porta de entrada no orzy.com.br pode somar cerca de R$ 92 |
+| Render, plano pago de entrada + 1 GB de disco | cerca de R$ 37 (alternativa com valor fixo) |
 | Hostinger VPS KVM 1 | de cerca de R$ 35 (promoção) a R$ 98 (preço cheio); precisa de alguém que cuide do Linux |
 | Railway, plano Hobby + uso | de cerca de R$ 35 a R$ 100, conforme o uso |
 | Oracle Cloud, Always Free | R$ 0, com riscos a validar (região e máquina ociosa) |
 
 Nada foi contratado. Detalhes e fontes em [07-fase-3-plano.md](07-fase-3-plano.md).
+
+## Fases 4 e 5 (do plano de 15/10/2026)
+
+- **Fase 4 (alertas automáticos):** agendador que busca os números todo dia, banco para os alertas e, se for usado,
+  o aviso por e-mail ou WhatsApp. A Orzy Intelligence cobra por uso (regras abaixo).
+- **Fase 5 (ERP):** banco relacional, como o PostgreSQL, se for o escolhido.
+
+O plano de cada fase traz a estimativa em reais por mês antes de qualquer contratação.
 
 ## Regras para qualquer custo novo
 

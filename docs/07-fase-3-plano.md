@@ -19,12 +19,13 @@ estão em [docs/legal/](legal/LEIA-ME.md). A recomendação de hospedagem, com c
 - Mostra o resultado no navegador (o que mudar em cada anúncio primeiro) e baixa o mesmo CSV do PC. A página diz a
   data e a hora em que os dados foram buscados, como pedem os termos do Mercado Livre (item 5.3).
 - Guarda um histórico dos relatórios, para abrir cada um depois. Dá para apagar tudo com um clique.
-- Mostra a Política de Privacidade e os Termos de Uso de `docs/legal/` (rascunhos), com os dois no rodapé de todas as
-  páginas e o aviso de aceite junto de cada botão Conectar. Tem cabeçalhos de segurança.
+- Mostra a Política de Privacidade e os Termos de Uso de `docs/legal/` (rascunhos), com os dois e o e-mail de contato
+  no rodapé de todas as páginas e o aviso de aceite junto de cada botão Conectar. Tem cabeçalhos de segurança.
 - Para buscadores: descrição da página (o resumo que o Google e o WhatsApp mostram) e `robots.txt`, que deixa os
   robôs só nas páginas públicas, para não ligarem o servidor à toa.
 
-Fica de fora: alterar anúncios, a Orzy Intelligence (IA), Shopee, cobrança e cadastro com senha (o login é só pelo
+Fica de fora (ver o [02-roadmap.md](02-roadmap.md)): alertas automáticos e a Orzy Intelligence (fase 4), custos e
+margem (fase 5), alterar anúncios (fase 6), Shopee (fase 7), cobrança e cadastro com senha (o login é só pelo
 Mercado Livre). As sugestões do relatório são regras fixas: o site não as chama de IA nem de inteligência artificial.
 
 ## Plano em 5 passos (espera o ok do Nicolas)

@@ -7,6 +7,11 @@ com vendedores que autorizem o app.
 Cada fase só começa quando a anterior estiver funcionando com dados reais.
 Antes de escrever código grande numa fase, o plano dela (3 a 6 passos) é mostrado e espera o ok do Nicolas.
 
+Rumo, do Plano de Desenvolvimento do Nicolas (15/10/2026), usado como referência e não como regra ("é só um plano
+inicial"): primeiro o Orzy observa, depois entende e recomenda, e só com autorização do vendedor executa. A ordem das
+fases 4 a 7 saiu desse plano e foi aprovada por ele em 15/10/2026. Texto do plano e comparação com este roadmap em
+`/mnt/project-files/orzy/plano/`.
+
 ## Fase 1 · Painel do Mercado Livre funcionando (concluída em 14/10/2026)
 
 Conectar na conta e gerar o relatório de anúncios ativos com visitas, vendas e conversão,
@@ -53,19 +58,24 @@ de agora, inclusive o da página inicial, é só uma base, nada perto do modelo 
 - [x] Recomendação de hospedagem com custos em reais
 - [ ] Terminar o site base (aprovado em 15/10/2026): segurança das sessões, páginas internas funcionando no
   celular, comparação de relatórios no histórico e histórico no Firestore
+- [ ] Busca pelo título e filtro por situação na tabela "Todos os anúncios" (do plano de 15/10/2026)
 - [ ] Identidade visual: logo, cores e letras (thread "Identidade visual e logo"). Depois que o Nicolas escolher uma
   direção, só a logo e as cores entram no site base
 - [ ] Visual final: refazer as páginas com a identidade escolhida, até um site realmente bonito
 - [ ] Escolher a hospedagem e adaptar o código a ela
-- [ ] Preencher os textos legais (responsável e contato) e, se o Nicolas quiser, revisão de advogado
+- [ ] Antes de abrir ao público: monitoramento do servidor, cópia de segurança do histórico e aviso de falha
+- [ ] Preencher os textos legais (nome e CPF ou CNPJ do responsável e a hospedagem; o e-mail de contato já está) e,
+  se o Nicolas quiser, revisão de advogado
 - [ ] Cadastrar a Redirect URI do site no OrzyApp e lançar, testando primeiro com a conta do Nicolas
-- [ ] Beta fechado com 3 a 5 vendedores
+- [ ] Beta fechado com 3 a 5 vendedores pequenos (dezenas ou centenas de anúncios), contando contas conectadas,
+  relatórios concluídos sem erro e anúncios por conta (só contagens, sem guardar dado novo do vendedor)
 
 - O vendedor entra no orzy.com.br e clica em **Conectar com Mercado Livre**. Ninguém precisa criar app.
 - Um servidor pequeno guarda o Client Secret do app do Orzy. O Secret nunca vai dentro de um programa distribuído.
 - O app "OrzyApp" do teste é o mesmo: ganha o Redirect URI do site e um Client Secret novo, que só o servidor conhece.
 - O relatório e as sugestões aparecem no navegador, no lugar do CSV.
-- Cada relatório fica guardado, para ver se um anúncio melhorou depois de uma mudança. Esse histórico é a base do ERP.
+- Cada relatório fica guardado, para ver se um anúncio melhorou depois de uma mudança. Esse histórico é a base dos
+  alertas da fase 4 e do ERP da fase 5.
 
 Antes de começar, o plano da fase mostra:
 
@@ -74,15 +84,52 @@ Antes de começar, o plano da fase mostra:
 - se o app "OrzyApp" continua na conta do Nicolas ou passa para uma conta de empresa: o Mercado Livre recomenda
   criar o app na conta dona da solução, de preferência de empresa, para evitar problema de transferência depois.
 
-## Fase 4 · Shopee
+## Fase 4 · Alertas automáticos e Orzy Intelligence
 
-Conectar a conta da Shopee e trazer os mesmos números e sugestões, quando o Mercado Livre estiver redondo.
+Do plano do Nicolas (15/10/2026). O Orzy passa a olhar os anúncios sozinho, todo dia, e avisa o que mudou, sem o
+vendedor precisar abrir o site. É o que o plano dele chama de primeira versão útil: conexão, histórico e alertas.
+
+- Guardar no servidor, com criptografia, o acesso renovável (refresh token) de quem ativar os alertas. Hoje o site não
+  guarda, e a Política de Privacidade diz isso: ela muda antes. O refresh token é de uso único, então só um processo
+  por vendedor renova de cada vez, e o novo é salvo antes de qualquer outra coisa.
+- Buscar os números todo dia e registrar as falhas (os termos do Mercado Livre pedem dados atualizados a cada 24 horas)
+- Regras para quedas e oportunidades, comparando períodos equivalentes, sem afirmar a causa
+- Ordenar por impacto e urgência, numa central de alertas no site (aviso por e-mail ou WhatsApp a decidir, com custo)
+- Guardar cada recomendação e o que aconteceu depois; o vendedor marca se ajudou ou não
+- **Orzy Intelligence (o módulo de IA, opcional, pago):** só onde regra não resolve: explicar os achados e sugerir
+  título e descrição. Pedido do Nicolas (15/10/2026): tem de ser muito eficiente e o mais otimizada possível. Regras
+  de custo e de otimização em [05-custos.md](05-custos.md). Até ela existir, as sugestões do relatório são
+  regras fixas e o site não as chama de IA. Antes de ligar, a Política de Privacidade precisa dizer qual empresa faz a
+  IA, em que país e com quais cláusulas da ANPD.
+
+Antes de começar, o plano da fase mostra o custo em reais por mês (agendador, banco e IA).
+
+## Fase 5 · ERP básico: custos e margem
+
+- Produtos ligados aos anúncios, custo de compra, taxas e despesas
+- Margem estimada por anúncio, vendas e faturamento, num painel com menu lateral
+- Alerta de margem: avisar quando uma promoção ou o frete grátis pode comer o lucro
+- "Empresa" com cadastro próprio, se precisar de mais de um usuário ou de mais de uma conta conectada (até lá, o
+  login é só pelo Mercado Livre)
+
+Antes de começar: rever a tecnologia (um framework Python e um banco relacional, como o PostgreSQL), com o motivo e o
+custo em reais.
+
+## Fase 6 · Executar mudanças com aprovação
+
+- O vendedor revisa e aprova cada mudança antes; nada muda sozinho
+- Alterar pelo Orzy o que a API do Mercado Livre deixa (preço, título, descrição e outros), conferindo limites e margem
+- Registrar quem aprovou, quando, o valor antigo e o novo; desfazer quando a API deixar
+- Precisa de permissão de escrita no app (os vendedores autorizam de novo) e de mudança nos Termos e na Política, que
+  hoje dizem que o Orzy só lê a conta
+
+## Fase 7 · Shopee
+
+Conectar a conta da Shopee e trazer os mesmos números, sugestões e alertas, quando o Mercado Livre estiver redondo.
+Era a fase 4 até 15/10/2026; o plano do Nicolas não fala da Shopee.
 
 ## Depois (sem ordem definida ainda)
 
-- **Orzy Intelligence (o módulo de IA, opcional, pago):** reescrever título e descrição. Pedido do Nicolas
-  (15/10/2026): tem de ser muito eficiente e o mais otimizada possível. Regras de custo e de otimização em
-  [05-custos.md](05-custos.md). Até ela existir, as sugestões do relatório são regras fixas e o site não as chama de
-  IA. Antes de ligar, a Política de Privacidade precisa dizer qual empresa faz a IA, em que país e com quais
-  cláusulas da ANPD.
-- **ERP:** estoque, custo e margem por anúncio, pedidos, contas a pagar e a receber.
+- **Resto do ERP:** estoque, pedidos, contas a pagar e a receber.
+- **Planos pagos:** por volume de anúncios, contas conectadas e recursos de IA, depois do beta e com os custos
+  conhecidos.

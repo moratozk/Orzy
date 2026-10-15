@@ -8,9 +8,15 @@ mostra quais anúncios vendem e quais não vendem e sugere o que mudar em cada u
 Hoje roda no PC. Na fase 3 vira um site em **orzy.com.br**, onde o vendedor só clica em "Conectar com Mercado Livre".
 Começa como um MVP de custo zero e, aos poucos, vira um pequeno ERP para a loja.
 
+Rumo (Plano de Desenvolvimento do Nicolas, 15/10/2026): três partes. Acompanhar os anúncios e guardar o histórico;
+achar problemas e oportunidades e recomendar o que fazer, com regras e, depois, com a Orzy Intelligence (a IA do
+Orzy); e o ERP, com custos e margem. Primeiro o Orzy observa, depois entende e recomenda, e só com autorização do
+vendedor executa. A ordem está no [02-roadmap.md](02-roadmap.md).
+
 ## Para quem
 
-- **Usuários:** vendedores do Mercado Livre que querem saber o que mudar nos próprios anúncios.
+- **Usuários:** vendedores do Mercado Livre que querem saber o que mudar nos próprios anúncios. Primeiro, pequenos
+  vendedores, com dezenas ou centenas de anúncios.
 - **Quem desenvolve:** Nicolas. Ele testa com a conta conectada no PC dele e, para ter mais números,
   com vendedores que autorizem o app.
 - **Ambiente de desenvolvimento:** Windows, Prompt de Comando, Python 3.
@@ -33,4 +39,4 @@ Começa como um MVP de custo zero e, aos poucos, vira um pequeno ERP para a loja
 |---|---|
 | `painel-ml/` | O programa do Mercado Livre. O passo a passo de uso está em `painel-ml/LEIA-ME.md`. |
 | `testes/` | Mercado Livre simulado e testes automáticos. Não precisa de conta. |
-| `docs/01` a `docs/06` | Plano do projeto. Para continuar o trabalho, comece pelo [06-status.md](06-status.md). |
+| `docs/01` a `docs/07` | Plano do projeto. Para continuar o trabalho, comece pelo [06-status.md](06-status.md). |

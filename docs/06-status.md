@@ -38,6 +38,12 @@ Ordem decidida pelo Nicolas em 15/10/2026: primeiro o **site base**, funcionando
 realmente bonito, com a identidade visual (logo, cores e letras) da thread "Identidade visual e logo". O visual
 de agora, inclusive o da página inicial, é só uma base, nada perto do modelo final: não vale gastar tempo polindo.
 
+Em 15/10/2026 o Nicolas mandou o Plano de Desenvolvimento 1.0 (ERP, IA proativa e Mercado Livre) e disse que é "só
+um plano inicial": serve de referência, não de regra. Ele aprovou a nova ordem depois do site: fase 4 alertas
+automáticos e Orzy Intelligence, fase 5 ERP básico (custos e margem), fase 6 executar mudanças com aprovação e
+fase 7 Shopee (era a fase 4). A fase 3 ganhou busca e filtro na tabela de anúncios, cuidados antes de abrir ao
+público e contagens no beta. Texto do plano e comparação em `/mnt/project-files/orzy/plano/`.
+
 ## Decisões de 14/10/2026
 
 - O Orzy é para outros vendedores analisarem os próprios anúncios.
@@ -77,7 +83,8 @@ de agora, inclusive o da página inicial, é só uma base, nada perto do modelo 
   - `docs/07-fase-3-plano.md`: plano em 5 passos, custos em reais, LGPD e decisões que faltam;
   - página inicial (aprovada como primeiro protótipo em 15/10/2026), com o aviso de aceite dos Termos junto de cada
     botão Conectar;
-  - `/privacidade` e `/termos` mostram os textos de `docs/legal/`, com links no rodapé de todas as páginas;
+  - `/privacidade` e `/termos` mostram os textos de `docs/legal/`, com links e o e-mail de contato
+    (orzy.suporte@gmail.com) no rodapé de todas as páginas;
   - o resultado mostra a data e a hora em que os dados foram buscados (termos do Mercado Livre, item 5.3);
   - o histórico com mais de 365 dias é apagado todo dia, e não só quando o servidor liga;
   - descrição da página para o Google e o WhatsApp, `robots.txt` que deixa os robôs só nas páginas públicas,
@@ -96,7 +103,7 @@ de agora, inclusive o da página inicial, é só uma base, nada perto do modelo 
   com título que tem HTML (sai escapado), CSV com BOM, isolamento entre contas, token vencido sem renovação
   escondida, pedido de outro site recusado, um relatório por vez em cada conexão, histórico com confirmação para
   apagar, cabeçalhos de segurança, uma ida e volta por HTTP real, página inicial com e sem login, textos legais
-  lidos de `docs/legal/` (com escape), rodapé com os dois textos, data do relatório em horário de Brasília, limpeza
+  lidos de `docs/legal/` (com escape), rodapé com os dois textos e o e-mail, data do relatório em horário de Brasília, limpeza
   diária do histórico que continua depois de um erro, `HEAD` sem corpo, `robots.txt`, descrição para buscadores,
   sessão sem login que some em 15 minutos e o limite delas, código novo da sessão depois do login e conexão parada
   que fecha sem erro.

@@ -37,6 +37,9 @@ O site usa as mesmas regras e a mesma coleta do PC (`painel-ml/analise.py` e `pa
 | `PORT` ou `ORZY_PORTA` | não | Porta (padrão: 8000). A hospedagem costuma definir `PORT` |
 | `ORZY_MAX_ANUNCIOS` | não | Quantos anúncios um relatório lê, no máximo (padrão: 300) |
 | `ORZY_HORAS_SESSAO` | não | Depois de quantas horas sem uso a sessão some (padrão: 8) |
+| `ORZY_HISTORICO` | não | Onde fica o histórico: `sqlite` (padrão, no arquivo de `ORZY_BANCO`) ou `firestore` (Google Cloud, para o Cloud Run) |
+| `ORZY_FIRESTORE_PROJETO` | com `firestore` | Id do projeto no Google Cloud |
+| `ORZY_FIRESTORE_URL` | não | Só para testar com o emulador do Firestore (ex.: `http://127.0.0.1:8080/v1`). Sem ela, usa o Firestore de verdade, com o login da conta de serviço do Cloud Run |
 
 O redirect do login é sempre `ORZY_URL_BASE` + `/retorno`. Ele precisa ser igual ao cadastrado no app do Mercado Livre.
 
@@ -56,13 +59,18 @@ Sem `ORZY_ML_CLIENT_ID`, `ORZY_ML_CLIENT_SECRET` ou `ORZY_URL_BASE`, o programa 
 python -m unittest discover -s testes -v
 ```
 
-Os testes do site (`testes/test_site.py`) usam o Mercado Livre simulado e não precisam de conta nem de internet.
+Os testes do site (`testes/test_site.py`) usam o Mercado Livre e o Firestore simulados e não precisam de conta nem
+de internet.
 
 ## Antes de publicar
 
 - **Uma instância só.** Sessões e relatórios em andamento ficam na memória do servidor.
-- **Banco em disco persistente** (`ORZY_BANCO`). No Cloud Run, a hospedagem recomendada, o disco apaga a cada
-  reinício: o histórico vai para o Firestore, uma das mudanças listadas em `docs/07-fase-3-plano.md`.
+- **Histórico que não some.** No Render ou num servidor próprio, `ORZY_BANCO` num disco persistente. No Cloud Run,
+  a hospedagem recomendada, o disco apaga a cada reinício: use `ORZY_HISTORICO=firestore`. Nesse caso, no Google
+  Cloud: banco do Firestore no modo nativo em São Paulo (`southamerica-east1`); a conta de serviço do Cloud Run com
+  o papel Cloud Datastore User (`roles/datastore.user`); política de TTL no campo `expira_em` da coleção
+  `relatorios` (apaga o que passou de 365 dias, além da limpeza diária do servidor); e, de preferência, os campos
+  `anuncios` e `resumo` sem índice (a busca não usa esses campos, e cada índice custa uma escrita a mais).
 - **HTTPS na frente** (a hospedagem resolve), e a Redirect URI do site cadastrada no app.
 - **Política de Privacidade e Termos de Uso completos** (rascunhos em `docs/legal/`; o que falta preencher está em
   `docs/legal/LEIA-ME.md`) e canal de contato definido.
@@ -77,6 +85,7 @@ Os testes do site (`testes/test_site.py`) usam o Mercado Livre simulado e não p
 | `sessoes.py` | Sessões na memória, com prazo (8 horas com login, 15 minutos sem), limite para as sem login e código novo depois do login |
 | `relatorios.py` | Gera o relatório em segundo plano e guarda o andamento |
 | `historico.py` | Histórico em SQLite: salvar, listar, ver, achar o anterior, apagar e apagar os antigos |
+| `historico_firestore.py` | O mesmo histórico, no Firestore (Cloud Run), pela API REST e com o login do servidor de metadados |
 | `comparacao.py` | O que mudou entre dois relatórios do histórico (mesma conta e mesmo período) |
 | `paginas.py` | HTML das páginas (todo texto do Mercado Livre passa por escape) |
 | `legal.py` | Mostra a Política de Privacidade e os Termos de Uso a partir do Markdown de `docs/legal/`, com escape |

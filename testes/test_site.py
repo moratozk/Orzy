@@ -13,7 +13,7 @@ import sys
 import tempfile
 import threading
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from unittest import mock
@@ -26,8 +26,9 @@ sys.path.insert(0, str(PASTA_RAIZ / "painel-ml"))
 
 import analise  # noqa: E402
 import ml_api  # noqa: E402
+from firestore_simulado import FirestoreSimulado  # noqa: E402
 from ml_simulado import MLSimulado, performance  # noqa: E402
-from web import app, comparacao, configuracao, login, relatorios, servidor, sessoes  # noqa: E402
+from web import app, comparacao, configuracao, historico_firestore, login, relatorios, servidor, sessoes  # noqa: E402
 from web.historico import Historico  # noqa: E402
 
 URL = "https://orzy.test"
@@ -137,6 +138,21 @@ class ConfiguracaoTests(unittest.TestCase):
         self.assertEqual(config.porta, 9000)
         self.assertEqual(config.max_anuncios, 300)
         self.assertTrue(config.seguro)
+        self.assertEqual(config.historico, "sqlite")
+        self.assertIsInstance(app.abrir_historico(config), Historico)
+
+    def test_historico_no_firestore_pede_o_projeto(self):
+        env = {"ORZY_ML_CLIENT_ID": "1", "ORZY_ML_CLIENT_SECRET": "s", "ORZY_URL_BASE": "https://orzy.test",
+               "ORZY_HISTORICO": "firestore"}
+        with self.assertRaises(configuracao.ErroConfiguracao) as contexto:
+            configuracao.carregar(env)
+        self.assertIn("ORZY_FIRESTORE_PROJETO", str(contexto.exception))
+        with self.assertRaises(configuracao.ErroConfiguracao):
+            configuracao.carregar(dict(env, ORZY_HISTORICO="mysql"))
+        config = configuracao.carregar(dict(env, ORZY_FIRESTORE_PROJETO="orzy-teste"))
+        self.assertIsInstance(app.abrir_historico(config), historico_firestore.HistoricoFirestore)
+        emulador = configuracao.carregar(dict(env, ORZY_FIRESTORE_PROJETO="p", ORZY_FIRESTORE_URL="http://127.0.0.1:1"))
+        self.assertEqual(app.abrir_historico(emulador)._token(), "", "o emulador não pede login")
 
 
 class SessoesTests(unittest.TestCase):
@@ -173,12 +189,15 @@ class SessoesTests(unittest.TestCase):
             self.assertIn(sessao.id, guardadas._dados)
 
 
-class HistoricoTests(unittest.TestCase):
+class ContratoDoHistorico:
+    """O que o histórico faz, guardado no SQLite ou no Firestore: as duas classes filhas rodam estes mesmos testes."""
+
+    def novo_historico(self, agora):
+        raise NotImplementedError
+
     def setUp(self):
-        temp = tempfile.TemporaryDirectory()
-        self.addCleanup(temp.cleanup)
-        self.caminho = Path(temp.name) / "orzy.db"
-        self.historico = Historico(str(self.caminho))
+        self.relogio = datetime(2026, 10, 15, 12, 0, tzinfo=timezone.utc)
+        self.historico = self.novo_historico(agora=lambda: self.relogio)
         self.linhas = [
             {"id": "MLB1", "titulo": "Anúncio A", "visitas": 5, "vendas": 0, "situacao": "VISITA SEM VENDA",
              "pontos": 3},
@@ -186,39 +205,121 @@ class HistoricoTests(unittest.TestCase):
              "pontos": 0},
         ]
 
+    def salvar(self, conta, dias, minutos_depois=1):
+        self.relogio += timedelta(minutes=minutos_depois)
+        return self.historico.salvar(conta, dias, self.linhas)
+
     def test_salva_lista_ve_e_apaga_so_da_conta_pedida(self):
-        id_ = self.historico.salvar(111, 30, self.linhas)
-        self.historico.salvar(222, 30, self.linhas)
+        id_ = self.salvar(111, 30)
+        self.salvar(222, 30)
         lista = self.historico.listar(111)
         self.assertEqual([r["id"] for r in lista], [id_])
+        self.assertEqual((lista[0]["criado_em"], lista[0]["dias"], lista[0]["total"]),
+                         ("2026-10-15T12:01:00+00:00", 30, 2))
+        self.assertEqual(list(lista[0]["resumo"]), analise.ORDEM, "as situações na ordem de prioridade")
         self.assertEqual(lista[0]["resumo"]["VISITA SEM VENDA"], 1)
         dados = self.historico.ver(111, id_)
-        self.assertEqual([a["id"] for a in dados["anuncios"]], ["MLB1", "MLB2"])
+        self.assertEqual(dados["anuncios"], self.linhas, "volta igual, com acento e números vazios")
         self.assertIsNone(self.historico.ver(222, id_), "outra conta não pode ver o relatório")
+        self.assertIsNone(self.historico.ver(111, id_ + 999_999), "relatório que não existe")
         self.assertEqual(self.historico.apagar(111), 1)
         self.assertEqual(self.historico.listar(111), [])
         self.assertEqual(len(self.historico.listar(222)), 1)
 
+    def test_lista_do_mais_novo_para_o_mais_velho(self):
+        ids = [self.salvar(111, 30) for _ in range(3)]
+        self.assertEqual([r["id"] for r in self.historico.listar(111)], ids[::-1])
+
     def test_apaga_relatorios_mais_velhos_que_o_prazo(self):
-        self.historico.salvar(111, 30, self.linhas)
-        con = sqlite3.connect(self.caminho)
-        with con:
-            con.execute("UPDATE relatorios SET criado_em = '2000-01-01T00:00:00+00:00'")
-        con.close()
-        self.historico.salvar(111, 30, self.linhas)
+        self.salvar(111, 30)
+        self.salvar(111, 30, minutos_depois=366 * 24 * 60)  # um ano e um dia depois
         self.assertEqual(self.historico.apagar_antigos(365), 1)
         self.assertEqual(len(self.historico.listar(111)), 1)
 
     def test_anterior_e_o_ultimo_da_mesma_conta_e_do_mesmo_periodo(self):
-        primeiro = self.historico.salvar(111, 30, self.linhas)
-        self.historico.salvar(111, 60, self.linhas)  # outro período: os números não são comparáveis
-        self.historico.salvar(222, 30, self.linhas)  # outra conta: nunca
-        segundo = self.historico.salvar(111, 30, self.linhas)
-        terceiro = self.historico.salvar(111, 30, self.linhas)
+        primeiro = self.salvar(111, 30)
+        self.salvar(111, 60)  # outro período: os números não são comparáveis
+        self.salvar(222, 30)  # outra conta: nunca
+        segundo = self.salvar(111, 30)
+        terceiro = self.salvar(111, 30)
         self.assertIsNone(self.historico.id_do_anterior(111, primeiro))
         self.assertEqual(self.historico.id_do_anterior(111, segundo), primeiro)
         self.assertEqual(self.historico.id_do_anterior(111, terceiro), segundo)
         self.assertIsNone(self.historico.id_do_anterior(222, terceiro), "o relatório pedido não é da conta 222")
+
+
+class HistoricoTests(ContratoDoHistorico, unittest.TestCase):
+    """No SQLite (PC e Render)."""
+
+    def novo_historico(self, agora):
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        return Historico(str(Path(temp.name) / "orzy.db"), agora=agora)
+
+
+class HistoricoFirestoreTests(ContratoDoHistorico, unittest.TestCase):
+    """No Firestore (Cloud Run), contra o Firestore simulado."""
+
+    def novo_historico(self, agora):
+        self.fs = FirestoreSimulado()
+        self.fs.iniciar()
+        self.addCleanup(self.fs.parar)
+        return historico_firestore.HistoricoFirestore(
+            self.fs.projeto, url=self.fs.url_firestore,
+            token=historico_firestore.TokenDoMetadata(self.fs.url_token), agora=agora)
+
+    def test_guarda_o_prazo_para_o_ttl_e_um_numero_que_cresce_com_o_tempo(self):
+        id_ = self.salvar(111, 30)
+        self.assertEqual(id_, int(datetime(2026, 10, 15, 12, 1, tzinfo=timezone.utc).timestamp()) * 1_000_000)
+        campos = self.fs.documentos[f"{self.fs.prefixo}/relatorios/{id_}"]["fields"]
+        self.assertEqual(campos["expira_em"], {"timestampValue": "2027-10-15T12:01:00Z"}, "365 dias depois")
+        self.assertEqual(campos["ml_user_id"], {"integerValue": "111"})
+        self.historico.listar(111)
+        self.historico.ver(111, id_)
+        self.assertEqual(self.fs.tokens_entregues, 1, "o token do servidor de metadados é reaproveitado")
+
+    def test_token_e_pedido_de_novo_perto_de_vencer(self):
+        relogio = [0.0]
+        token = historico_firestore.TokenDoMetadata(self.fs.url_token, agora=lambda: relogio[0])
+        self.assertEqual(token(), "token-1")
+        relogio[0] = 3000
+        self.assertEqual(token(), "token-1")
+        relogio[0] = 3540  # a menos de um minuto dos 3599 segundos de validade
+        self.assertEqual(token(), "token-2")
+
+    def test_dois_relatorios_no_mesmo_instante_ganham_numeros_diferentes(self):
+        primeiro = self.salvar(111, 30)
+        segundo = self.salvar(111, 30, minutos_depois=0)
+        self.assertEqual(segundo, primeiro + 1)
+        self.assertEqual(self.historico.id_do_anterior(111, segundo), primeiro)
+
+    def test_sem_o_login_do_servidor_de_metadados_vira_erro_claro(self):
+        historico = historico_firestore.HistoricoFirestore(
+            self.fs.projeto, url=self.fs.url_firestore,
+            token=historico_firestore.TokenDoMetadata(self.fs.url_token + "-errado"))
+        with self.assertRaises(historico_firestore.ErroFirestore) as contexto:
+            historico.listar(111)
+        self.assertIn("servidor de metadados", str(contexto.exception))
+
+    def test_firestore_fora_do_ar_vira_erro_claro(self):
+        self.fs.falhar = [503]
+        with self.assertRaises(historico_firestore.ErroFirestore) as contexto:
+            self.historico.listar(111)
+        self.assertEqual(contexto.exception.status, 503)
+        self.assertIn("503 UNAVAILABLE", str(contexto.exception))
+
+    def test_apaga_em_lotes_do_tamanho_que_o_firestore_aceita(self):
+        for _ in range(5):
+            self.salvar(111, 30)
+        self.fs.max_escritas = 2  # um Firestore que aceita só 2 escritas por commit
+        with mock.patch.object(historico_firestore, "POR_COMMIT", 2):
+            self.assertEqual(self.historico.apagar(111), 5)
+        self.assertEqual(self.historico.listar(111), [])
+        self.assertEqual(sum(1 for _, caminho in self.fs.chamadas if caminho.endswith(":commit")), 3)
+
+    def test_le_data_com_fracao_de_segundo(self):
+        self.assertEqual(historico_firestore._do_valor({"timestampValue": "2026-10-15T18:00:00.123456Z"}),
+                         "2026-10-15T18:00:00+00:00")
 
 
 class ComparacaoTests(unittest.TestCase):
@@ -480,6 +581,41 @@ class HistoricoSiteTests(SiteBase):
         self.assertNotIn("<script>x", texto)
         self.assertIn("<li>Capa &lt;b&gt;antiga&lt;/b&gt; para celular</li>", texto)
         self.assertIn('Suporte de mesa<br><span class="ajuda">Novo neste relatório</span>', texto)
+
+
+class HistoricoSiteFirestoreTests(HistoricoSiteTests):
+    """As mesmas páginas do histórico (herdadas), com o histórico guardado no Firestore simulado."""
+
+    def setUp(self):
+        super().setUp()
+        self.fs = FirestoreSimulado()
+        self.fs.iniciar()
+        self.addCleanup(self.fs.parar)
+        historico = historico_firestore.HistoricoFirestore(
+            self.fs.projeto, url=self.fs.url_firestore, token=historico_firestore.TokenDoMetadata(self.fs.url_token))
+        self.site = app.Site(configuracao_de_teste(self.pasta / "orzy.db"), historico=historico,
+                             pasta_legal=self.pasta_legal)
+
+    def test_relatorio_sai_mesmo_com_o_firestore_fora_do_ar(self):
+        self.semear()
+        cookie = self.entrar()
+        self.fs.falhar = [503]
+        with self.assertLogs(level="ERROR"):
+            relatorio = self.esperar(cookie, self.gerar(cookie))
+        self.assertEqual(relatorio.estado, relatorios.PRONTO)
+        self.assertIsNone(relatorio.historico_id, "não foi guardado")
+        status, _, pagina = self.pedir("GET", f"/relatorio/{relatorio.id}", cookie=cookie)
+        self.assertEqual(status, 200)
+        self.assertNotIn(b"#mudancas", pagina)
+
+    def test_historico_fora_do_ar_mostra_pagina_de_erro(self):
+        cookie = self.entrar()
+        self.fs.falhar = [503]
+        with self.assertLogs(level="ERROR"):
+            status, cabecalhos, pagina = self.pedir("GET", "/historico", cookie=cookie)
+        self.assertEqual(status, 500)
+        self.assertIn("Algo deu errado do nosso lado".encode("utf-8"), pagina)
+        self.assertIn(("X-Frame-Options", "DENY"), cabecalhos, "a página de erro também leva os cabeçalhos")
 
 
 class PaginasSimplesTests(SiteBase):

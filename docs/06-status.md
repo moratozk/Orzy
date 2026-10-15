@@ -8,8 +8,8 @@ Plano e custos em [07-fase-3-plano.md](07-fase-3-plano.md). Nada vai ao ar antes
 
 - **Site: código e login**: `web/`, `testes/test_site.py`, `docs/07-fase-3-plano.md`, este arquivo e o PR #5 (rascunho).
 - **Página inicial do site**: entregou a página, que já está no PR #5. Thread encerrada.
-- **Privacidade e termos**: `docs/legal/` (PR #6, #7 e #8, mesclados em 15/10/2026). O site mostra esses textos em `/privacidade`
-  e `/termos`.
+- **Privacidade e termos**: `docs/legal/` (PR #6, #7, #8 e #9, mesclados em 15/10/2026). O site mostra esses textos
+  em `/privacidade` e `/termos`.
 - **Identidade visual e logo**: três direções de logo, com cores e letras, em `/mnt/project-files/orzy/marca/`.
   Depois que o Nicolas escolher uma, o visual final entra no site pela thread do código.
 - **Hospedagem e domínio**: hospedagem, deploy, DNS, Redirect URI e Client Secret do OrzyApp. A recomendação está em
@@ -95,6 +95,9 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
   - comparação de relatórios: cada relatório do histórico mostra o que mudou desde o anterior da mesma conta e do
     mesmo período (situação, visitas, vendas e título de cada anúncio, os novos e os que saíram), sem dizer por
     quê, e a página do resultado leva até ela;
+  - histórico no Firestore, para o Cloud Run (`ORZY_HISTORICO=firestore`), testado contra um Firestore simulado;
+    o SQLite continua no PC e no Render;
+  - um erro inesperado (o histórico fora do ar, por exemplo) mostra uma página de erro, em vez de cortar a conexão;
   - recomendação de hospedagem com custos em reais (thread "Hospedagem e domínio").
 
 ## O que foi testado (com dados simulados)
@@ -107,16 +110,23 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
   com título que tem HTML (sai escapado), CSV com BOM, isolamento entre contas, token vencido sem renovação
   escondida, pedido de outro site recusado, um relatório por vez em cada conexão, histórico com confirmação para
   apagar, cabeçalhos de segurança, uma ida e volta por HTTP real, página inicial com e sem login, textos legais
-  lidos de `docs/legal/` (com escape), rodapé com os dois textos e o e-mail, data do relatório em horário de Brasília, limpeza
-  diária do histórico que continua depois de um erro, `HEAD` sem corpo, `robots.txt`, descrição para buscadores,
-  sessão sem login que some em 15 minutos e o limite delas, código novo da sessão depois do login e conexão parada
-  que fecha sem erro, comparação com o relatório anterior do mesmo período (nunca de outra conta nem de outro
-  período, com escape dos títulos antigos). No navegador (Chromium), com login e relatórios simulados: as páginas internas (formulário,
-  andamento, resultado e histórico) de 320 a 1280 px, nos dois temas, sem nada empurrando a página para o lado.
-- Testes rodados no Python 3.10 e 3.13 (103: 64 do PC e 39 do site). Quebrar de propósito a checagem do estado do
+  lidos de `docs/legal/` (com escape), rodapé com os dois textos e o e-mail, data do relatório em horário de
+  Brasília, limpeza diária do histórico que continua depois de um erro, `HEAD` sem corpo, `robots.txt`, descrição
+  para buscadores, sessão sem login que some em 15 minutos e o limite delas, código novo da sessão depois do login,
+  conexão parada que fecha sem erro e comparação com o relatório anterior do mesmo período (nunca de outra conta
+  nem de outro período, com escape dos títulos antigos).
+- Histórico no Firestore, contra um Firestore simulado: os mesmos testes do SQLite (cada conta só vê o próprio,
+  ordem, prazo de 365 dias, relatório anterior), o prazo para o TTL, o token do servidor de metadados reaproveitado
+  e pedido de novo perto de vencer (ou sem resposta), dois relatórios no mesmo instante, apagar em lotes, o
+  Firestore fora do ar (o relatório sai mesmo assim, e a página do histórico mostra um erro claro) e as páginas do
+  histórico e da comparação com ele.
+- No navegador (Chromium), com login e relatórios simulados: as páginas internas (formulário, andamento, resultado
+  e histórico) de 320 a 1280 px, nos dois temas, sem nada empurrando a página para o lado.
+- Testes rodados no Python 3.10 e 3.13 (121: 64 do PC e 57 do site). Quebrar de propósito a checagem do estado do
   OAuth, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a limpeza diária, o `HEAD`, o
   `robots.txt`, o prazo e o limite das sessões sem login, o código novo depois do login, o tempo máximo de uma
-  conexão, a escolha do relatório anterior ou o escape dos títulos antigos faz os testes falharem.
+  conexão, a escolha do relatório anterior, o escape dos títulos antigos, a página de erro ou, no Firestore, a
+  conta, o período, o prazo do TTL, o token, os lotes de apagar ou a ordem do resumo faz os testes falharem.
 
 ## Validado com dados reais (14 e 15/10/2026)
 
@@ -141,9 +151,10 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
 2. Nicolas: quando puder, baixar o ZIP de novo do GitHub. Para não fazer login de novo, copiar o `config.json` e o
    `tokens.json` da pasta `painel-ml` usada por último para a nova. Rodar `python meus_anuncios.py` e mandar o
    texto do que apareceu no cmd (sem print). Ver a linha "Ficha técnica: X de Y campos".
-3. Site: terminar o site base, nos passos que o Nicolas aprovou em 15/10/2026 (segurança, páginas internas no
-   celular, comparação de relatórios e histórico no Firestore). Depois, o visual final com a identidade que ele
-   escolher. As mudanças da hospedagem entram quando ela for escolhida.
+3. Site: os passos que o Nicolas aprovou em 15/10/2026 estão prontos (segurança, páginas internas no celular,
+   comparação de relatórios e histórico no Firestore). Próximo, do roadmap: busca e filtro na tabela de anúncios.
+   Depois, o visual final com a identidade que ele escolher. As mudanças da hospedagem entram quando ela for
+   escolhida.
 
 Na conversa, mandar só o texto do que apareceu no cmd, sem print. **Nunca** mandar o Client Secret,
 o `config.json`, o `tokens.json` nem o banco do site.

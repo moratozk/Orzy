@@ -8,9 +8,9 @@ from urllib.parse import urlsplit
 
 from . import configuracao
 from .app import Site
+from .historico import DIAS_DE_HISTORICO
 
 LIMITE_CORPO = 10_000  # bytes: formulário pequeno, nada mais que isso é necessário
-DIAS_DE_HISTORICO = 365  # relatórios mais antigos são apagados ao ligar o servidor e depois uma vez por dia
 UM_DIA = 24 * 3600
 
 

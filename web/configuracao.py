@@ -22,6 +22,9 @@ class Configuracao:
     porta: int
     max_anuncios: int  # quantos anúncios um relatório lê, no máximo
     horas_sessao: int  # a sessão some depois de tanto tempo sem uso
+    historico: str = "sqlite"  # onde fica o histórico: "sqlite" (arquivo) ou "firestore" (Google Cloud)
+    firestore_projeto: str = ""  # id do projeto no Google Cloud, quando o histórico fica no Firestore
+    firestore_url: str = ""  # só para o emulador do Firestore; vazio é o Firestore de verdade
 
     @property
     def redirect_uri(self):
@@ -55,6 +58,13 @@ def carregar(ambiente=None):
         raise ErroConfiguracao("ORZY_URL_BASE precisa começar com https:// "
                                "(para testar aqui, use http://127.0.0.1 com a porta)")
 
+    historico = (env.get("ORZY_HISTORICO") or "sqlite").strip().lower()
+    if historico not in ("sqlite", "firestore"):
+        raise ErroConfiguracao("ORZY_HISTORICO precisa ser sqlite ou firestore")
+    if historico == "firestore" and not env.get("ORZY_FIRESTORE_PROJETO", "").strip():
+        raise ErroConfiguracao("com ORZY_HISTORICO=firestore, falta ORZY_FIRESTORE_PROJETO "
+                               "(o id do projeto no Google Cloud)")
+
     return Configuracao(
         client_id=env["ORZY_ML_CLIENT_ID"],
         client_secret=env["ORZY_ML_CLIENT_SECRET"],
@@ -64,4 +74,7 @@ def carregar(ambiente=None):
         porta=int(env.get("PORT") or env.get("ORZY_PORTA") or 8000),
         max_anuncios=int(env.get("ORZY_MAX_ANUNCIOS") or 300),
         horas_sessao=int(env.get("ORZY_HORAS_SESSAO") or 8),
+        historico=historico,
+        firestore_projeto=env.get("ORZY_FIRESTORE_PROJETO", "").strip(),
+        firestore_url=env.get("ORZY_FIRESTORE_URL", "").strip(),
     )

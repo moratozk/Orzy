@@ -9,6 +9,7 @@ from urllib.parse import parse_qs, urlsplit
 import meus_anuncios
 from . import comparacao, legal, login, paginas
 from .historico import Historico
+from .historico_firestore import URL_FIRESTORE, HistoricoFirestore
 from .relatorios import ERRO, GERANDO, PRONTO, ErroRelatorio, Relatorios
 from .sessoes import Sessoes
 
@@ -20,6 +21,8 @@ ARQUIVOS_STATIC = {"estilo.css": "text/css; charset=utf-8",
 # Robôs de busca ficam nas páginas públicas: as outras pedem login e só ligariam o servidor à toa.
 ROBOTS = "User-agent: *\nDisallow: /entrar\nDisallow: /retorno\nDisallow: /relatorio\nDisallow: /historico\n"
 
+ERRO_INTERNO = "Algo deu errado do nosso lado. Tente de novo em alguns minutos."
+
 CABECALHOS_DE_SEGURANCA = [
     ("X-Content-Type-Options", "nosniff"),
     ("X-Frame-Options", "DENY"),
@@ -29,16 +32,32 @@ CABECALHOS_DE_SEGURANCA = [
 ]
 
 
+def abrir_historico(config):
+    """SQLite no PC e no Render; Firestore no Cloud Run, onde o disco apaga a cada reinício."""
+    if config.historico == "firestore":
+        if config.firestore_url:  # o emulador do Firestore não pede login
+            return HistoricoFirestore(config.firestore_projeto, url=config.firestore_url, token=lambda: "")
+        return HistoricoFirestore(config.firestore_projeto, url=URL_FIRESTORE)
+    return Historico(config.banco)
+
+
 class Site:
     def __init__(self, config, historico=None, sessoes=None, relatorios=None, pasta_legal=legal.PASTA_LEGAL):
         self.config = config
-        self.historico = historico or Historico(config.banco)
+        self.historico = historico or abrir_historico(config)
         self.sessoes = sessoes or Sessoes(horas=config.horas_sessao)
         self.relatorios = relatorios or Relatorios(self.historico, config.max_anuncios)
         self.pasta_legal = pasta_legal
 
     def tratar(self, metodo, endereco, cabecalhos, corpo=b""):
-        status, extras, dados = self._rotear(metodo, urlsplit(endereco), cabecalhos, corpo)
+        url = urlsplit(endereco)
+        try:
+            status, extras, dados = self._rotear(metodo, url, cabecalhos, corpo)
+        except Exception:
+            # Um problema inesperado (o histórico fora do ar, por exemplo) vira página de erro, não conexão
+            # cortada. No registro vai só o caminho: a busca pode ter o código do Mercado Livre.
+            logging.exception("Erro inesperado em %s %s", metodo, url.path)
+            status, extras, dados = self._html(500, paginas.erro(ERRO_INTERNO))
         return status, extras + CABECALHOS_DE_SEGURANCA, dados
 
     # ------------------------------------------------------------ rotas

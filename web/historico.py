@@ -11,6 +11,8 @@ from datetime import datetime, timedelta, timezone
 
 import analise
 
+DIAS_DE_HISTORICO = 365  # relatórios mais antigos são apagados ao ligar o servidor e depois uma vez por dia
+
 ESQUEMA = """
 CREATE TABLE IF NOT EXISTS relatorios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,12 +38,13 @@ COLUNAS_ANUNCIO = ("id", "titulo", "visitas", "vendas", "situacao", "pontos")
 
 
 def _agora():
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(timezone.utc)
 
 
 class Historico:
-    def __init__(self, caminho):
+    def __init__(self, caminho, agora=_agora):
         self.caminho = caminho
+        self._agora = agora
         with self._conectar() as con:
             con.executescript(ESQUEMA)
 
@@ -59,7 +62,8 @@ class Historico:
         with self._conectar() as con:
             cursor = con.execute(
                 "INSERT INTO relatorios (ml_user_id, criado_em, dias, total, resumo) VALUES (?, ?, ?, ?, ?)",
-                (int(ml_user_id), _agora(), dias, len(linhas), json.dumps(resumo)))
+                (int(ml_user_id), self._agora().isoformat(timespec="seconds"), dias, len(linhas),
+                 json.dumps(resumo)))
             id_ = cursor.lastrowid
             con.executemany(
                 "INSERT INTO anuncios (relatorio_id, item_id, titulo, visitas, vendas, situacao, pontos) "
@@ -112,7 +116,7 @@ class Historico:
             return con.execute("DELETE FROM relatorios WHERE ml_user_id = ?", (int(ml_user_id),)).rowcount
 
     def apagar_antigos(self, dias):
-        limite = (datetime.now(timezone.utc) - timedelta(days=dias)).isoformat(timespec="seconds")
+        limite = (self._agora() - timedelta(days=dias)).isoformat(timespec="seconds")
         with self._conectar() as con:
             con.execute("DELETE FROM anuncios WHERE relatorio_id IN "
                         "(SELECT id FROM relatorios WHERE criado_em < ?)", (limite,))

@@ -25,7 +25,6 @@ linha horizontal nem imagem. Os links para `politica-de-privacidade.md` e `termo
 |---|---|---|
 | Nome completo do responsável, ou nome da empresa | Política (item 1) e Termos (início) | É quem responde pelos dados perante a lei. Precisa ser maior de 18 anos (ou emancipado), ou uma empresa. |
 | CPF ou CNPJ | Política (item 1) e Termos (início) | Enquanto o Orzy for grátis, a LGPD pede a identificação do responsável; publicar o CPF não parece obrigatório (confirmar com advogado). Quando cobrar, o Decreto nº 7.962/2013 exige CPF ou CNPJ e endereço no site. |
-| E-mail de contato | Política (itens 1 e 8) e Termos (item 14) | É o canal da LGPD. Alguém precisa ler: pedidos sobre dados têm resposta em até 15 dias. Pode ser um Gmail só do Orzy, de graça. |
 | Data de publicação | Os dois | Muda a cada versão. |
 
 Já perguntado no thread "Site: código e login": se haverá revisão de advogado antes do público.
@@ -149,6 +148,12 @@ comunicar incidentes (art. 14). Os textos prometem o prazo normal de 15 dias, qu
   um modelo).
 - Plano para incidente: avisar a ANPD e os vendedores em até 3 dias úteis (6 para agente de pequeno porte) quando houver
   risco ou dano relevante, e guardar o registro de todo incidente por 5 anos (Resolução CD/ANPD nº 15/2024).
+- **E-mail de contato:** orzy.suporte@gmail.com, criado pelo Nicolas em 15/10/2026. É um Gmail comum: segue os termos de
+  consumidor do Google, sem contrato de tratamento de dados nem as cláusulas-padrão da ANPD, e as mensagens podem ficar
+  em servidores fora do Brasil (a Política diz isso nos itens 4 e 5). O Google diz que pode pôr essas cláusulas nos
+  contratos de serviços comerciais, como o Google Workspace, que é pago. Antes de abrir ao público, confirmar com o
+  advogado se a transferência das mensagens se apoia no art. 33, IX, da LGPD (necessária para responder a quem
+  escreveu); se não, trocar por um e-mail com contrato de dados e ajustar os itens 4 e 5 da Política.
 - Ler o e-mail de contato e responder pedidos em até 15 dias; apagar mensagens resolvidas há mais de 12 meses.
 - Reler os termos do Mercado Livre e conferir se mudaram.
 
@@ -199,4 +204,7 @@ Consultadas em 15/10/2026.
   thread de hospedagem)
 - [Onde o Cloud Logging guarda os registros](https://docs.cloud.google.com/logging/docs/region-support)
 - [Transparência nas transferências pela Resolução CD/ANPD nº 19/2024](https://www.mattosfilho.com.br/en/unico/regulates-international-data-transfers/)
+- [Política de Privacidade do Google: "servidores em todo o mundo"](https://policies.google.com/privacy?hl=pt-BR)
+  e [estruturas de transferência de dados](https://policies.google.com/privacy/frameworks?hl=pt-BR) (cláusulas da
+  ANPD nos contratos de serviços comerciais, como o Google Workspace)
 - [Declaração de Privacidade do Mercado Livre](https://www.mercadolivre.com.br/privacidade/declaracao-privacidade)

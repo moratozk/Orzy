@@ -114,11 +114,10 @@ O Orzy pode mudar estes termos. A versão nova é publicada no site pelo menos 1
 desta página. Como você aceita os termos toda vez que conecta, a versão nova vale a partir da primeira conexão depois
 dessa data. Se não concordar, pare de usar o Orzy e apague o seu histórico.
 
-## 13. Lei e foro
+## 13. Lei aplicável
 
-Estes termos seguem as leis do Brasil. Se você for consumidor, pode levar qualquer questão ao foro da sua cidade. Nos
-outros casos, fica escolhido o foro da comarca de [PREENCHER: cidade e estado do responsável]. Antes de ir à Justiça,
-se puder, fale com o Orzy: a maioria dos problemas se resolve por e-mail.
+Estes termos seguem as leis do Brasil. Se você for consumidor, pode levar qualquer questão à Justiça da sua cidade.
+Antes de ir à Justiça, se puder, fale com o Orzy: a maioria dos problemas se resolve por e-mail.
 
 ## 14. Contato
 

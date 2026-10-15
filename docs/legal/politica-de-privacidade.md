@@ -29,10 +29,10 @@ de Proteção de Dados Pessoais (LGPD, Lei nº 13.709/2018).
 O responsável pelos seus dados (o "controlador", na LGPD) é [PREENCHER: nome completo ou razão social],
 [PREENCHER: CPF ou CNPJ], que oferece o Orzy.
 
-Para qualquer assunto sobre os seus dados, escreva para **[PREENCHER: e-mail de contato]**. Esse é o canal de
-comunicação do Orzy com você. Como agente de tratamento de pequeno porte, o Orzy não é obrigado a indicar um
-encarregado de dados (Resolução CD/ANPD nº 2/2022, art. 11): quem responde a esse e-mail é o próprio responsável.
-[CONFIRMAR: vale para pessoa física e para empresa pequena; ver o LEIA-ME.]
+Para qualquer assunto sobre os seus dados, escreva para **[orzy.suporte@gmail.com](mailto:orzy.suporte@gmail.com)**.
+Esse é o canal de comunicação do Orzy com você. Como agente de tratamento de pequeno porte, o Orzy não é obrigado a
+indicar um encarregado de dados (Resolução CD/ANPD nº 2/2022, art. 11): quem responde a esse e-mail é o próprio
+responsável. [CONFIRMAR: vale para pessoa física e para empresa pequena; ver o LEIA-ME.]
 
 ## 2. Quais dados o Orzy usa e para que
 
@@ -111,6 +111,7 @@ isso só para responder.
   [Declaração de Privacidade](https://www.mercadolivre.com.br/privacidade/declaracao-privacidade).
 - **Hospedagem:** [PREENCHER: nome da empresa de hospedagem], que roda o servidor e guarda o histórico em nome do Orzy,
   seguindo as instruções do Orzy.
+- **E-mail:** o Gmail, do Google, guarda as mensagens que você manda para o Orzy e as respostas.
 - **Autoridades:** quando a lei ou uma ordem judicial obrigar.
 
 O Orzy não vende, não aluga e não passa os seus dados para mais ninguém, e não usa os seus dados para propaganda.
@@ -119,6 +120,10 @@ O Orzy não vende, não aluga e não passa os seus dados para mais ninguém, e n
 
 Os dados ficam em servidores [PREENCHER: no Brasil, ou o país da hospedagem]. [CONFIRMAR: se for fora do Brasil, usar
 o texto do LEIA-ME para o país escolhido.]
+
+Já as mensagens que você manda por e-mail ficam no Gmail, em servidores do Google que podem estar fora do Brasil, como
+nos Estados Unidos. Elas servem só para responder você e seguem os prazos do item 6. [CONFIRMAR: base dessa
+transferência; ver o LEIA-ME.]
 
 ## 6. Por quanto tempo o Orzy guarda cada dado
 
@@ -173,8 +178,9 @@ Como fazer:
   [CONFIRMAR: caminho do menu no Mercado Livre]. Trocar a senha do Mercado Livre também encerra o acesso.
   O histórico já guardado continua no Orzy até completar 12 meses; para apagar antes, entre de novo no site e use
   **Apagar meu histórico**, ou escreva para o e-mail abaixo.
-- **Por e-mail:** escreva para [PREENCHER: e-mail de contato]. O Orzy responde em até 15 dias. Para proteger você,
-  o Orzy pode pedir que confirme que é o dono da conta, por exemplo entrando no Orzy com o Mercado Livre.
+- **Por e-mail:** escreva para [orzy.suporte@gmail.com](mailto:orzy.suporte@gmail.com). O Orzy responde em até 15 dias.
+  Para proteger você, o Orzy pode pedir que confirme que é o dono da conta, por exemplo entrando no Orzy com o Mercado
+  Livre.
 
 Você também pode reclamar à ANPD, em [gov.br/anpd](https://www.gov.br/anpd).
 

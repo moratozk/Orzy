@@ -33,7 +33,12 @@ Nada foi contratado. Detalhes e fontes em [07-fase-3-plano.md](07-fase-3-plano.m
 
 ## Orzy Intelligence, a IA do Orzy (quando existir o módulo)
 
+Pedido do Nicolas (15/10/2026): a IA tem de ser "muito, mas muito eficiente" e o mais otimizada possível.
+
 - Usar o modelo mais barato que resolva: **Haiku** para triagem e volume, **Sonnet** só para reescrita detalhada.
 - Usar o modo **Batch** quando o resultado não for urgente (sai mais barato).
 - Antes de rodar, mostrar o custo estimado da execução, com os preços do dia em anthropic.com/pricing.
+- Mandar só o que a IA precisa: os anúncios que as regras já apontaram e só os campos usados.
+- Não repetir trabalho: guardar a resposta e só pedir de novo quando o anúncio mudar. As instruções que se repetem
+  em todo pedido vão com cache de prompt, que cobra menos pela parte repetida.
 - Enquanto o módulo não existe, o Claude analisa os relatórios que o Nicolas colar na conversa, sem custo extra.

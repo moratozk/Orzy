@@ -53,7 +53,8 @@ de agora, inclusive o da página inicial, é só uma base, nada perto do modelo 
 - [x] Recomendação de hospedagem com custos em reais
 - [ ] Terminar o site base (aprovado em 15/10/2026): segurança das sessões, páginas internas funcionando no
   celular, comparação de relatórios no histórico e histórico no Firestore
-- [ ] Identidade visual: logo, cores e letras (thread "Identidade visual e logo"; o Nicolas escolhe uma direção)
+- [ ] Identidade visual: logo, cores e letras (thread "Identidade visual e logo"). Depois que o Nicolas escolher uma
+  direção, só a logo e as cores entram no site base
 - [ ] Visual final: refazer as páginas com a identidade escolhida, até um site realmente bonito
 - [ ] Escolher a hospedagem e adaptar o código a ela
 - [ ] Preencher os textos legais (responsável e contato) e, se o Nicolas quiser, revisão de advogado
@@ -79,7 +80,8 @@ Conectar a conta da Shopee e trazer os mesmos números e sugestões, quando o Me
 
 ## Depois (sem ordem definida ainda)
 
-- **Orzy Intelligence (o módulo de IA, opcional, pago):** reescrever título e descrição. Regras de custo em
+- **Orzy Intelligence (o módulo de IA, opcional, pago):** reescrever título e descrição. Pedido do Nicolas
+  (15/10/2026): tem de ser muito eficiente e o mais otimizada possível. Regras de custo e de otimização em
   [05-custos.md](05-custos.md). Até ela existir, as sugestões do relatório são regras fixas e o site não as chama de
   IA. Antes de ligar, a Política de Privacidade precisa dizer qual empresa faz a IA, em que país e com quais
   cláusulas da ANPD.

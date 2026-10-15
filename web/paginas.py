@@ -9,6 +9,7 @@ BRASILIA = timezone(timedelta(hours=-3))  # o Brasil não tem horário de verão
 # Resumo que o Google e o WhatsApp mostram junto do link.
 DESCRICAO = ("Conecte sua conta do Mercado Livre e veja quais anúncios vendem, quais não vendem e o que mudar em "
              "cada um. Sem instalar nada.")
+CONTATO = "orzy.suporte@gmail.com"  # o mesmo da Política de Privacidade e dos Termos de Uso
 MAX_PRIORIDADES = 10
 SUGESTOES_POR_ANUNCIO = 3
 
@@ -63,7 +64,8 @@ def _pagina(titulo, corpo, logado=False, script=None, atualizar=None):
 <header class="topo"><a class="marca" href="/">Orzy</a><nav>{menu}</nav></header>
 <main>{corpo}</main>
 <footer class="rodape">O Orzy só lê os seus anúncios: não altera nada na sua conta.
-Não somos o Mercado Livre. <a href="/privacidade">Política de Privacidade</a> · <a href="/termos">Termos de Uso</a></footer>
+Não somos o Mercado Livre. <a href="/privacidade">Política de Privacidade</a> · <a href="/termos">Termos de Uso</a>
+· Contato: <a href="mailto:{CONTATO}">{CONTATO}</a></footer>
 {arquivo_js}
 </body>
 </html>

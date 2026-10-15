@@ -440,7 +440,8 @@ class PaginasSimplesTests(SiteBase):
             "que continua na linha de baixo.\n\n"
             "- um item que segue\n  na linha seguinte;\n- leia a [Política](politica-de-privacidade.md).\n\n"
             "| Dado | Prazo |\n|---|---|\n| Código de renovação | Não é guardado |\n\n"
-            "[clique](javascript:alert(1)) ou veja a [ANPD](https://www.gov.br/anpd).\n",
+            "[clique](javascript:alert(1)) ou veja a [ANPD](https://www.gov.br/anpd).\n\n"
+            "Escreva para [o Orzy](mailto:orzy.suporte@gmail.com).\n",
             encoding="utf-8")
         status, _, pagina = self.pedir("GET", "/termos", origem=None)
         texto = pagina.decode("utf-8")
@@ -456,6 +457,7 @@ class PaginasSimplesTests(SiteBase):
         self.assertIn("<td>Código de renovação</td><td>Não é guardado</td>", texto)
         self.assertNotIn("javascript:", texto)
         self.assertIn('<a href="https://www.gov.br/anpd"', texto)
+        self.assertIn('<a href="mailto:orzy.suporte@gmail.com">o Orzy</a>', texto, "e-mail sem abrir aba vazia")
 
     def test_rodape_tem_os_dois_textos_em_todas_as_paginas(self):
         cookie = self.entrar()
@@ -465,6 +467,7 @@ class PaginasSimplesTests(SiteBase):
             rodape = texto[texto.index('<footer class="rodape">'):]
             self.assertIn('href="/privacidade"', rodape, caminho)
             self.assertIn('href="/termos"', rodape, caminho)
+            self.assertIn('href="mailto:orzy.suporte@gmail.com"', rodape, caminho)
 
     def test_inicio_sem_login_leva_ao_mercado_livre(self):
         status, _, pagina = self.pedir("GET", "/", origem=None)

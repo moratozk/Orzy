@@ -32,8 +32,10 @@ def carregar(rota, pasta=PASTA_LEGAL):
 
 def _link(achado):
     texto, destino = achado.group(1), achado.group(2)  # os dois já passaram por escape
-    if destino.startswith(("https://", "http://", "mailto:")):
+    if destino.startswith(("https://", "http://")):
         return f'<a href="{destino}" target="_blank" rel="noopener noreferrer">{texto}</a>'
+    if destino.startswith("mailto:"):  # abre o e-mail sem deixar uma aba vazia para trás
+        return f'<a href="{destino}">{texto}</a>'
     arquivo, _, ancora = destino.partition("#")
     rota = ROTAS.get(arquivo)
     if rota is None:

@@ -18,6 +18,7 @@ class Manipulador(BaseHTTPRequestHandler):
     site = None  # preenchido em main()
     server_version = "Orzy"
     sys_version = ""
+    timeout = 60  # segundos: uma conexão parada é fechada e não prende uma thread do servidor
 
     def do_GET(self):
         self._responder("GET")
@@ -46,7 +47,9 @@ class Manipulador(BaseHTTPRequestHandler):
 
     def log_message(self, formato, *args):
         # Só o caminho, sem a busca: o ?code=... do Mercado Livre não pode ir para o registro do servidor.
-        logging.info("%s %s", self.command, urlsplit(self.path).path)
+        # Num erro antes de ler o pedido (uma conexão parada, por exemplo), ainda não há comando nem caminho.
+        caminho = urlsplit(getattr(self, "path", "") or "").path
+        logging.info("%s %s", getattr(self, "command", None) or "-", caminho or "-")
 
 
 def apagar_antigos_todo_dia(historico, parar, intervalo=UM_DIA):

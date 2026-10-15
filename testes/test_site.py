@@ -91,7 +91,7 @@ class SiteBase(unittest.TestCase):
         status, cabecalhos, _ = self.site.tratar("GET", endereco[len(URL):], {"Cookie": cookie})
         self.assertEqual(status, 302, "o retorno deveria levar para /relatorio")
         self.assertEqual(_cab(cabecalhos, "Location"), "/relatorio")
-        return cookie
+        return _cab(cabecalhos, "Set-Cookie").split(";")[0]  # o login troca o código da sessão
 
     def gerar(self, cookie, dias=30):
         status, cabecalhos, _ = self.site.tratar("POST", "/relatorio/gerar",
@@ -144,12 +144,33 @@ class SessoesTests(unittest.TestCase):
         relogio = [1000.0]
         guardadas = sessoes.Sessoes(horas=1, agora=lambda: relogio[0])
         sessao = guardadas.criar()
+        sessao.cliente = object()  # já entrou com o Mercado Livre
         relogio[0] += 3000
         self.assertIsNotNone(guardadas.obter(sessao.id))  # o uso renova o prazo
         relogio[0] += 3000
         self.assertIsNotNone(guardadas.obter(sessao.id))
         relogio[0] += 3601 * 2
         self.assertIsNone(guardadas.obter(sessao.id))
+
+    def test_sessao_sem_login_some_em_15_minutos_e_tem_limite(self):
+        relogio = [1000.0]
+        guardadas = sessoes.Sessoes(horas=8, agora=lambda: relogio[0], max_pendentes=3)
+        logada = guardadas.criar()
+        logada.cliente = object()
+        pendente = guardadas.criar()
+        relogio[0] += 15 * 60 + 1
+        self.assertIsNone(guardadas.obter(pendente.id), "quem não voltou do Mercado Livre sai em 15 minutos")
+        self.assertIsNotNone(guardadas.obter(logada.id))
+
+        primeiras = []
+        for _ in range(3):
+            relogio[0] += 1
+            primeiras.append(guardadas.criar())
+        relogio[0] += 1
+        nova = guardadas.criar()
+        self.assertNotIn(primeiras[0].id, guardadas._dados, "no limite, sai a sessão sem login mais antiga")
+        for sessao in (*primeiras[1:], nova, logada):
+            self.assertIn(sessao.id, guardadas._dados)
 
 
 class HistoricoTests(unittest.TestCase):
@@ -226,6 +247,20 @@ class LoginTests(SiteBase):
         self.assertFalse(ml_api.ARQ_TOKENS.exists(), "o login do site não pode ir para o disco")
         self.assertFalse(ml_api.ARQ_CONFIG.exists())
         self.assertNotIn(sessao.cliente.tokens["access_token"], cookie)
+
+    def test_login_troca_o_codigo_da_sessao(self):
+        status, cabecalhos, _ = self.pedir("GET", "/entrar", origem=None)
+        antes = _cab(cabecalhos, "Set-Cookie").split(";")[0]
+        endereco = self.ml.autorizar(_cab(cabecalhos, "Location"))
+        status, cabecalhos, _ = self.pedir("GET", endereco[len(URL):], cookie=antes, origem=None)
+        self.assertEqual((status, _cab(cabecalhos, "Location")), (302, "/relatorio"))
+        novo_cookie = _cab(cabecalhos, "Set-Cookie")
+        for atributo in ("HttpOnly", "SameSite=Lax", "Secure", "Max-Age=28800", "Path=/"):
+            self.assertIn(atributo, novo_cookie)
+        depois = novo_cookie.split(";")[0]
+        self.assertNotEqual(antes, depois)
+        self.assertEqual(self.pedir("GET", "/relatorio", cookie=antes)[0], 302, "o código de antes do login não entra")
+        self.assertEqual(self.pedir("GET", "/relatorio", cookie=depois)[0], 200)
 
     def test_sem_login_nao_ve_relatorio(self):
         status, cabecalhos, _ = self.pedir("GET", "/relatorio")
@@ -493,6 +528,27 @@ class ServidorTests(SiteBase):
         self.assertEqual(resposta.status, 403)
         resposta.read()
         conexao.close()
+
+
+class ConexaoParadaTests(SiteBase):
+    def test_conexao_parada_e_fechada_sem_erro(self):
+        self.assertTrue(0 < servidor.Manipulador.timeout <= 120, "o servidor de verdade tem tempo máximo por conexão")
+        manipulador = type("ManipuladorTeste", (servidor.Manipulador,), {"site": self.site, "timeout": 0.3})
+        http_server = ThreadingHTTPServer(("127.0.0.1", 0), manipulador)
+        erros = []
+        http_server.handle_error = lambda pedido, endereco: erros.append(sys.exc_info()[1])
+        threading.Thread(target=http_server.serve_forever, daemon=True).start()
+        self.addCleanup(http_server.server_close)
+        self.addCleanup(http_server.shutdown)
+        porta = http_server.server_address[1]
+
+        with socket.create_connection(("127.0.0.1", porta), timeout=10) as s:
+            self.assertEqual(s.recv(1), b"", "o servidor fecha a conexão que não manda nada")
+        conexao = http.client.HTTPConnection("127.0.0.1", porta, timeout=10)
+        conexao.request("GET", "/saude")
+        self.assertEqual(conexao.getresponse().status, 200, "e continua atendendo")
+        conexao.close()
+        self.assertEqual(erros, [])
 
 
 class LimpezaDoHistoricoTests(unittest.TestCase):

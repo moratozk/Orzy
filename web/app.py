@@ -95,7 +95,11 @@ class Site:
             sessao.cliente, sessao.usuario = login.concluir(self.config, sessao, parametros)
         except login.ErroLoginSite as e:
             return self._html(400, paginas.erro(str(e)))
-        return self._redirect("/relatorio")
+        # Código novo depois do login: quem soubesse o código de antes (o do /entrar) não entra na conta.
+        sessao = self.sessoes.trocar_id(sessao.id)
+        if sessao is None:  # a pessoa saiu (em outra aba) enquanto o login terminava
+            return self._redirect("/")
+        return self._redirect("/relatorio", extras=[self._cookie(sessao.id, self.config.horas_sessao * 3600)])
 
     def _sair(self, cabecalhos):
         if not self._origem_ok(cabecalhos):

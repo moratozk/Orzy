@@ -29,13 +29,16 @@ PASTA_PAINEL = PASTA_TESTES.parent / "painel-ml"
 sys.path.insert(0, str(PASTA_PAINEL))
 sys.path.insert(0, str(PASTA_TESTES))
 
+import analise  # noqa: E402
 import conectar  # noqa: E402
 import meus_anuncios  # noqa: E402
 import ml_api  # noqa: E402
-from ml_simulado import MLSimulado  # noqa: E402
+from ml_simulado import ATRIBUTOS_PADRAO, MLSimulado, performance  # noqa: E402
 
 CLIENT_ID = "1234567890"
 SECRET = "segredo-de-teste"
+
+TITULO_BOM = "Fone de Ouvido Bluetooth Sem Fio Marca Teste Modelo X1 Preto"  # 60 caracteres
 
 
 class Base(unittest.TestCase):
@@ -366,7 +369,8 @@ class TestRelatorio(Base):
 
         linhas = self.ler_csv()
         self.assertEqual(list(linhas[0].keys()), ["id", "titulo", "preco", "estoque", "visitas_30d", "vendas_30d",
-                                                  "conversao_%", "situacao", "o_que_olhar", "link"])
+                                                  "conversao_%", "situacao", "o_que_olhar", "o_que_mudar",
+                                                  "qualidade_ml", "link"])
         por_id = {l["id"]: l for l in linhas}
         self.assertNotIn("MLB700", por_id, "anúncio pausado não entra")
         self.assertEqual([l["id"] for l in linhas], ["MLB100", "MLB200", "MLB300", "MLB400", "MLB500", "MLB600"])
@@ -385,6 +389,10 @@ class TestRelatorio(Base):
         self.assertEqual(por_id["MLB500"]["conversao_%"], "5,0")
         self.assertEqual(por_id["MLB600"]["visitas_30d"], "?")
         self.assertTrue(por_id["MLB100"]["link"].startswith("https://"))
+        self.assertTrue(por_id["MLB100"]["o_que_mudar"].startswith("1) Título curto (12 de 60 caracteres)"))
+        self.assertEqual(por_id["MLB100"]["qualidade_ml"], "ainda sem nota")
+        self.assertIn("O Mercado Livre ainda não tem nota para nenhum dos anúncios (resposta: Not found item "
+                      "performance)", saida)
 
         self.assertIn("Comece por estes", saida)
         self.assertIn("Os que mais vendem", saida)
@@ -483,6 +491,272 @@ class TestRelatorio(Base):
         self.assertIn("python conectar.py", saida)
 
 
+    def test_sugestoes_e_nota_do_ml_no_relatorio(self):
+        ml = self.ml
+        ml.adicionar_item("MLB100", "Fone Bluetooth", visitas=500, fotos=1, frete_gratis=False,
+                          ficha={"BRAND": "Genérica", "LINE": None, "WITH_BLUETOOTH": "Sim"},
+                          qualidade=performance("MLB100", 40, "Bad", "Básica", [
+                              ("FREE_SHIPPING", "HAS_FREE_SHIPPING",
+                               "Ofereça frete grátis para que seu anúncio seja mais competitivo")]))
+        ml.adicionar_item("MLB200", TITULO_BOM, visitas=10,
+                          qualidade=performance("MLB200", 95, "Good", "Profissional"))
+        codigo, saida = self.rodar_relatorio()
+        self.assertEqual(codigo, 0, saida)
+
+        por_id = {l["id"]: l for l in self.ler_csv()}
+        mudar = por_id["MLB100"]["o_que_mudar"]
+        self.assertIn("Coloque pelo menos 3 fotos", mudar)
+        self.assertIn("(tem 1)", mudar)
+        self.assertIn("Faltam: Modelo (obrigatório)", mudar)
+        self.assertIn("(3 de 4 campos preenchidos)", mudar)
+        self.assertIn("Título curto (14 de 60 caracteres)", mudar)
+        self.assertIn("Ofereça frete grátis para que seu anúncio seja mais competitivo (pedido do ML).", mudar)
+        self.assertNotIn("se a margem permitir", mudar, "o pedido do ML substitui a regra igual do Orzy")
+        self.assertIn("Teste o Premium", mudar)
+        self.assertEqual(por_id["MLB100"]["qualidade_ml"], "Básica (40/100)")
+        self.assertEqual(por_id["MLB200"]["o_que_mudar"], "Nenhuma mudança sugerida")
+        self.assertEqual(por_id["MLB200"]["qualidade_ml"], "Profissional (95/100)")
+
+        self.assertIn("Comece por estes (o que mudar em cada um):", saida)
+        self.assertIn("Nota de qualidade do Mercado Livre: Básica (40/100)", saida)
+        self.assertIn("      - Coloque pelo menos 3 fotos", saida)
+        self.assertIn("(mais 2 no CSV)", saida)
+        self.assertIn("      - Quase ninguém encontra", saida, "sem sugestão, mostra o que olhar na situação")
+
+        campos = [c[2]["attributes"].split(",") for c in self.ml.chamadas if c[1] == "/items"][0]
+        for campo in ("title", "pictures", "attributes", "shipping", "listing_type_id", "category_id", "tags"):
+            self.assertIn(campo, campos)
+
+    def test_quem_tem_mais_para_mudar_vem_antes_na_mesma_situacao(self):
+        self.ml.adicionar_item("MLB300", TITULO_BOM, visitas=20)                       # nada a mudar
+        self.ml.adicionar_item("MLB400", "Fone", visitas=5, fotos=1, ficha={})          # muito a mudar
+        codigo, saida = self.rodar_relatorio()
+        self.assertEqual(codigo, 0, saida)
+        linhas = self.ler_csv()
+        self.assertEqual([l["situacao"] for l in linhas], ["POUCA VISITA", "POUCA VISITA"])
+        self.assertEqual([l["id"] for l in linhas], ["MLB400", "MLB300"])
+
+    def test_ficha_tecnica_lida_uma_vez_por_categoria(self):
+        for n in range(3):
+            self.ml.adicionar_item(f"MLB10{n}", TITULO_BOM, visitas=50)
+        self.ml.adicionar_item("MLB200", TITULO_BOM, visitas=50, categoria="MLB2000")
+        codigo, saida = self.rodar_relatorio()
+        self.assertEqual(codigo, 0, saida)
+        caminhos = [c[1] for c in self.ml.chamadas]
+        for categoria in ("MLB1000", "MLB2000"):
+            self.assertEqual(caminhos.count(f"/categories/{categoria}"), 1)
+            self.assertEqual(caminhos.count(f"/categories/{categoria}/attributes"), 1)
+
+    def test_titulo_curto_usa_o_limite_da_categoria(self):
+        self.ml.adicionar_categoria("MLB3000", max_titulo=120)
+        self.ml.adicionar_item("MLB100", TITULO_BOM, visitas=50, categoria="MLB3000")
+        codigo, saida = self.rodar_relatorio()
+        self.assertEqual(codigo, 0, saida)
+        self.assertIn("Título curto (60 de 120 caracteres)", self.ler_csv()[0]["o_que_mudar"])
+
+    def test_sem_permissao_para_a_nota_de_qualidade(self):
+        self.montar_loja()
+        self.ml.erros_por_rota["/item/"] = 403
+        codigo, saida = self.rodar_relatorio()
+        self.assertEqual(codigo, 0, saida)
+        self.assertIn("Não consegui ler a nota de qualidade de 6 anúncio(s)", saida)
+        self.assertIn("Sem permissão", saida)
+        linhas = self.ler_csv()
+        self.assertEqual(len(linhas), 6)
+        self.assertTrue(all(l["qualidade_ml"] == "?" for l in linhas))
+        self.assertEqual(sum(1 for c in self.ml.chamadas if c[1].startswith("/item/")), 1,
+                         "sem permissão vale para todos: para de perguntar no primeiro")
+
+    def test_login_recusado_na_nota_de_qualidade_nao_perde_o_relatorio(self):
+        # A documentação diz que a nota devolve 401 quando quem pergunta não é o dono do anúncio.
+        self.montar_loja()
+        antigo = self.ler_tokens()["refresh_token"]
+        self.ml.erros_por_rota["/item/"] = 401
+        codigo, saida = self.rodar_relatorio()
+        self.assertEqual(codigo, 0, saida)
+        self.assertIn("Não consegui ler a nota de qualidade de 6 anúncio(s)", saida)
+        self.assertEqual(len(self.ler_csv()), 6)
+        novo = self.ler_tokens()["refresh_token"]
+        self.assertNotEqual(novo, antigo)
+        self.assertTrue(self.ml.refresh_ainda_vale(novo), "o refresh token novo foi salvo")
+
+    def test_nota_que_falha_nos_3_primeiros_para_de_perguntar(self):
+        self.montar_loja()
+        self.ml.erros_por_rota["/item/"] = 500
+        codigo, saida = self.rodar_relatorio()
+        self.assertEqual(codigo, 0, saida)
+        self.assertIn("Não consegui ler a nota de qualidade de 6 anúncio(s)", saida)
+        self.assertEqual(len(self.ler_csv()), 6)
+        tentativas = sum(1 for c in self.ml.chamadas if c[1].startswith("/item/"))
+        self.assertEqual(tentativas, 3 * 4, "3 anúncios, 4 tentativas cada")
+
+    def test_erro_na_ficha_tecnica_nao_para_o_relatorio(self):
+        self.ml.adicionar_item("MLB100", "Fone sem fio", visitas=50, fotos=1, ficha={})
+        self.ml.erros_por_rota["/categories/"] = 500
+        codigo, saida = self.rodar_relatorio()
+        self.assertEqual(codigo, 0, saida)
+        self.assertIn("Não consegui ler a ficha técnica de 1 categoria(s)", saida)
+        mudar = self.ler_csv()[0]["o_que_mudar"]
+        self.assertIn("Coloque pelo menos 3 fotos", mudar)
+        self.assertNotIn("ficha técnica", mudar)
+
+
+class TestAnalise(unittest.TestCase):
+    """As regras do analise.py, sem Mercado Livre nenhum: só os dados do anúncio."""
+
+    def temas(self, sugestoes):
+        return [s["tema"] for s in sugestoes]
+
+    def test_titulo_bom_nao_tem_sugestao(self):
+        self.assertEqual(analise.analisar_titulo({"title": TITULO_BOM}), [])
+
+    def test_titulo_curto(self):
+        sugestoes = analise.analisar_titulo({"title": "Fone sem fio"})
+        self.assertEqual(self.temas(sugestoes), ["titulo_tamanho"])
+        self.assertIn("12 de 60 caracteres", sugestoes[0]["texto"])
+        self.assertEqual(analise.analisar_titulo({"title": "Fone de Ouvido Bluetooth Sem Fio Marca Teste"}), [],
+                         "44 caracteres já usam bem o limite de 60")
+
+    def test_palavras_que_o_ml_pede_para_tirar_do_titulo(self):
+        sugestoes = analise.analisar_titulo({"title": "Fone Bluetooth PROMOCAO Frete Gratis 50% OFF Lacrado X1"})
+        self.assertEqual(self.temas(sugestoes), ["titulo_palavras"])
+        texto = sugestoes[0]["texto"]
+        for palavra in ("frete grátis", "promoção", "lacrado", "% OFF"):
+            self.assertIn(palavra, texto)
+
+    def test_estoque_no_titulo_pode_moderar(self):
+        sugestoes = analise.analisar_titulo({"title": "Fone de Ouvido Bluetooth Sem Fio Pronta Entrega"})
+        self.assertEqual(sugestoes[0]["tema"], "titulo_estoque")
+        self.assertEqual(sugestoes[0]["peso"], analise.ALTA)
+        self.assertIn("moderar", sugestoes[0]["texto"])
+
+    def test_titulo_sem_falso_alarme(self):
+        for titulo in ("Termômetro Digital -50°C a 300°C Cozinha + Sonda (Preto) 1/2",
+                       "Camiseta 100% Algodão USB-C Descontinuado Ofertante 2x Kit"):
+            self.assertEqual(analise.analisar_titulo({"title": titulo}), [], titulo)
+
+    def test_simbolos_e_emojis_no_titulo(self):
+        sugestoes = analise.analisar_titulo({"title": "Fone de Ouvido Bluetooth!!! Sem Fio ★ Top *Original*"})
+        self.assertEqual(self.temas(sugestoes), ["titulo_simbolos"])
+        self.assertIn("(! ★ *)", sugestoes[0]["texto"])
+
+    def test_poucas_fotos(self):
+        sugestoes = analise.analisar_fotos({"pictures": [{"max_size": "1200x1200"}]})
+        self.assertEqual(self.temas(sugestoes), ["fotos_quantidade"])
+        self.assertEqual(sugestoes[0]["peso"], analise.ALTA)
+        self.assertIn("pelo menos 3 fotos", sugestoes[0]["texto"])
+        self.assertIn("(tem 1)", sugestoes[0]["texto"])
+
+    def test_fotos_pequenas_ficam_sem_zoom(self):
+        tres = [{"max_size": "500x500"}, {"max_size": "1200x900"}, {"max_size": "800x800"}]
+        sugestoes = analise.analisar_fotos({"pictures": tres})
+        self.assertEqual(self.temas(sugestoes), ["fotos_tamanho"])
+        self.assertIn("2 de 3 fotos têm até 800 px de largura e ficam sem zoom", sugestoes[0]["texto"])
+        duas = analise.analisar_fotos({"pictures": [{"max_size": "640x480"}] * 2})
+        self.assertIn("As 2 fotos têm até 800 px", duas[-1]["texto"])
+        uma = analise.analisar_fotos({"pictures": [{"max_size": "640x480"}]})
+        self.assertIn("A foto tem até 800 px de largura e fica sem zoom", uma[-1]["texto"])
+        self.assertEqual(analise.analisar_fotos({"pictures": [{"max_size": "1200x1200"}] * 3}), [])
+        self.assertEqual(analise.analisar_fotos({"pictures": [{"id": "1"}] * 3}), [], "sem tamanho, não julga")
+        self.assertEqual(analise.analisar_fotos({}), [], "sem o campo de fotos, não julga")
+
+    def ficha(self, **valores):
+        return [{"id": campo, "value_id": "-1" if valor is None else "1", "value_name": valor}
+                for campo, valor in valores.items()]
+
+    def test_ficha_tecnica_sem_campo_obrigatorio(self):
+        item = {"attributes": self.ficha(BRAND="Genérica", LINE=None)}  # LINE marcada como "não se aplica"
+        sugestoes = analise.analisar_ficha(item, ATRIBUTOS_PADRAO)
+        self.assertEqual(len(sugestoes), 1)
+        self.assertEqual(sugestoes[0]["peso"], analise.ALTA)
+        self.assertIn("(2 de 4 campos preenchidos)", sugestoes[0]["texto"])
+        self.assertIn("Faltam: Modelo (obrigatório), Com Bluetooth.", sugestoes[0]["texto"])
+
+    def test_ficha_tecnica_pouco_preenchida(self):
+        campos = [{"id": "BRAND", "name": "Marca", "tags": {"required": True}}] + [
+            {"id": f"C{n}", "name": f"Campo {n}", "tags": {}} for n in range(1, 8)]
+        pouco = analise.analisar_ficha({"attributes": self.ficha(BRAND="X")}, campos)
+        self.assertEqual(pouco[0]["peso"], analise.MEDIA)
+        self.assertIn("Faltam: Campo 1, Campo 2, Campo 3, Campo 4, Campo 5 e mais 2.", pouco[0]["texto"])
+        quase = analise.analisar_ficha({"attributes": self.ficha(BRAND="X", C1="a", C2="b", C3="c", C4="d")}, campos)
+        self.assertEqual(quase[0]["peso"], analise.BAIXA)
+        completa = self.ficha(BRAND="X", **{f"C{n}": "v" for n in range(1, 8)})
+        self.assertEqual(analise.analisar_ficha({"attributes": completa}, campos), [])
+
+    def test_ficha_marcada_incompleta_pelo_ml(self):
+        sugestoes = analise.analisar_ficha({"tags": ["incomplete_technical_specs"]}, None)
+        self.assertEqual(sugestoes[0]["peso"], analise.ALTA)
+        self.assertIn("marcou a ficha técnica", sugestoes[0]["texto"])
+        self.assertEqual(analise.analisar_ficha({"tags": []}, None), [], "sem a categoria, não julga")
+
+    def test_frete_gratis_so_quando_o_anuncio_tem_problema(self):
+        sem_frete = {"shipping": {"free_shipping": False}}
+        for situacao in ("VISITA SEM VENDA", "CONVERTE POUCO", "POUCA VISITA", "VENDE, MAS POUCO VISTO"):
+            self.assertEqual(self.temas(analise.analisar_frete(sem_frete, situacao)), ["frete"], situacao)
+        for situacao in ("VENDENDO BEM", "SEM DADOS"):
+            self.assertEqual(analise.analisar_frete(sem_frete, situacao), [], situacao)
+        self.assertEqual(analise.analisar_frete({"shipping": {"free_shipping": True}}, "POUCA VISITA"), [])
+
+    def test_tipo_de_anuncio(self):
+        gratis = analise.analisar_tipo({"listing_type_id": "free"}, "POUCA VISITA")
+        self.assertEqual(gratis[0]["peso"], analise.ALTA)
+        self.assertIn("Grátis para Clássico", gratis[0]["texto"])
+        premium = analise.analisar_tipo({"listing_type_id": "gold_special"}, "VISITA SEM VENDA")
+        self.assertIn("Teste o Premium", premium[0]["texto"])
+        self.assertEqual(analise.analisar_tipo({"listing_type_id": "gold_special"}, "POUCA VISITA"), [])
+        self.assertEqual(analise.analisar_tipo({"listing_type_id": "gold_pro"}, "VISITA SEM VENDA"), [])
+
+    def test_nota_de_qualidade_do_ml(self):
+        resposta = performance("MLB1", 69, "Average", "Satisfatória", [
+            ("PICTURES", "PICTURES_QUANTITY_MIN", "Adicione mais fotos, pelo menos 3."),
+            ("SIZE_CHART", "HAS_SIZE_CHART", "Inclua a tabela de medidas", "WARNING")])
+        qualidade = analise.ler_qualidade(resposta)
+        self.assertEqual(qualidade["nota"], 69)
+        self.assertEqual(analise.texto_qualidade(qualidade), "Satisfatória (69/100)")
+        textos = [p["texto"] for p in qualidade["pedidos"]]
+        self.assertEqual(textos, ["Adicione mais fotos, pelo menos 3 (pedido do ML).",
+                                  "Inclua a tabela de medidas (pedido do ML)."], "a regra cumprida (GTIN) não entra")
+        self.assertEqual([p["peso"] for p in qualidade["pedidos"]], [analise.MEDIA, analise.ALTA])
+
+    def test_texto_da_nota(self):
+        self.assertEqual(analise.texto_qualidade(None), "?")
+        self.assertEqual(analise.texto_qualidade(analise.ler_qualidade(None)), "ainda sem nota")
+        self.assertEqual(analise.texto_qualidade(analise.ler_qualidade({"score": 74.34})), "74/100")
+        self.assertEqual(analise.texto_qualidade(analise.ler_qualidade({"score": 99, "level": "Good"})),
+                         "Profissional (99/100)")
+
+    def test_pedido_do_ml_substitui_a_regra_igual_e_fica_com_o_peso_maior(self):
+        item = {"title": TITULO_BOM, "pictures": [{"max_size": "1200x1200"}]}
+        qualidade = analise.ler_qualidade(performance("MLB1", 50, "Average", "Satisfatória", [
+            ("PICTURES", "PICTURES_QUANTITY_MIN", "Adicione mais fotos")]))
+        sugestoes = analise.sugerir(item, "POUCA VISITA", None, qualidade)
+        self.assertEqual(len(sugestoes), 1)
+        self.assertEqual(sugestoes[0]["origem"], "ML")
+        self.assertEqual(sugestoes[0]["peso"], analise.ALTA)
+
+    def test_formato_inesperado_nao_derruba_o_relatorio(self):
+        # O formato real da nota e de alguns campos ainda vai ser conferido na conta de verdade.
+        estranho = {"title": 123, "pictures": ["foto"], "attributes": "x", "shipping": [], "tags": None}
+        self.assertEqual(analise.sugerir(estranho, "POUCA VISITA", {"atributos": [1, "a"], "max_titulo": "60"},
+                                         analise.ler_qualidade({"buckets": {"a": 1}, "score": "alto"})),
+                         [self.sugestao_fotos(1)])
+        qualidade = analise.ler_qualidade({"buckets": [{"variables": [{"rules": [{"status": "PENDING",
+                                                                                 "wordings": "texto"}]}]}]})
+        self.assertEqual(qualidade, {"nota": None, "nivel": None, "pedidos": []})
+
+    def sugestao_fotos(self, tem):
+        return analise.analisar_fotos({"pictures": [{}] * tem})[0]
+
+    def test_sugestoes_da_mais_importante_para_a_menos(self):
+        item = {"title": "Fone! Pronta Entrega", "pictures": [{"max_size": "500x500"}],
+                "shipping": {"free_shipping": False}, "listing_type_id": "gold_special", "attributes": []}
+        sugestoes = analise.sugerir(item, "VISITA SEM VENDA", {"atributos": ATRIBUTOS_PADRAO})
+        pesos = [s["peso"] for s in sugestoes]
+        self.assertEqual(pesos, sorted(pesos, reverse=True))
+        self.assertEqual(len(sugestoes), 8)
+        self.assertEqual(analise.pontos(sugestoes), sum(pesos))
+
+
 class TestSemLogin(Base):
 
     def test_relatorio_antes_de_conectar(self):
@@ -551,9 +825,11 @@ class TestComoNoPrompt(unittest.TestCase):
                              capture_output=True, text=True, encoding="utf-8", timeout=60)
         self.assertEqual(rel.returncode, 0, rel.stdout + rel.stderr)
         self.assertIn("Comece por estes", rel.stdout)
+        self.assertIn("Título curto", rel.stdout)
         with open(self.pasta / "relatorio_anuncios.csv", encoding="utf-8-sig", newline="") as f:
             linhas = list(csv.DictReader(f, delimiter=";"))
         self.assertEqual([l["situacao"] for l in linhas], ["VISITA SEM VENDA", "VENDENDO BEM"])
+        self.assertTrue(all(l["o_que_mudar"] and l["qualidade_ml"] for l in linhas))
 
 
 if __name__ == "__main__":

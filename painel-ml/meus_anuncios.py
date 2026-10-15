@@ -1,37 +1,31 @@
 """
 Passo 2: lista seus anúncios ativos com visitas, vendas e conversão do período,
-e diz o que olhar em cada um.
+a nota de qualidade que o Mercado Livre dá a cada um e o que mudar em cada anúncio.
 
 Como usar (no Prompt de Comando, dentro desta pasta):
     python meus_anuncios.py             últimos 30 dias
     python meus_anuncios.py --dias 60   outro período (1 a 150 dias)
 
 Gera o arquivo relatorio_anuncios.csv, que abre direto no Excel.
+As regras das situações e das sugestões ficam no analise.py.
 """
 
 import argparse
 import csv
 import sys
+import textwrap
 import time
 from datetime import datetime, timedelta, timezone
 
+import analise
 import ml_api
 
-# Pontos de partida para a classificação. Ajuste à vontade: não são regras do Mercado Livre.
-POUCAS_VISITAS = 30      # abaixo disso no período, o anúncio quase não está sendo encontrado
-CONVERSAO_BAIXA = 0.01   # 1%: abaixo disso, vende pouco para as visitas que recebe
 PAUSA_ENTRE_CHAMADAS = 0.05
+SUGESTOES_NA_TELA = 3  # as outras ficam no CSV
 
-# Em ordem de prioridade: os primeiros são os que mais valem a pena mexer.
-SITUACOES = {
-    "VISITA SEM VENDA": "As pessoas veem e não compram: revise preço, fotos, frete e descrição.",
-    "CONVERTE POUCO": "Vende pouco para as visitas que tem: compare preço e frete com os concorrentes.",
-    "POUCA VISITA": "Quase ninguém encontra: revise título, palavras-chave, categoria e ficha técnica.",
-    "VENDE, MAS POUCO VISTO": "Quem vê, compra: vale melhorar o título ou anunciar para ganhar visitas.",
-    "VENDENDO BEM": "Está funcionando: use como modelo para os outros anúncios.",
-    "SEM DADOS": "Não consegui ler as visitas ou as vendas deste anúncio.",
-}
-ORDEM = list(SITUACOES)
+# O que o relatório pede de cada anúncio: os números e o que as sugestões precisam olhar.
+CAMPOS_DOS_ANUNCIOS = ("id,title,price,currency_id,available_quantity,status,permalink,"
+                       "category_id,condition,listing_type_id,pictures,attributes,shipping,tags")
 
 ARQ_RELATORIO = ml_api.PASTA / "relatorio_anuncios.csv"
 
@@ -72,17 +66,41 @@ def listar_ids_ativos(cliente, user_id):
 
 
 def buscar_detalhes(cliente, ids):
-    campos = "id,title,price,currency_id,available_quantity,status,permalink"
     detalhes = {}
     for i in range(0, len(ids), 20):  # o Mercado Livre aceita até 20 por chamada
         lote = ids[i:i + 20]
-        resposta = cliente.get("/items", {"ids": ",".join(lote), "attributes": campos}) or []
+        resposta = cliente.get("/items", {"ids": ",".join(lote), "attributes": CAMPOS_DOS_ANUNCIOS}) or []
         for item in resposta:
             corpo = item.get("body") or {}
             if item.get("code") == 200 and corpo.get("id"):
                 detalhes[corpo["id"]] = corpo
         time.sleep(PAUSA_ENTRE_CHAMADAS)
     return detalhes
+
+
+def buscar_categorias(cliente, detalhes):
+    """Limite do título e campos da ficha técnica de cada categoria (uma consulta por categoria)."""
+    categorias = {}
+    ultimo_erro = None
+    for categoria in dict.fromkeys(d.get("category_id") for d in detalhes.values() if d.get("category_id")):
+        dados = {"max_titulo": None, "atributos": None}
+        try:
+            info = cliente.get(f"/categories/{categoria}")
+            ajustes = info.get("settings") if isinstance(info, dict) else None
+            if isinstance(ajustes, dict):
+                dados["max_titulo"] = ajustes.get("max_title_length")
+            atributos = cliente.get(f"/categories/{categoria}/attributes")
+            dados["atributos"] = atributos if isinstance(atributos, list) else None
+        except ml_api.ErroLogin:
+            raise
+        except ml_api.ErroML as e:
+            ultimo_erro = e
+        categorias[categoria] = dados
+        time.sleep(PAUSA_ENTRE_CHAMADAS)
+    sem_ficha = sum(1 for c in categorias.values() if c["atributos"] is None)
+    if sem_ficha:
+        print(f"  Não consegui ler a ficha técnica de {sem_ficha} categoria(s). Último erro: {ultimo_erro}")
+    return categorias
 
 
 def buscar_visitas(cliente, ids, dias):
@@ -138,28 +156,53 @@ def buscar_vendas(cliente, user_id, dias):
     return vendas
 
 
+def buscar_qualidade(cliente, ids):
+    """Nota de qualidade que o Mercado Livre dá a cada anúncio e o que ele pede para melhorar.
+
+    Ela é um extra: se não der para ler, o relatório sai do mesmo jeito, sem a nota.
+    """
+    qualidade = {}
+    ultimo_erro = None
+    sem_calculo = None  # o que o Mercado Livre responde quando ainda não calculou a nota
+    for n, item_id in enumerate(ids, 1):
+        try:
+            qualidade[item_id] = analise.ler_qualidade(cliente.get(f"/item/{item_id}/performance"))
+        except ml_api.ErroML as e:
+            if e.status == 404:
+                qualidade[item_id] = analise.ler_qualidade(None)
+                sem_calculo = e
+            else:
+                ultimo_erro = e
+                # Sem permissão e login recusado valem para todos os anúncios. Se os 3 primeiros falharam,
+                # o problema também não é de um anúncio só. Nesses casos, não adianta continuar perguntando.
+                if isinstance(e, ml_api.ErroLogin) or e.status == 403 or (not qualidade and n >= 3):
+                    break
+        if n % 10 == 0 or n == len(ids):
+            print(f"  {n}/{len(ids)}", end="\r", flush=True)
+        time.sleep(PAUSA_ENTRE_CHAMADAS)
+    print()
+    sem_nota = len(ids) - len(qualidade)
+    if sem_nota:
+        print(f"  Não consegui ler a nota de qualidade de {sem_nota} anúncio(s). Último erro: {ultimo_erro}")
+    elif sem_calculo and all(q["nota"] is None and not q["nivel"] for q in qualidade.values()):
+        print(f"  O Mercado Livre ainda não tem nota para nenhum dos anúncios (resposta: {sem_calculo}).")
+    return qualidade
+
+
 # ---------------------------------------------------------------- análise
 
-def classificar(visitas, vendas):
-    if visitas is None or vendas is None:
-        return "SEM DADOS"
-    if visitas < POUCAS_VISITAS:
-        return "VENDE, MAS POUCO VISTO" if vendas > 0 else "POUCA VISITA"
-    if vendas == 0:
-        return "VISITA SEM VENDA"
-    if vendas / visitas < CONVERSAO_BAIXA:
-        return "CONVERTE POUCO"
-    return "VENDENDO BEM"
-
-
-def montar_linhas(ids, detalhes, visitas, vendas):
+def montar_linhas(ids, detalhes, visitas, vendas, categorias=None, qualidade=None):
+    categorias = categorias or {}
+    qualidade = qualidade or {}
     linhas = []
     for item_id in ids:
         d = detalhes.get(item_id, {})
         v = visitas.get(item_id)
         s = None if vendas is None else vendas.get(item_id, 0)
         conversao = (s / v) if (v and s is not None) else None
-        situacao = classificar(v, s)
+        situacao = analise.classificar(v, s)
+        nota = qualidade.get(item_id)
+        sugestoes = analise.sugerir(d, situacao, categorias.get(d.get("category_id")), nota)
         linhas.append({
             "id": item_id,
             "titulo": d.get("title") or "",
@@ -169,10 +212,14 @@ def montar_linhas(ids, detalhes, visitas, vendas):
             "vendas": s,
             "conversao": conversao,
             "situacao": situacao,
-            "o_que_olhar": SITUACOES[situacao],
+            "o_que_olhar": analise.SITUACOES[situacao],
+            "sugestoes": sugestoes,
+            "pontos": analise.pontos(sugestoes),
+            "qualidade": analise.texto_qualidade(nota),
             "link": d.get("permalink") or "",
         })
-    linhas.sort(key=lambda l: (ORDEM.index(l["situacao"]), -(l["visitas"] or 0)))
+    # Primeiro a situação; dentro dela, quem tem mais coisas importantes para mudar e depois mais visitas.
+    linhas.sort(key=lambda l: (analise.ORDEM.index(l["situacao"]), -l["pontos"], -(l["visitas"] or 0)))
     return linhas
 
 
@@ -188,9 +235,15 @@ def _texto(valor):
     return "?" if valor is None else str(valor)
 
 
+def _o_que_mudar(sugestoes):
+    if not sugestoes:
+        return "Nenhuma mudança sugerida"
+    return " | ".join(f"{n}) {s['texto']}" for n, s in enumerate(sugestoes, 1))
+
+
 def salvar_csv(linhas, dias):
     cabecalho = ["id", "titulo", "preco", "estoque", f"visitas_{dias}d", f"vendas_{dias}d",
-                 "conversao_%", "situacao", "o_que_olhar", "link"]
+                 "conversao_%", "situacao", "o_que_olhar", "o_que_mudar", "qualidade_ml", "link"]
     destino = ARQ_RELATORIO
     try:
         f = open(destino, "w", encoding="utf-8-sig", newline="")
@@ -206,31 +259,42 @@ def salvar_csv(linhas, dias):
                 l["id"], l["titulo"], _num_br(l["preco"]), _texto(l["estoque"]),
                 _texto(l["visitas"]), _texto(l["vendas"]),
                 _num_br(l["conversao"] * 100 if l["conversao"] is not None else None, 1),
-                l["situacao"], l["o_que_olhar"], l["link"],
+                l["situacao"], l["o_que_olhar"], _o_que_mudar(l["sugestoes"]), l["qualidade"], l["link"],
             ])
     return destino
 
 
+def _encurtar(titulo):
+    return (titulo[:45] + "...") if len(titulo) > 48 else titulo
+
+
 def mostrar_resumo(linhas, dias):
     print(f"\n=== Resumo dos últimos {dias} dias ===")
-    for situacao in ORDEM:
+    for situacao in analise.ORDEM:
         qtd = sum(1 for l in linhas if l["situacao"] == situacao)
         if qtd:
             print(f"  {situacao:<24} {qtd:>4}")
 
-    prioridade = [l for l in linhas if l["situacao"] in ("VISITA SEM VENDA", "CONVERTE POUCO")][:10]
+    com_problema = analise.PROBLEMA_DE_VENDA | analise.PROBLEMA_DE_VISITA
+    prioridade = [l for l in linhas if l["sugestoes"] or l["situacao"] in com_problema][:10]
     if prioridade:
-        print("\nComece por estes (mais visitas e pouca ou nenhuma venda):")
+        print("\nComece por estes (o que mudar em cada um):")
         for n, l in enumerate(prioridade, 1):
-            titulo = (l["titulo"][:45] + "...") if len(l["titulo"]) > 48 else l["titulo"]
-            print(f"  {n:>2}. {titulo:<48} {_texto(l['visitas']):>6} visitas  {_texto(l['vendas']):>4} vendas")
+            print(f"  {n:>2}. {_encurtar(l['titulo']):<48} {_texto(l['visitas']):>6} visitas  "
+                  f"{_texto(l['vendas']):>4} vendas")
+            if l["qualidade"] not in ("?", "ainda sem nota"):
+                print(f"      Nota de qualidade do Mercado Livre: {l['qualidade']}")
+            textos = [s["texto"] for s in l["sugestoes"]] or [l["o_que_olhar"]]
+            for texto in textos[:SUGESTOES_NA_TELA]:
+                print(textwrap.fill(texto, width=100, initial_indent="      - ", subsequent_indent="        "))
+            if len(textos) > SUGESTOES_NA_TELA:
+                print(f"        (mais {len(textos) - SUGESTOES_NA_TELA} no CSV)")
 
     melhores = sorted((l for l in linhas if l["vendas"]), key=lambda l: -l["vendas"])[:5]
     if melhores:
         print("\nOs que mais vendem:")
         for n, l in enumerate(melhores, 1):
-            titulo = (l["titulo"][:45] + "...") if len(l["titulo"]) > 48 else l["titulo"]
-            print(f"  {n:>2}. {titulo:<48} {l['vendas']:>4} vendas")
+            print(f"  {n:>2}. {_encurtar(l['titulo']):<48} {l['vendas']:>4} vendas")
 
 
 # ---------------------------------------------------------------- principal
@@ -255,6 +319,9 @@ def main():
         print(f"  {achados}. Buscando detalhes...")
         detalhes = buscar_detalhes(cliente, ids)
 
+        print("Buscando a ficha técnica de cada categoria...")
+        categorias = buscar_categorias(cliente, detalhes)
+
         print("Buscando visitas (uma consulta por anúncio, pode levar um tempinho)...")
         visitas = buscar_visitas(cliente, ids, dias)
 
@@ -267,11 +334,14 @@ def main():
             print(f"  Não consegui ler as vendas ({e}). Elas vão aparecer como '?'.")
             vendas = None
 
+        print("Buscando a nota de qualidade do Mercado Livre (uma consulta por anúncio)...")
+        qualidade = buscar_qualidade(cliente, ids)
+
     except ml_api.ErroML as e:
         print("\nNão deu certo:", e)
         sys.exit(1)
 
-    linhas = montar_linhas(ids, detalhes, visitas, vendas)
+    linhas = montar_linhas(ids, detalhes, visitas, vendas, categorias, qualidade)
     mostrar_resumo(linhas, dias)
     destino = salvar_csv(linhas, dias)
     print(f"\nRelatório completo salvo em: {destino}")

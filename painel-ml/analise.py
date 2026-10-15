@@ -75,8 +75,10 @@ FORA_DA_FICHA = {"SELLER_SKU", "ITEM_CONDITION"}  # código interno do vendedor 
 
 # Nomes que o Mercado Livre usa no Brasil para o nível de qualidade.
 NIVEIS = {"Bad": "Básica", "Average": "Satisfatória", "Good": "Profissional"}
-# Regras do Mercado Livre que pedem o mesmo que uma regra do Orzy: fica só o texto do Mercado Livre.
-MESMO_TEMA = {"PICTURES_QUANTITY_MIN": "fotos_quantidade", "HAS_FREE_SHIPPING": "frete"}
+# Pedidos do Mercado Livre que dizem o mesmo que uma regra do Orzy: fica só o texto do Mercado Livre.
+# O nome da regra muda de um site para outro (no Brasil, a das fotos não tem o nome da documentação),
+# então basta o grupo (variável) ou a regra ter este pedaço no nome.
+MESMO_TEMA = {"PICTURE": "fotos_quantidade", "FREE_SHIPPING": "frete"}
 
 
 def _sugestao(tema, peso, texto, origem="Orzy"):
@@ -198,13 +200,26 @@ def _respondido(atributo):
     return any(v.get("name") for v in _dicts(atributo.get("values")))
 
 
+def _ficha(item, atributos_categoria):
+    """Os campos da ficha técnica da categoria e os que o anúncio ainda não respondeu."""
+    if not isinstance(item.get("attributes"), list):
+        return [], []  # a ficha do anúncio não veio: sem ela, não dá para dizer o que falta
+    campos = [a for a in _dicts(atributos_categoria) if _entra_na_ficha(a)]
+    respondidos = {a.get("id") for a in _dicts(item.get("attributes")) if _respondido(a)}
+    return campos, [a for a in campos if a.get("id") not in respondidos]
+
+
+def contar_ficha(item, atributos_categoria):
+    """(preenchidos, total) da ficha técnica, ou None quando não deu para ler os campos da categoria."""
+    campos, faltam = _ficha(item, atributos_categoria)
+    return (len(campos) - len(faltam), len(campos)) if campos else None
+
+
 def analisar_ficha(item, atributos_categoria):
     """Compara a ficha técnica do anúncio com os campos que a categoria tem."""
     marcado = "incomplete_technical_specs" in (item.get("tags") or [])
     aviso_ml = "O Mercado Livre marcou a ficha técnica deste anúncio como incompleta, e isso diminui a exposição."
-    campos = [a for a in _dicts(atributos_categoria) if _entra_na_ficha(a)]
-    respondidos = {a.get("id") for a in _dicts(item.get("attributes")) if _respondido(a)}
-    faltam = [a for a in campos if a.get("id") not in respondidos]
+    campos, faltam = _ficha(item, atributos_categoria)
     if not faltam:
         return [_sugestao("ficha", ALTA, aviso_ml + " Complete os campos que faltam.")] if marcado else []
 
@@ -254,6 +269,14 @@ def analisar_tipo(item, situacao):
     return []
 
 
+def _tema_do_ml(variavel, regra):
+    nomes = (str(variavel.get("key") or "").upper(), str(regra.get("key") or "").upper())
+    for pedaco, tema in MESMO_TEMA.items():
+        if any(pedaco in nome for nome in nomes):
+            return tema
+    return f"ml:{regra.get('key') or variavel.get('key')}"
+
+
 def ler_qualidade(resposta):
     """Resume a resposta de /item/{id}/performance: nota de 0 a 100, nível e o que o Mercado Livre pede.
 
@@ -273,7 +296,7 @@ def ler_qualidade(resposta):
                 if not texto or texto in vistos:
                     continue
                 vistos.add(texto)
-                tema = MESMO_TEMA.get(regra.get("key"), f"ml:{regra.get('key')}")
+                tema = _tema_do_ml(variavel, regra)
                 peso = ALTA if regra.get("mode") == "WARNING" else MEDIA
                 pedidos.append(_sugestao(tema, peso, f"{texto} (pedido do ML).", origem="ML"))
     nota = resposta.get("score")

@@ -86,7 +86,8 @@ Depois mostra um resumo na tela e salva o **relatorio_anuncios.csv** nesta pasta
 
 Na tela aparecem quantos anúncios estão em cada situação, os que mais vendem e, em **Comece por estes**,
 até 10 anúncios, dos que mais precisam de mudança para os que menos precisam. Cada um vem com até 3 sugestões e com
-a nota de qualidade do Mercado Livre, quando ela existir. As outras sugestões ficam no CSV.
+uma linha que mostra a nota de qualidade do Mercado Livre, quantas fotos o anúncio tem e quantos campos da ficha técnica
+estão preenchidos. As outras sugestões ficam no CSV.
 
 ### O que tem no CSV
 
@@ -95,6 +96,7 @@ a nota de qualidade do Mercado Livre, quando ela existir. As outras sugestões f
 | situacao e o_que_olhar | Em que situação o anúncio está e o que costuma resolver (tabela abaixo). |
 | o_que_mudar | As sugestões para este anúncio, numeradas da mais importante para a menos. |
 | qualidade_ml | A nota que o Mercado Livre dá ao anúncio: Básica, Satisfatória ou Profissional, de 0 a 100. "ainda sem nota" quer dizer que ele ainda não calculou. |
+| fotos e ficha_tecnica | Quantas fotos o anúncio tem e quantos campos da ficha técnica da categoria estão preenchidos (por exemplo, "8 de 12 campos"). |
 
 ### De onde vêm as sugestões
 

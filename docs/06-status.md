@@ -1,8 +1,8 @@
 # 06 · Status
 
 **Atualizado em:** 15/10/2026
-**Fase atual:** 2, sugestões para cada anúncio: feita e testada no Mercado Livre simulado. Falta rodar no anúncio real
-([02-roadmap.md](02-roadmap.md)).
+**Fase atual:** 2, sugestões para cada anúncio: rodou no anúncio real em 15/10/2026. Falta conferir a ficha técnica
+e as sugestões com o anúncio aberto no site ([02-roadmap.md](02-roadmap.md)).
 
 ## Onde parou
 
@@ -11,8 +11,11 @@ técnica, o frete grátis e o tipo (Grátis, Clássico ou Premium), lê a nota d
 e diz o que mudar em cada um. As regras ficam no `painel-ml/analise.py`, separadas da coleta, para o site da fase 3
 usar as mesmas.
 
-Falta rodar no microfone de lapela do Nicolas e conferir, no anúncio aberto no site do Mercado Livre, se as sugestões
-fazem sentido.
+Em 15/10/2026 o Nicolas rodou no microfone de lapela: a nota de qualidade veio (Profissional, 88/100), com o pedido
+do Mercado Livre em português. A sugestão de fotos saiu duas vezes, a do Orzy e a do Mercado Livre, porque no Brasil
+a regra das fotos não tem o nome da documentação. Isso foi corrigido, e a tela agora mostra também quantas fotos
+e quantos campos da ficha técnica o anúncio tem. Falta rodar de novo para ver a contagem da ficha técnica e conferir
+as sugestões com o anúncio aberto no site.
 
 ## Decisões de 14/10/2026
 
@@ -52,6 +55,10 @@ fazem sentido.
   - CSV com as colunas `o_que_mudar` e `qualidade_ml`, e os anúncios que mais precisam de mudança primeiro
     dentro de cada situação;
   - na tela, "Comece por estes" mostra até 10 anúncios com até 3 sugestões cada e a nota do Mercado Livre.
+- Ajustes depois do teste real (15/10/2026):
+  - o pedido de fotos do Mercado Livre, que no Brasil vem com outro nome de regra, não repete mais a sugestão do Orzy;
+  - a tela e o CSV mostram quantas fotos e quantos campos da ficha técnica (preenchidos de total) cada anúncio tem;
+  - se a ficha técnica do anúncio não vier na resposta do Mercado Livre, aparece "?" em vez de acusar campos faltando.
 
 ## O que foi testado (com dados simulados)
 
@@ -73,11 +80,12 @@ fazem sentido.
   - limite do título vindo da categoria e ficha técnica lida uma vez por categoria;
   - sem permissão para a nota (para no primeiro anúncio e o relatório sai sem ela), 401 na nota (o login é
     renovado e salvo, e o relatório sai), nota que falha nos 3 primeiros anúncios (para de perguntar),
-    erro ao ler a ficha técnica (o relatório sai sem as sugestões de ficha).
+    erro ao ler a ficha técnica (o relatório sai sem as sugestões de ficha);
+  - pedido de fotos do Mercado Livre com outro nome de regra, como veio no teste real: não repete a sugestão.
 - Os dois programas rodando de verdade, como no Prompt de Comando, numa cópia da pasta.
 - Testes rodados no Python 3.10, 3.11 e 3.13.
 
-## Validado com dados reais (14/10/2026)
+## Validado com dados reais (14 e 15/10/2026)
 
 - [x] Criar o app no Mercado Livre (formulário novo: propósito, quantos usuários, logotipo, Fluxos OAuth, permissões por área).
 - [x] `python conectar.py`: o Google mantém o código no endereço e o login dá certo, com PKCE e Refresh Token.
@@ -87,15 +95,18 @@ fazem sentido.
 - [x] Abrir o CSV no Excel: colunas certas, preço com vírgula, link do anúncio.
 - [ ] Conferir visitas e vendas com o painel do Mercado Livre numa conta com movimento.
 - [ ] Rodar numa conta com mais anúncios e vendas (um vendedor que autorize o app).
-- [ ] Fase 2: rodar no microfone de lapela e ver se aparecem a nota de qualidade, a ficha técnica e as fotos.
+- [x] Fase 2: rodar no microfone de lapela (15/10/2026). A nota de qualidade veio (Profissional, 88/100), o pedido
+  do Mercado Livre veio em português e as fotos foram lidas (1 foto).
+- [ ] Fase 2: ver a contagem da ficha técnica na tela (linha "Ficha técnica: X de Y campos").
 - [ ] Fase 2: conferir as sugestões com o anúncio aberto no site do Mercado Livre.
 
 ## Próximo passo
 
 1. Nicolas: baixar o ZIP de novo do GitHub. Para não fazer login de novo, copiar o `config.json` e o `tokens.json`
-   da pasta `painel-ml` antiga para a nova.
-2. Nicolas: rodar `python meus_anuncios.py` e mandar o texto do que apareceu no cmd.
-3. Claude: ajustar as regras com o que aparecer no anúncio real e marcar a fase 2 como concluída.
+   da pasta `painel-ml` usada por último para a nova.
+2. Nicolas: rodar `python meus_anuncios.py`, mandar o texto do que apareceu no cmd e conferir, no anúncio aberto
+   no site, o número de fotos e se a ficha técnica está completa.
+3. Claude: ajustar o que precisar e marcar a fase 2 como concluída.
 4. Quando der, rodar numa conta com mais anúncios e vendas, de um vendedor que autorize o app.
 
 Na conversa, mandar só o texto do que apareceu no cmd, sem print. **Nunca** mandar o Client Secret,
@@ -106,4 +117,3 @@ o `config.json` nem o `tokens.json`.
 - Qual vendedor com mais anúncios vai testar.
 - O que "propósito" e "quantos usuários" do formulário do app mudam: a documentação do Mercado Livre não fala.
 - Se existirem os arquivos de plano originais da conversa anterior, juntar com estes.
-- Se a nota de qualidade (`/item/{id}/performance`) responde para os anúncios do Brasil com a permissão que o app já tem.

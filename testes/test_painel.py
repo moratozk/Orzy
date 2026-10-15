@@ -370,7 +370,7 @@ class TestRelatorio(Base):
         linhas = self.ler_csv()
         self.assertEqual(list(linhas[0].keys()), ["id", "titulo", "preco", "estoque", "visitas_30d", "vendas_30d",
                                                   "conversao_%", "situacao", "o_que_olhar", "o_que_mudar",
-                                                  "qualidade_ml", "link"])
+                                                  "qualidade_ml", "fotos", "ficha_tecnica", "link"])
         por_id = {l["id"]: l for l in linhas}
         self.assertNotIn("MLB700", por_id, "anúncio pausado não entra")
         self.assertEqual([l["id"] for l in linhas], ["MLB100", "MLB200", "MLB300", "MLB400", "MLB500", "MLB600"])
@@ -514,11 +514,14 @@ class TestRelatorio(Base):
         self.assertNotIn("se a margem permitir", mudar, "o pedido do ML substitui a regra igual do Orzy")
         self.assertIn("Teste o Premium", mudar)
         self.assertEqual(por_id["MLB100"]["qualidade_ml"], "Básica (40/100)")
+        self.assertEqual(por_id["MLB100"]["fotos"], "1")
+        self.assertEqual(por_id["MLB100"]["ficha_tecnica"], "3 de 4 campos")
+        self.assertEqual(por_id["MLB200"]["ficha_tecnica"], "4 de 4 campos")
         self.assertEqual(por_id["MLB200"]["o_que_mudar"], "Nenhuma mudança sugerida")
         self.assertEqual(por_id["MLB200"]["qualidade_ml"], "Profissional (95/100)")
 
         self.assertIn("Comece por estes (o que mudar em cada um):", saida)
-        self.assertIn("Nota de qualidade do Mercado Livre: Básica (40/100)", saida)
+        self.assertIn("Nota do ML: Básica (40/100)  |  Fotos: 1  |  Ficha técnica: 3 de 4 campos", saida)
         self.assertIn("      - Coloque pelo menos 3 fotos", saida)
         self.assertIn("(mais 2 no CSV)", saida)
         self.assertIn("      - Quase ninguém encontra", saida, "sem sugestão, mostra o que olhar na situação")
@@ -724,6 +727,26 @@ class TestAnalise(unittest.TestCase):
         self.assertEqual(analise.texto_qualidade(analise.ler_qualidade({"score": 74.34})), "74/100")
         self.assertEqual(analise.texto_qualidade(analise.ler_qualidade({"score": 99, "level": "Good"})),
                          "Profissional (99/100)")
+
+    def test_pedido_de_fotos_do_ml_com_outro_nome_nao_repete(self):
+        # No primeiro teste real (microfone, 15/10/2026), a regra das fotos veio com outro nome e a sugestão
+        # saiu duas vezes: a do Orzy e a do Mercado Livre.
+        item = {"title": TITULO_BOM, "pictures": [{"max_size": "1200x1200"}], "shipping": {"free_shipping": False}}
+        resposta = performance("MLB1", 88, "Good", "Profissional", [
+            ("PICTURES", "QUANTIDADE_DE_FOTOS", "Adicione mais fotos para mostrar seu produto em diferentes "
+                                                "ângulos, carregue pelo menos 3"),
+            ("free_shipping", "outra_regra", "Ofereça frete grátis")])
+        sugestoes = analise.sugerir(item, "POUCA VISITA", None, analise.ler_qualidade(resposta))
+        self.assertEqual([s["origem"] for s in sugestoes], ["ML", "ML"])
+        self.assertEqual([s["tema"] for s in sugestoes], ["fotos_quantidade", "frete"])
+        self.assertEqual(sugestoes[0]["peso"], analise.ALTA, "fica com o peso maior, o da regra do Orzy")
+
+    def test_contar_ficha(self):
+        item = {"attributes": self.ficha(BRAND="Genérica", LINE=None)}
+        self.assertEqual(analise.contar_ficha(item, ATRIBUTOS_PADRAO), (2, 4))
+        self.assertIsNone(analise.contar_ficha(item, None), "sem os campos da categoria, não dá para contar")
+        self.assertIsNone(analise.contar_ficha({}, ATRIBUTOS_PADRAO), "sem a ficha do anúncio, também não")
+        self.assertEqual(analise.analisar_ficha({}, ATRIBUTOS_PADRAO), [], "e não acusa campo faltando")
 
     def test_pedido_do_ml_substitui_a_regra_igual_e_fica_com_o_peso_maior(self):
         item = {"title": TITULO_BOM, "pictures": [{"max_size": "1200x1200"}]}

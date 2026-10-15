@@ -20,6 +20,8 @@ estão em [docs/legal/](legal/LEIA-ME.md). A recomendação de hospedagem, com c
 - Guarda um histórico dos relatórios, para abrir cada um depois. Dá para apagar tudo com um clique.
 - Mostra a Política de Privacidade e os Termos de Uso de `docs/legal/` (rascunhos), com os dois no rodapé de todas as
   páginas e o aviso de aceite junto de cada botão Conectar. Tem cabeçalhos de segurança.
+- Para buscadores: descrição da página (o resumo que o Google e o WhatsApp mostram) e `robots.txt`, que deixa os
+  robôs só nas páginas públicas, para não ligarem o servidor à toa.
 
 Fica de fora: alterar anúncios, IA, Shopee, cobrança e cadastro com senha (o login é só pelo Mercado Livre).
 
@@ -40,13 +42,14 @@ Fica de fora: alterar anúncios, IA, Shopee, cobrança e cadastro com senha (o l
 - `painel-ml/`: a mesma coleta e as mesmas regras do PC. O que mudou para o site: o login passou a ter uma
   versão que não grava em arquivo, e a coleta ganhou etapas e andamento que o PC também usa.
   O PC continua igual: os 64 testes antigos passam sem mudança.
-- `testes/test_site.py`: 31 testes contra o Mercado Livre simulado. Cobrem o login inteiro, o estado do OAuth,
+- `testes/test_site.py`: 32 testes contra o Mercado Livre simulado. Cobrem o login inteiro, o estado do OAuth,
   o escape de títulos, o CSV com BOM, o isolamento entre contas, token vencido, pedido de outro site, histórico,
-  cabeçalhos de segurança, uma ida e volta por HTTP real, a página inicial, os textos legais (com escape), o
-  rodapé, a hora do relatório em horário de Brasília e a limpeza diária do histórico.
-- Verificado: 95 testes passam no Python 3.13 e no 3.10 (64 do PC e 31 do site); pyflakes limpo. Quebrar de
-  propósito a checagem do estado, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília ou a
-  limpeza diária faz os testes falharem.
+  cabeçalhos de segurança, uma ida e volta por HTTP real (com `HEAD`), a página inicial, os textos legais (com
+  escape), o rodapé, a hora do relatório em horário de Brasília, a limpeza diária do histórico, o `robots.txt` e
+  a descrição para buscadores.
+- Verificado: 96 testes passam no Python 3.13 e no 3.10 (64 do PC e 32 do site); pyflakes limpo. Quebrar de
+  propósito a checagem do estado, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a
+  limpeza diária, o `HEAD` ou o `robots.txt` faz os testes falharem.
 
 Limites da primeira versão (propostos, a confirmar):
 - **Uma instância só**: as sessões e os relatórios em andamento ficam na memória do servidor.

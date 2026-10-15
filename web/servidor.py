@@ -25,7 +25,11 @@ class Manipulador(BaseHTTPRequestHandler):
     def do_POST(self):
         self._responder("POST")
 
-    def _responder(self, metodo):
+    def do_HEAD(self):
+        # Verificadores de link e monitores usam HEAD: mesma resposta do GET, sem o corpo.
+        self._responder("GET", com_corpo=False)
+
+    def _responder(self, metodo, com_corpo=True):
         try:
             tamanho = max(0, int(self.headers.get("Content-Length") or 0))
         except ValueError:
@@ -37,7 +41,8 @@ class Manipulador(BaseHTTPRequestHandler):
             self.send_header(nome, valor)
         self.send_header("Content-Length", str(len(dados)))
         self.end_headers()
-        self.wfile.write(dados)
+        if com_corpo:
+            self.wfile.write(dados)
 
     def log_message(self, formato, *args):
         # Só o caminho, sem a busca: o ?code=... do Mercado Livre não pode ir para o registro do servidor.

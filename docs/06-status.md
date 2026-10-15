@@ -74,6 +74,8 @@ o site e o servidor.
   - `/privacidade` e `/termos` mostram os textos de `docs/legal/`, com links no rodapé de todas as páginas;
   - o resultado mostra a data e a hora em que os dados foram buscados (termos do Mercado Livre, item 5.3);
   - o histórico com mais de 365 dias é apagado todo dia, e não só quando o servidor liga;
+  - descrição da página para o Google e o WhatsApp, `robots.txt` que deixa os robôs só nas páginas públicas,
+    resposta a `HEAD` (verificadores de link) e cor dos links com contraste suficiente para leitura;
   - recomendação de hospedagem com custos em reais (thread "Hospedagem e domínio").
 
 ## O que foi testado (com dados simulados)
@@ -86,11 +88,11 @@ o site e o servidor.
   com título que tem HTML (sai escapado), CSV com BOM, isolamento entre contas, token vencido sem renovação
   escondida, pedido de outro site recusado, um relatório por conta, histórico com confirmação para apagar,
   cabeçalhos de segurança, uma ida e volta por HTTP real, página inicial com e sem login, textos legais lidos de
-  `docs/legal/` (com escape), rodapé com os dois textos, data do relatório em horário de Brasília e limpeza diária
-  do histórico, que continua depois de um erro.
-- Testes rodados no Python 3.10 e 3.13 (95: 64 do PC e 31 do site). Quebrar de propósito a checagem do estado do
-  OAuth, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília ou a limpeza diária faz os testes
-  falharem.
+  `docs/legal/` (com escape), rodapé com os dois textos, data do relatório em horário de Brasília, limpeza diária
+  do histórico que continua depois de um erro, `HEAD` sem corpo, `robots.txt` e descrição para buscadores.
+- Testes rodados no Python 3.10 e 3.13 (96: 64 do PC e 32 do site). Quebrar de propósito a checagem do estado do
+  OAuth, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a limpeza diária, o `HEAD` ou o
+  `robots.txt` faz os testes falharem.
 
 ## Validado com dados reais (14 e 15/10/2026)
 

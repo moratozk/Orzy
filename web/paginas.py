@@ -6,6 +6,9 @@ from html import escape
 import analise
 
 BRASILIA = timezone(timedelta(hours=-3))  # o Brasil não tem horário de verão desde 2019
+# Resumo que o Google e o WhatsApp mostram junto do link.
+DESCRICAO = ("Conecte sua conta do Mercado Livre e veja quais anúncios vendem, quais não vendem e o que mudar em "
+             "cada um. Sem instalar nada.")
 MAX_PRIORIDADES = 10
 SUGESTOES_POR_ANUNCIO = 3
 
@@ -52,6 +55,7 @@ def _pagina(titulo, corpo, logado=False, script=None, atualizar=None):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{escape(titulo)} · Orzy</title>
+<meta name="description" content="{escape(DESCRICAO)}">
 <link rel="stylesheet" href="/static/estilo.css">
 {atualiza}
 </head>

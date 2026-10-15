@@ -16,6 +16,8 @@ OPCOES_DIAS = (30, 60, 90, 150)
 PASTA_STATIC = Path(__file__).resolve().parent / "static"
 ARQUIVOS_STATIC = {"estilo.css": "text/css; charset=utf-8",
                    "andamento.js": "application/javascript; charset=utf-8"}
+# Robôs de busca ficam nas páginas públicas: as outras pedem login e só ligariam o servidor à toa.
+ROBOTS = "User-agent: *\nDisallow: /entrar\nDisallow: /retorno\nDisallow: /relatorio\nDisallow: /historico\n"
 
 CABECALHOS_DE_SEGURANCA = [
     ("X-Content-Type-Options", "nosniff"),
@@ -54,6 +56,7 @@ class Site:
             ("GET", "/privacidade"): lambda: self._texto_legal("privacidade"),
             ("GET", "/termos"): lambda: self._texto_legal("termos"),
             ("GET", "/saude"): self._saude,
+            ("GET", "/robots.txt"): self._robots,
         }
         rota = fixas.get((metodo, caminho))
         if rota is not None:
@@ -188,6 +191,10 @@ class Site:
         if html is None:
             return self._html(200, paginas.texto_legal_ausente(legal.NOMES[rota]))
         return self._html(200, paginas.texto_legal(legal.NOMES[rota], html))
+
+    def _robots(self):
+        return 200, [("Content-Type", "text/plain; charset=utf-8"), ("Cache-Control", "public, max-age=86400")], \
+            ROBOTS.encode("utf-8")
 
     def _saude(self):
         return 200, [("Content-Type", "text/plain; charset=utf-8"), ("Cache-Control", "no-store")], b"ok"

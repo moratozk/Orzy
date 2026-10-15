@@ -4,7 +4,7 @@
   --fraco: #5b6474;
   --cartao: #ffffff;
   --borda: #e2e5ea;
-  --destaque: #1f6feb;
+  --destaque: #1a66d9;  /* 4,96:1 sobre o fundo: link legível (o mínimo é 4,5:1) */
   --destaque-texto: #ffffff;
   --aviso: #fff4d6;
   --aviso-borda: #e7c26a;

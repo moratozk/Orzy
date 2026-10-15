@@ -7,6 +7,7 @@ Nada aqui fala com o Mercado Livre de verdade. O histórico dos testes fica numa
 """
 
 import http.client
+import socket
 import sqlite3
 import sys
 import tempfile
@@ -382,6 +383,16 @@ class PaginasSimplesTests(SiteBase):
         self.assertEqual(status, 200)
         self.assertEqual(_cab(cabecalhos, "Content-Type"), "text/css; charset=utf-8")
 
+    def test_robots_e_descricao_para_buscadores(self):
+        status, cabecalhos, corpo = self.pedir("GET", "/robots.txt", origem=None)
+        self.assertEqual(status, 200)
+        self.assertEqual(_cab(cabecalhos, "Content-Type"), "text/plain; charset=utf-8")
+        for caminho in ("/entrar", "/retorno", "/relatorio", "/historico"):
+            self.assertIn(f"Disallow: {caminho}\n".encode(), corpo)
+        self.assertNotIn(b"Disallow: /\n", corpo, "a página inicial e os textos legais continuam abertos")
+        inicio = self.pedir("GET", "/", origem=None)[2].decode("utf-8")
+        self.assertIn('<meta name="description" content="Conecte sua conta do Mercado Livre', inicio)
+
     def test_pagina_que_nao_existe(self):
         self.assertEqual(self.pedir("GET", "/nao-existe", origem=None)[0], 404)
 
@@ -464,6 +475,17 @@ class ServidorTests(SiteBase):
         conexao.request("GET", "/saude")
         resposta = conexao.getresponse()
         self.assertEqual((resposta.status, resposta.read()), (200, b"ok"))
+
+        # HEAD (verificadores de link): os cabeçalhos do GET, sem o corpo.
+        with socket.create_connection(("127.0.0.1", porta), timeout=10) as s:
+            s.sendall(b"HEAD /termos HTTP/1.0\r\nHost: 127.0.0.1\r\n\r\n")
+            bruto = b""
+            while pedaco := s.recv(65536):
+                bruto += pedaco
+        cabecalho, _, corpo = bruto.partition(b"\r\n\r\n")
+        self.assertTrue(cabecalho.startswith(b"HTTP/1.0 200"), cabecalho[:40])
+        self.assertIn(b"Content-Type: text/html; charset=utf-8", cabecalho)
+        self.assertEqual(corpo, b"", "HEAD não manda o corpo")
 
         conexao.request("POST", "/sair", body=b"", headers={"Origin": "https://site-estranho.example",
                                                             "Content-Length": "0"})

@@ -4,6 +4,15 @@
 **Fase atual:** 3, planejamento e código em rascunho do site (PR, sem merge). A fase 2 está concluída.
 Plano e custos em [07-fase-3-plano.md](07-fase-3-plano.md).
 
+## Quem faz o quê (15/10/2026)
+
+- **Site: código e login** (esta thread): `web/`, `testes/test_site.py`, `docs/07-fase-3-plano.md`, este arquivo e o PR #5 (rascunho).
+- **Página inicial do site**: entrega os arquivos em `/mnt/project-files/orzy/site/inicio/`; a thread de código integra.
+- **Privacidade e termos**: `docs/legal/` e PR próprio. O texto de `/privacidade` em `web/` é só rascunho.
+- **Hospedagem e domínio**: hospedagem, deploy, DNS, Redirect URI e Client Secret do OrzyApp. Nada disso sai sem o ok do Nicolas.
+- Pesquisa de hospedagem e LGPD para todas: `/mnt/project-files/orzy/hospedagem-e-lgpd.md`.
+- Domínio: orzy.com.br já responde com uma página temporária que o Nicolas colocou (15/10/2026). Não sabemos onde ela roda.
+
 ## Onde parou
 
 A fase 2 está concluída. Em 15/10/2026 o Nicolas rodou no microfone de lapela: a nota de qualidade veio
@@ -54,6 +63,7 @@ Nada foi publicado, contratado nem mudado no app do Mercado Livre. Ele decide ho
   - `painel-ml/`: o login e a coleta ganharam versões que o site usa sem gravar em arquivo; o PC continua igual;
   - `testes/test_site.py`: testes do site contra o Mercado Livre simulado;
   - `docs/07-fase-3-plano.md`: plano em 5 passos, custos em reais, LGPD e decisões que faltam.
+  - `/mnt/project-files/orzy/hospedagem-e-lgpd.md`: pesquisa de hospedagem e LGPD para as outras threads.
 
 ## O que foi testado (com dados simulados)
 
@@ -91,7 +101,8 @@ Nada foi publicado, contratado nem mudado no app do Mercado Livre. Ele decide ho
 2. Nicolas: quando puder, baixar o ZIP de novo do GitHub. Para não fazer login de novo, copiar o `config.json` e o
    `tokens.json` da pasta `painel-ml` usada por último para a nova. Rodar `python meus_anuncios.py` e mandar o
    texto do que apareceu no cmd (sem print). Ver a linha "Ficha técnica: X de Y campos".
-3. Claude: com o ok do passo 1 e 2 da fase 3, publicar num endereço de teste e testar com a conta do Nicolas.
+3. Hospedagem e domínio: com o ok do Nicolas nos passos 1 e 2 da fase 3, publicar num endereço de teste e testar com a conta dele.
+4. Site: integrar a página inicial quando chegar em `/mnt/project-files/orzy/site/inicio/`, e ajustar o código conforme o teste real.
 
 Na conversa, mandar só o texto do que apareceu no cmd, sem print. **Nunca** mandar o Client Secret,
 o `config.json`, o `tokens.json` nem o banco do site.
@@ -100,5 +111,5 @@ o `config.json`, o `tokens.json` nem o banco do site.
 
 - Qual vendedor com mais anúncios vai testar.
 - O que "propósito" e "quantos usuários" do formulário do app mudam: a documentação do Mercado Livre não fala.
-- Os termos do Mercado Livre sobre guardar dados de vendedores: a página não abriu no dia 15/10/2026.
+- Os termos do Mercado Livre sobre guardar dados de vendedores: a página não abriu no dia 15/10/2026, nem em duas tentativas. Ler antes de abrir ao público e confirmar se o histórico de 12 meses é permitido.
 - Se existirem os arquivos de plano originais da conversa anterior, juntar com estes.

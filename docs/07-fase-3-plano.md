@@ -4,6 +4,10 @@
 **Situação:** planejamento e código em rascunho (PR aberto, sem merge). Nada foi contratado, publicado nem
 mexido no app do Mercado Livre. Tudo depende das decisões do Nicolas, listadas no fim.
 
+**Quem faz o quê:** ver [06-status.md](06-status.md). Deploy, DNS e textos legais ficam com as outras threads;
+este arquivo cobre o código e as decisões. A pesquisa de hospedagem e LGPD está em
+`/mnt/project-files/orzy/hospedagem-e-lgpd.md`.
+
 ## O que o site faz na primeira versão
 
 - O vendedor clica em **Conectar com Mercado Livre** e entra com a própria conta. Ninguém cria app.
@@ -70,9 +74,9 @@ A VPS é a alternativa mais barata no longo prazo, mas só se alguém (ele ou qu
    Isso segue a decisão de 14/10: um app só, o "OrzyApp".
 3. **Quantos usuários e propósito:** a documentação não diz o efeito de cada resposta. Confirmar antes de abrir
    para vendedores de fora (a validar).
-4. **Conta dona do app:** a pessoal do Nicolas serve para começar. Antes do público, a recomendação do Mercado
-   Livre é uma conta de empresa.
-5. **Termos de uso sobre guardar dados de vendedores:** a página não abriu hoje. Ler antes de abrir o site (a validar).
+4. **Conta dona do app:** a pessoal do Nicolas serve para começar. Antes do público, vale avaliar uma conta de empresa
+   (a validar na documentação).
+5. **Termos de uso sobre guardar dados de vendedores:** a página não abriu hoje, nem em duas tentativas. Ler antes de abrir o site e confirmar se o histórico de 12 meses é permitido (a validar).
 
 ## LGPD (resumo, não é parecer jurídico)
 
@@ -90,8 +94,6 @@ dos anúncios. Tokens: só na memória. Dados de compradores: nenhum.
 Antes de abrir ao público: política de privacidade revisada (rascunho em `/privacidade`), canal de contato,
 responsável identificado, e uma conversa com advogado. Não tenho preço confiável de advogado: pedir orçamento.
 
-Ainda não li os termos do Mercado Livre sobre guardar dados de vendedores: as páginas de desenvolvedores falharam no ambiente (15/10/2026). Ler antes de abrir ao público e confirmar se o histórico de 12 meses é permitido.
-
 ## Decisões que o Nicolas precisa tomar
 
 1. Hospedagem: Render (recomendado, ~R$ 37/mês), VPS Hostinger ou Railway.
@@ -104,5 +106,6 @@ Ainda não li os termos do Mercado Livre sobre guardar dados de vendedores: as p
 ## Próximo passo
 
 - Nicolas: responder os itens acima (uma palavra por item basta).
-- Claude: com o ok do passo 1 e 2, publicar no endereço de teste e testar com a conta dele. Nada de DNS,
+- Hospedagem e domínio (outra thread): com o ok do passo 1 e 2, publicar no endereço de teste. Nada de DNS,
   cobrança ou mudança no app sem o ok dele.
+- Site (esta thread): ajustar o código conforme o teste real e integrar a página inicial quando chegar.

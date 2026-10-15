@@ -26,21 +26,24 @@ Roda no seu computador, não precisa de servidor e não custa nada.
    com os anúncios) e vá em **Minhas aplicações > Criar nova aplicação**.
    - Se o site pedir, complete e valide os dados da sua conta primeiro: no Brasil isso é obrigatório para criar apps.
 2. **Informações básicas:**
-   - **Nome:** precisa ser único no Mercado Livre (ex.: "Painel da Loja Tal").
+   - **Nome:** precisa ser único no Mercado Livre e ter pelo menos 5 caracteres (ex.: "Painel da Loja Tal").
    - **Nome curto:** o nome sem espaços e sem acento (ex.: `painellojatal`).
    - **Descrição:** até 150 caracteres. Ela aparece na tela em que o vendedor autoriza o app.
    - **Propósito** e **quantos usuários:** escolha o que for verdade para você. Para uso só seu: Pessoal e o menor intervalo.
    - **Logotipo:** o formulário exige uma imagem .png de até 1MB. Qualquer imagem serve para começar.
      Se ela for .jpg, abra no Paint e use **Arquivo > Salvar como > Imagem PNG**.
-3. **Redirect URI:** `https://www.google.com` (exatamente assim, sem barra no final).
-4. **PKCE:** se aparecer essa opção, pode ativar. Só lembre o que escolheu.
-5. **Escopos / permissões:** marque **Leitura** (read) e **Acesso offline** (offline_access).
-   Escrita pode ficar desmarcada por enquanto.
-   - Se o formulário também mostrar permissões por área, marque pelo menos **leitura** nas áreas
-     de anúncios (publicações), vendas (pedidos) e métricas (visitas). Os nomes podem variar um pouco no site.
-6. **Tópicos e notificações:** não precisa marcar nada. Se o formulário exigir uma URL de
-   notificação, use `https://www.google.com` também.
-7. Salve. Na tela do app, copie o **Client ID** (o número) e o **Client Secret** (a chave).
+3. Na tela **Configuração e scopes**:
+   - **URIs de redirect:** `https://www.google.com` (exatamente assim, sem barra no final).
+   - **Fluxos OAuth:** deixe **Authorization Code** marcado e marque **Refresh Token**, que renova o login sozinho.
+     Client Credentials pode ficar desmarcado: o painel não usa.
+   - **PKCE:** pode marcar. Só lembre o que escolheu, porque o `conectar.py` vai perguntar.
+   - **Negócios:** marque **Mercado Livre**.
+   - **Permissões:** escolha pelo menos **Leitura** em Publicação e sincronização (anúncios), em Vendas e envios
+     (pedidos) e na área de métricas (visitas). Usuários pode ficar como está e o resto, Sem acesso.
+     Os nomes podem variar um pouco no site.
+   - **Tópicos e notificações:** não precisa marcar nada. Se o formulário exigir uma URL de
+     notificação, use `https://www.google.com` também.
+4. Salve. Na tela do app, copie o **Client ID** (o número) e o **Client Secret** (a chave).
 
 ## 2. Conecte sua conta
 
@@ -99,7 +102,7 @@ As visitas podem levar até 48 horas para aparecer no Mercado Livre.
   Rode `python conectar.py` de novo e cole o endereço logo depois de clicar em Permitir.
 - **"Problema com o PKCE"**: rode `python conectar.py --refazer` e responda o PKCE igual ao que está no app.
 - **"Sem permissão"**: entre com a conta dona dos anúncios, não com a de um operador. Se já entrou com ela,
-  confira as permissões do app (passo 1, item 5) e rode `python conectar.py` de novo.
+  confira as permissões do app (passo 1, item 3) e rode `python conectar.py` de novo.
 - **"Não consegui ler as visitas"**: quase sempre é o app sem permissão de métricas. Acerte no app
   e rode `python conectar.py` de novo.
 - **"Sem conexão" ou "respondeu algo inesperado"**: confira a internet. Em rede com bloqueio, como a da

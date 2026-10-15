@@ -14,7 +14,7 @@ O Nicolas está criando o app de teste no Mercado Livre. Ainda **não foi rodado
 - O Nicolas comprou o domínio **orzy.com.br**.
 - O Orzy vira site na **fase 3** (escolha do Nicolas). Até lá, o teste e a fase 2 seguem no programa do PC.
   Motivo: cada vendedor criar o próprio app é difícil demais, e o Client Secret não pode ir dentro de um programa distribuído.
-- O app do Mercado Livre se chama "Orzy" e fica na conta do Nicolas. Ele serve para o teste e é editado na fase 3
+- O app do Mercado Livre se chama "Orzy App" e fica na conta do Nicolas. Ele serve para o teste e é editado na fase 3
   (Redirect URI do site), sem criar outro.
 
 ## Feito
@@ -26,7 +26,8 @@ O Nicolas está criando o app de teste no Mercado Livre. Ainda **não foi rodado
   - rede com bloqueio (escola, trabalho) que devolve uma página no lugar dos dados também fechava o programa: agora explica;
   - quando as visitas não podiam ser lidas (por exemplo, app sem permissão de métricas), o relatório saía todo "SEM DADOS" sem dizer por quê: agora mostra o motivo.
 - LEIA-ME com como baixar do GitHub, permissões por área no app e os erros novos.
-- LEIA-ME com os campos novos do formulário do app e como autorizar com outra conta numa janela anônima.
+- LEIA-ME com o formulário novo do app (informações básicas e a tela "Configuração e scopes") e como autorizar
+  com outra conta numa janela anônima. As mensagens do programa falam em "Refresh Token", o nome novo de "Acesso offline".
 - Testes rodando sozinhos no GitHub a cada PR, no Windows (Python mais recente e 3.10) e no Linux: todos passam.
 
 ## O que foi testado (com dados simulados)
@@ -54,7 +55,7 @@ Nicolas, seguindo o `painel-ml/LEIA-ME.md`:
 
 1. Instalar o Python.
 2. Baixar o Orzy e abrir a pasta `painel-ml`.
-3. Criar o app "Orzy" no Mercado Livre, com a conta dele.
+3. Criar o app "Orzy App" no Mercado Livre, com a conta dele.
 4. `python conectar.py`, entrando com a conta dele.
 5. `python meus_anuncios.py`. Com a conta dele, o esperado é "Nenhum anúncio ativo nessa conta.".
 6. Para ver números, um vendedor conhecido autoriza o app: rodar `python conectar.py`, abrir o link que ele mostra

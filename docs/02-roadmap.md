@@ -15,7 +15,7 @@ vende mas pouco visto, vendendo bem).
 
 - [x] Código do painel no repositório (`painel-ml/`)
 - [x] Testes com Mercado Livre simulado (`testes/`)
-- [ ] Criar o app "Orzy" no Mercado Livre, na conta do Nicolas, e conectar
+- [ ] Criar o app "Orzy App" no Mercado Livre, na conta do Nicolas, e conectar
 - [ ] Rodar o relatório na conta de um vendedor que autorize o app e conferir os números com o painel do Mercado Livre
 
 ## Fase 2 · Sugestões de verdade para cada anúncio
@@ -38,7 +38,7 @@ Decidido pelo Nicolas em 14/10/2026: é aqui que o Orzy vira site, para outros v
 
 - O vendedor entra no orzy.com.br e clica em **Conectar com Mercado Livre**. Ninguém precisa criar app.
 - Um servidor pequeno guarda o Client Secret do app do Orzy. O Secret nunca vai dentro de um programa distribuído.
-- O app "Orzy" do teste é o mesmo: ganha o Redirect URI do site e um Client Secret novo, que só o servidor conhece.
+- O app "Orzy App" do teste é o mesmo: ganha o Redirect URI do site e um Client Secret novo, que só o servidor conhece.
 - O relatório e as sugestões aparecem no navegador, no lugar do CSV.
 - Cada relatório fica guardado, para ver se um anúncio melhorou depois de uma mudança. Esse histórico é a base do ERP.
 
@@ -46,7 +46,7 @@ Antes de começar, o plano da fase mostra:
 
 - onde hospedar o site e o servidor, com o custo em reais por mês (existem opções grátis, com limites);
 - como cuidar dos dados dos vendedores (LGPD e política de privacidade);
-- se o app "Orzy" continua na conta do Nicolas ou passa para uma conta de empresa: o Mercado Livre recomenda
+- se o app "Orzy App" continua na conta do Nicolas ou passa para uma conta de empresa: o Mercado Livre recomenda
   criar o app na conta dona da solução, de preferência de empresa, para evitar problema de transferência depois.
 
 ## Fase 4 · Shopee

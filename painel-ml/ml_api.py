@@ -234,7 +234,7 @@ def trocar_code_por_token(config, code, verifier=None):
 
 def renovar_token(config, tokens):
     if not tokens.get("refresh_token"):
-        raise ErroLogin("Seu login não se renova sozinho (falta marcar 'Acesso offline' no app). "
+        raise ErroLogin("Seu login não se renova sozinho (falta marcar 'Refresh Token' em Fluxos OAuth, no app). "
                         "Marque essa opção e rode: python conectar.py")
     corpo = {
         "grant_type": "refresh_token",

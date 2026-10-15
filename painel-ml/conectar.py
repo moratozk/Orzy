@@ -74,8 +74,8 @@ def main():
     if tokens.get("refresh_token"):
         print("O login se renova sozinho. Agora rode: python meus_anuncios.py")
     else:
-        print("Atenção: o app está sem 'Acesso offline', então este login vale só 6 horas.\n"
-              "Marque essa opção no app e rode python conectar.py de novo.")
+        print("Atenção: o app está sem o fluxo 'Refresh Token', então este login vale só 6 horas.\n"
+              "Marque Refresh Token em Fluxos OAuth, no app, e rode python conectar.py de novo.")
 
 
 if __name__ == "__main__":

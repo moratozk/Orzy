@@ -12,7 +12,13 @@ Legenda: **[doc]** está na documentação oficial · **[código]** é como o pa
   - código: `grant_type=authorization_code`, `client_id`, `client_secret`, `code`, `redirect_uri` (e `code_verifier` com PKCE)
   - renovação: `grant_type=refresh_token`, `client_id`, `client_secret`, `refresh_token`
 - O access token vale 6 horas (o exemplo da documentação mostra 3 horas, então o painel usa o `expires_in` da resposta). **[doc]**
-- O refresh token é de uso único (cada renovação devolve um novo) e vence em 6 meses. Precisa do escopo `offline_access`. **[doc]**
+- O refresh token é de uso único (cada renovação devolve um novo) e vence em 6 meses. Precisa do escopo `offline_access` **[doc]**,
+  que no formulário novo do app aparece como o fluxo **Refresh Token**.
+- Formulário novo do app (visto em 14/10/2026): nome único com pelo menos 5 caracteres, descrição de até 150 caracteres
+  (aparece na autorização), propósito, quantos usuários e logotipo PNG obrigatório. Depois, na tela "Configuração e scopes":
+  URIs de redirect, Fluxos OAuth (Authorization Code, Client Credentials, Refresh Token), PKCE, unidades de negócio
+  (Mercado Livre, VIS) e permissões por área (Usuários, Comunicações pré e pós-vendas, Publicação e sincronização e outras),
+  cada uma com um tipo de acesso (por exemplo, Sem acesso ou Leitura e escrita).
 - Trocar a senha ou tirar a permissão do app invalida tudo: tem que fazer login de novo. **[doc]**
 - A Redirect URI tem que ser idêntica à cadastrada no app. **[doc]**
 - Erros: `invalid_client` (Client ID ou Secret errado), `invalid_grant` (código ou refresh token vencido, já usado ou com Redirect URI diferente), `local_rate_limited` (429). **[doc]**

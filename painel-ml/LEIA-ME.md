@@ -22,10 +22,16 @@ Roda no seu computador, não precisa de servidor e não custa nada.
 
 ## 1. Crie o app no Mercado Livre
 
-1. Entre em **developers.mercadolivre.com.br** com a conta **dona dos anúncios**
-   e vá em **Minhas aplicações > Criar nova aplicação**.
+1. Entre em **developers.mercadolivre.com.br** com a sua conta do Mercado Livre (não precisa ser a conta
+   com os anúncios) e vá em **Minhas aplicações > Criar nova aplicação**.
    - Se o site pedir, complete e valide os dados da sua conta primeiro: no Brasil isso é obrigatório para criar apps.
-2. **Nome, nome curto e descrição:** o que quiser (ex.: "Meu painel").
+2. **Informações básicas:**
+   - **Nome:** precisa ser único no Mercado Livre (ex.: "Painel da Loja Tal").
+   - **Nome curto:** o nome sem espaços e sem acento (ex.: `painellojatal`).
+   - **Descrição:** até 150 caracteres. Ela aparece na tela em que o vendedor autoriza o app.
+   - **Propósito** e **quantos usuários:** escolha o que for verdade para você. Para uso só seu: Pessoal e o menor intervalo.
+   - **Logotipo:** o formulário exige uma imagem .png de até 1MB. Qualquer imagem serve para começar.
+     Se ela for .jpg, abra no Paint e use **Arquivo > Salvar como > Imagem PNG**.
 3. **Redirect URI:** `https://www.google.com` (exatamente assim, sem barra no final).
 4. **PKCE:** se aparecer essa opção, pode ativar. Só lembre o que escolheu.
 5. **Escopos / permissões:** marque **Leitura** (read) e **Acesso offline** (offline_access).
@@ -48,7 +54,9 @@ Roda no seu computador, não precisa de servidor e não custa nada.
 
 3. Ele pede o Client ID, o Client Secret, a Redirect URI (aperte Enter para usar o Google)
    e se você ativou o PKCE.
-4. O navegador abre no Mercado Livre. Entre e clique em **Permitir**.
+4. O navegador abre no Mercado Livre. Entre com a conta **dona dos anúncios** e clique em **Permitir**.
+   Se o navegador já estiver logado em outra conta, copie o link que o programa mostrou, abra numa janela
+   anônima (Ctrl+Shift+N no Chrome ou no Edge) e faça este passo e o próximo nela.
 5. O navegador vai cair no Google com um endereço assim:
    `https://www.google.com/?code=TG-...&state=...`
    Copie esse endereço **inteiro** da barra do navegador e cole no Prompt. Faça logo, o código vence em poucos minutos.

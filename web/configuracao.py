@@ -21,7 +21,7 @@ class Configuracao:
     host: str
     porta: int
     max_anuncios: int  # quantos anúncios um relatório lê, no máximo
-    horas_sessao: int  # a sessão some depois de tanto tempo sem uso
+    horas_sessao: int  # a sessão com login acaba tanto tempo depois do login, mesmo em uso (o prazo do cookie)
     historico: str = "sqlite"  # onde fica o histórico: "sqlite" (arquivo) ou "firestore" (Google Cloud)
     firestore_projeto: str = ""  # id do projeto no Google Cloud, quando o histórico fica no Firestore
     firestore_url: str = ""  # só para o emulador do Firestore; vazio é o Firestore de verdade

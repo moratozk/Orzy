@@ -1,6 +1,6 @@
 # 06 · Status
 
-**Atualizado em:** 15/10/2026
+**Atualizado em:** 16/10/2026
 **Fase atual:** 3, construindo o site (código em rascunho no PR #5, sem merge). A fase 2 está concluída.
 Plano e custos em [07-fase-3-plano.md](07-fase-3-plano.md). Nada vai ao ar antes de o site estar quase pronto.
 
@@ -25,9 +25,10 @@ Agora:
 Esperando:
 
 - **Privacidade e termos**: `docs/legal/` (PR #6, #7, #8 e #9, mesclados em 15/10/2026); o site mostra esses
-  textos em `/privacidade` e `/termos`. O site base fechou em 15/10/2026 (busca, filtro, marca e contagens do
-  beta no PR #5): falta reconferir a Política e os Termos contra o código do PR #5. Nome e CPF ou CNPJ quando o
-  Nicolas mandar, e a hospedagem quando for escolhida.
+  textos em `/privacidade` e `/termos`. A thread conferiu a Política e os Termos contra o site base do PR #5
+  (PR #10, mesclado em 15/10/2026), e os dois ajustes que ela pediu no código estão no PR #5: a sessão com login
+  acaba 8 horas depois do login, mesmo em uso, e as contagens do beta são apagadas depois de 12 meses. Nome e CPF
+  ou CNPJ quando o Nicolas mandar, e a hospedagem quando for escolhida.
 - **Hospedagem e domínio**: perto do lançamento, prepara no papel o monitoramento, a cópia de segurança do
   histórico e o aviso de falha, com custo em reais. Depois da escolha do Nicolas: deploy, Client Secret no
   servidor, DNS, Redirect URI e logo nova no OrzyApp. A recomendação está em
@@ -111,11 +112,13 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
   - `/privacidade` e `/termos` mostram os textos de `docs/legal/`, com links e o e-mail de contato
     (orzy.suporte@gmail.com) no rodapé de todas as páginas;
   - o resultado mostra a data e a hora em que os dados foram buscados (termos do Mercado Livre, item 5.3);
-  - o histórico com mais de 365 dias é apagado todo dia, e não só quando o servidor liga;
+  - o histórico e as contagens do beta com mais de 365 dias são apagados todo dia, e não só quando o servidor liga;
   - descrição da página para o Google e o WhatsApp, `robots.txt` que deixa os robôs só nas páginas públicas,
     resposta a `HEAD` (verificadores de link) e cor dos links com contraste suficiente para leitura;
   - segurança: quem abre o login e não volta perde a sessão em 15 minutos (no máximo 1000 sessões assim; sai a
     mais antiga), o código da sessão muda depois do login e uma conexão parada fecha em 60 segundos;
+  - a sessão com login acaba 8 horas depois do login, mesmo em uso, e o servidor apaga as vencidas a cada minuto,
+    mesmo sem ninguém usando o site: a Política promete tirar o login da memória até 8 horas depois da entrada;
   - páginas internas conferidas no celular: um apelido ou título sem espaço não empurra mais a página para o lado;
   - comparação de relatórios: cada relatório do histórico mostra o que mudou desde o anterior da mesma conta e do
     mesmo período (situação, visitas, vendas e título de cada anúncio, os novos e os que saíram), sem dizer por
@@ -130,7 +133,8 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
     `web/static`; as etiquetas que a mostram no WhatsApp entram no lançamento, com o endereço público;
   - contagens do beta: a página `/contagens`, que só abre para as contas de `ORZY_CONTAS_ADMIN` (a do Nicolas),
     mostra logins, relatórios sem erro e com erro e anúncios lidos por dia, guardados sem dizer de quem, e as
-    contas com relatório guardado e os anúncios por conta, tirados do histórico na hora em que a página abre;
+    contas com relatório guardado e os anúncios por conta, tirados do histórico na hora em que a página abre. As
+    contagens com mais de 12 meses são apagadas, como o histórico;
   - recomendação de hospedagem com custos em reais (thread "Hospedagem e domínio").
 
 ## O que foi testado (com dados simulados)
@@ -139,15 +143,16 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
   rede com bloqueio, sem permissão, relatórios de 30 a 150 dias, até 1000 e mais de 1000 anúncios (modo scan),
   CSV aberto no Excel, conta sem anúncios, nota de qualidade com regras pendentes, aviso e ainda não calculada,
   pedido de fotos com outro nome de regra, ordem dos anúncios e limites de chamadas.
-- Site (fase 3): login inteiro (estado do OAuth, PKCE, retorno), token que não é gravado em disco, relatório
-  com título que tem HTML (sai escapado), CSV com BOM, isolamento entre contas, token vencido sem renovação
-  escondida, pedido de outro site recusado, um relatório por vez em cada conexão, histórico com confirmação para
-  apagar, cabeçalhos de segurança, uma ida e volta por HTTP real, página inicial com e sem login, textos legais
-  lidos de `docs/legal/` (com escape), rodapé com os dois textos e o e-mail, data do relatório em horário de
-  Brasília, limpeza diária do histórico que continua depois de um erro, `HEAD` sem corpo, `robots.txt`, descrição
-  para buscadores, sessão sem login que some em 15 minutos e o limite delas, código novo da sessão depois do login,
-  conexão parada que fecha sem erro e comparação com o relatório anterior do mesmo período (nunca de outra conta
-  nem de outro período, com escape dos títulos antigos).
+- Site (fase 3): login inteiro (estado do OAuth, PKCE, retorno), token que não é gravado em disco, relatório com
+  título que tem HTML (sai escapado), CSV com BOM, isolamento entre contas, token vencido sem renovação escondida,
+  pedido de outro site recusado, um relatório por vez em cada conexão, histórico com confirmação para apagar,
+  cabeçalhos de segurança, uma ida e volta por HTTP real, página inicial com e sem login, textos legais lidos de
+  `docs/legal/` (com escape), rodapé com os dois textos e o e-mail, data do relatório em horário de Brasília, limpeza
+  diária do histórico que continua depois de um erro, `HEAD` sem corpo, `robots.txt`, descrição para buscadores,
+  sessão com login que acaba 8 horas depois do login (mesmo usada a cada hora) e a limpeza das sessões a cada minuto,
+  sessão sem login que some em 15 minutos e o limite delas, código novo da sessão depois do login, conexão parada que
+  fecha sem erro e comparação com o relatório anterior do mesmo período (nunca de outra conta nem de outro período,
+  com escape dos títulos antigos).
 - Histórico no Firestore, contra um Firestore simulado: os mesmos testes do SQLite (cada conta só vê o próprio,
   ordem, prazo de 365 dias, relatório anterior), o prazo para o TTL, o token do servidor de metadados reaproveitado
   e pedido de novo perto de vencer (ou sem resposta), dois relatórios no mesmo instante, apagar em lotes, o
@@ -158,18 +163,20 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
 - Contagens do beta, no SQLite e no Firestore simulado: login, relatório sem erro (também o de conta sem anúncios),
   erro do Mercado Livre e erro inesperado contados; login que não terminou não conta; uma contagem que falha não
   atrapalha o login nem o relatório; a página só abre para as contas de `ORZY_CONTAS_ADMIN` e não mostra conta,
-  apelido nem anúncio; e o Firestore soma no próprio servidor, sem apagar as outras contagens do dia.
+  apelido nem anúncio; o Firestore soma no próprio servidor, sem apagar as outras contagens do dia; e os dias com
+  mais de 365 dias são apagados, contados pelo dia de Brasília.
 - No navegador (Chromium), com login e relatórios simulados: as páginas internas (formulário, andamento, resultado,
   histórico e contagens) de 320 a 1280 px, nos dois temas, sem nada empurrando a página para o lado. O formulário
   de busca usado de verdade: o endereço guarda a busca, a página volta rolada até a tabela e "Ver todos" mostra a
   lista inteira.
-- Testes rodados no Python 3.10 e 3.13 (143: 64 do PC e 79 do site). Quebrar de propósito a checagem do estado do
+- Testes rodados no Python 3.10 e 3.13 (148: 64 do PC e 84 do site). Quebrar de propósito a checagem do estado do
   OAuth, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a limpeza diária, o `HEAD`, o
-  `robots.txt`, o prazo e o limite das sessões sem login, o código novo depois do login, o tempo máximo de uma
-  conexão, a escolha do relatório anterior, o escape dos títulos antigos, a página de erro ou, no Firestore, a
-  conta, o período, o prazo do TTL, o token, os lotes de apagar ou a ordem do resumo, a busca (acento,
-  maiúscula, ordem das palavras, situação, escape) ou as contagens do beta (o que conta, o dia de Brasília, somar
-  em vez de trocar, o último relatório de cada conta, quem abre a página) faz os testes falharem.
+  `robots.txt`, o prazo da sessão com login contado do login, a limpeza das sessões a cada minuto, o prazo e o limite
+  das sessões sem login, o código novo depois do login, o tempo máximo de uma conexão, a escolha do relatório
+  anterior, o escape dos títulos antigos, a página de erro ou, no Firestore, a conta, o período, o prazo do TTL, o
+  token, os lotes de apagar ou a ordem do resumo, a busca (acento, maiúscula, ordem das palavras, situação, escape)
+  ou as contagens do beta (o que conta, o dia de Brasília, somar em vez de trocar, o último relatório de cada conta,
+  quem abre a página, apagar os dias antigos) faz os testes falharem.
 
 ## Validado com dados reais (14 e 15/10/2026)
 
@@ -195,9 +202,9 @@ público e contagens no beta. Texto do plano e comparação em `/mnt/project-fil
    `tokens.json` da pasta `painel-ml` usada por último para a nova. Rodar `python meus_anuncios.py` e mandar o
    texto do que apareceu no cmd (sem print). Ver a linha "Ficha técnica: X de Y campos".
 3. Site: o site base está pronto. Os passos que o Nicolas aprovou em 15/10/2026 (segurança, páginas internas no
-   celular, comparação de relatórios e histórico no Firestore), a busca, o filtro, a marca Anel e as contagens do
-   beta estão no PR #5. Próximo, pela divisão de 15/10/2026: o visual final, quando a thread da marca entregar a
-   prévia e o Nicolas aprovar.
+   celular, comparação de relatórios e histórico no Firestore), a busca, o filtro, a marca Anel, as contagens do
+   beta e os dois ajustes pedidos pela revisão da Política estão no PR #5. Próximo, pela divisão de 15/10/2026: o
+   visual final, quando a thread da marca entregar a prévia e o Nicolas aprovar.
    A hospedagem e o que vem com ela (monitoramento e cópia de segurança) ficam para perto de lançar.
 
 Na conversa, mandar só o texto do que apareceu no cmd, sem print. **Nunca** mandar o Client Secret,

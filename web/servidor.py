@@ -12,6 +12,7 @@ from .historico import DIAS_DE_HISTORICO
 
 LIMITE_CORPO = 10_000  # bytes: formulário pequeno, nada mais que isso é necessário
 UM_DIA = 24 * 3600
+UM_MINUTO = 60
 
 
 class Manipulador(BaseHTTPRequestHandler):
@@ -53,7 +54,7 @@ class Manipulador(BaseHTTPRequestHandler):
 
 
 def apagar_antigos_todo_dia(historico, parar, intervalo=UM_DIA):
-    """Apaga os relatórios com mais de 12 meses agora e depois a cada intervalo, até `parar` ser acionado.
+    """Apaga os relatórios e as contagens do beta com mais de 12 meses agora e depois a cada intervalo, até `parar`.
 
     A Política de Privacidade promete 12 meses: com o servidor ligado por semanas, não basta apagar ao ligar.
     """
@@ -69,6 +70,28 @@ def apagar_antigos_todo_dia(historico, parar, intervalo=UM_DIA):
             return
 
 
+def apagar_sessoes_vencidas_sempre(sessoes, parar, intervalo=UM_MINUTO):
+    """Apaga as sessões vencidas a cada intervalo, até `parar`, mesmo sem ninguém usando o site.
+
+    A Política de Privacidade promete tirar o login da memória no máximo 8 horas depois da entrada: sem isto, uma
+    sessão vencida só sai no próximo pedido. Apaga um intervalo antes do prazo, para nenhuma passar dele.
+    """
+    while True:
+        try:
+            sessoes.limpar(antecedencia=intervalo)
+        except Exception:
+            logging.exception("Não consegui apagar as sessões vencidas; tento de novo no próximo ciclo")
+        if parar.wait(intervalo):
+            return
+
+
+def ligar_limpezas(site, parar):
+    """Liga em segundo plano a limpeza do histórico (uma vez por dia) e a das sessões (a cada minuto)."""
+    for alvo, guardados, nome in ((apagar_antigos_todo_dia, site.historico, "limpeza-do-historico"),
+                                  (apagar_sessoes_vencidas_sempre, site.sessoes, "limpeza-das-sessoes")):
+        threading.Thread(target=alvo, args=(guardados, parar), name=nome, daemon=True).start()
+
+
 def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     try:
@@ -78,8 +101,7 @@ def main():
         sys.exit(1)
 
     site = Site(config)
-    threading.Thread(target=apagar_antigos_todo_dia, args=(site.historico, threading.Event()),
-                     name="limpeza-do-historico", daemon=True).start()
+    ligar_limpezas(site, threading.Event())
 
     manipulador = type("ManipuladorOrzy", (Manipulador,), {"site": site})
     servidor = ThreadingHTTPServer((config.host, config.porta), manipulador)

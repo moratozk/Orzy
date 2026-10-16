@@ -2,6 +2,9 @@
 
 O token de acesso do Mercado Livre fica aqui: nunca vai para o navegador nem para arquivo.
 Se o servidor reiniciar, todo mundo conecta de novo. Por isso o site roda com uma instância só.
+
+Uma sessão com login acaba `horas` depois do login, mesmo em uso: é o prazo do cookie, e a Política de Privacidade
+promete apagar o login, o apelido e os relatórios da memória no máximo 8 horas depois de a pessoa entrar.
 """
 
 import secrets
@@ -21,6 +24,7 @@ class Sessao:
     cliente: object | None = None  # ClienteDaSessao, com o token de acesso
     usuario: dict | None = None  # {"id", "apelido"} da conta conectada
     relatorios: dict = field(default_factory=dict)  # id do relatório -> Relatorio
+    login_em: float | None = None  # quando o login terminou: o prazo da sessão conta daqui
 
 
 class Sessoes:
@@ -45,11 +49,13 @@ class Sessoes:
             return sessao
 
     def trocar_id(self, id_):
-        """Dá um código novo à sessão depois do login: o código de antes do login deixa de valer."""
+        """Dá um código novo à sessão depois do login (o código de antes do login deixa de valer) e marca a hora do
+        login, de onde conta o prazo da sessão."""
         with self._trava:
             sessao = self._dados.pop(id_, None)
             if sessao is not None:
                 sessao.id = secrets.token_urlsafe(32)
+                sessao.login_em = self._agora()
                 self._dados[sessao.id] = sessao
             return sessao
 
@@ -65,9 +71,23 @@ class Sessoes:
         with self._trava:
             self._dados.pop(id_, None)
 
-    def _limpar(self):
-        agora = self._agora()
-        com_login, sem_login = agora - self._horas * 3600, agora - self._minutos_pendente * 60
+    def limpar(self, antecedencia=0):
+        """Apaga as sessões vencidas sem esperar o próximo pedido, e também as que vencem nos próximos `antecedencia`
+        segundos: quem limpa a cada minuto passa 60, e nenhuma sessão fica na memória além do prazo."""
+        with self._trava:
+            self._limpar(antecedencia)
+
+    def _limpar(self, antecedencia=0):
+        momento = self._agora() + antecedencia
+        com_login, sem_login = momento - self._horas * 3600, momento - self._minutos_pendente * 60
         for id_ in [i for i, s in self._dados.items()
-                    if s.ultimo_uso < (com_login if s.cliente is not None else sem_login)]:
+                    if self._comeco(s) < (com_login if s.cliente is not None else sem_login)]:
             del self._dados[id_]
+
+    @staticmethod
+    def _comeco(sessao):
+        """De onde conta o prazo: o login, para quem entrou (usar o site não estica); o último uso, para quem não
+        voltou do Mercado Livre. Entre o fim do login e a troca do código, ainda não há hora do login: vale o uso."""
+        if sessao.cliente is not None and sessao.login_em is not None:
+            return sessao.login_em
+        return sessao.ultimo_uso

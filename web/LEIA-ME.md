@@ -21,7 +21,8 @@ Plano, custos e decisões em [docs/07-fase-3-plano.md](../docs/07-fase-3-plano.m
 6. **Contagens do beta:** `/contagens` mostra quantos logins e relatórios (sem erro e com erro) o site teve por dia
    e quantos anúncios leu, guardados sem dizer de quem, e quantas contas têm relatório guardado e quantos anúncios
    cada uma tem (menor, média e maior), tirados do histórico na hora em que a página abre. Só abre para as contas
-   de `ORZY_CONTAS_ADMIN`: para as outras, a página não existe (404), e nenhum link leva a ela.
+   de `ORZY_CONTAS_ADMIN`: para as outras, a página não existe (404), e nenhum link leva a ela. As contagens com mais
+   de 365 dias são apagadas junto com o histórico antigo.
 
 O site usa as mesmas regras e a mesma coleta do PC (`painel-ml/analise.py` e `painel-ml/meus_anuncios.py`).
 
@@ -40,7 +41,7 @@ O site usa as mesmas regras e a mesma coleta do PC (`painel-ml/analise.py` e `pa
 | `ORZY_HOST` | não | Endereço onde o servidor escuta (padrão: `127.0.0.1`). Na hospedagem, `0.0.0.0` |
 | `PORT` ou `ORZY_PORTA` | não | Porta (padrão: 8000). A hospedagem costuma definir `PORT` |
 | `ORZY_MAX_ANUNCIOS` | não | Quantos anúncios um relatório lê, no máximo (padrão: 300) |
-| `ORZY_HORAS_SESSAO` | não | Depois de quantas horas sem uso a sessão some (padrão: 8) |
+| `ORZY_HORAS_SESSAO` | não | Quantas horas a sessão com login dura, contadas do login, mesmo em uso (padrão: 8). É também o prazo do cookie. Mais de 8 só depois de mudar a Política de Privacidade, que promete 8 |
 | `ORZY_HISTORICO` | não | Onde fica o histórico: `sqlite` (padrão, no arquivo de `ORZY_BANCO`) ou `firestore` (Google Cloud, para o Cloud Run) |
 | `ORZY_FIRESTORE_PROJETO` | com `firestore` | Id do projeto no Google Cloud |
 | `ORZY_CONTAS_ADMIN` | não | Números das contas do Mercado Livre que abrem `/contagens`, separados por vírgula. É o ID que o `conectar.py` do PC mostra em "Conectado como ... (ID ...)". Sem ela, ninguém abre |
@@ -76,7 +77,8 @@ de internet.
   o papel Cloud Datastore User (`roles/datastore.user`); política de TTL no campo `expira_em` da coleção
   `relatorios` (apaga o que passou de 365 dias, além da limpeza diária do servidor); e, de preferência, os campos
   `anuncios` e `resumo` sem índice (a busca não usa esses campos, e cada índice custa uma escrita a mais). As
-  contagens do beta ficam na coleção `contagens`, um documento por dia, só com números; essa coleção não tem TTL.
+  contagens do beta ficam na coleção `contagens`, um documento por dia, só com números; a limpeza diária do servidor
+  apaga as contagens com mais de 365 dias (essa coleção não precisa de TTL).
 - **`ORZY_CONTAS_ADMIN`** com o ID da conta do Nicolas no Mercado Livre, para ele abrir `/contagens`.
 - **HTTPS na frente** (a hospedagem resolve), e a Redirect URI do site cadastrada no app.
 - **Política de Privacidade e Termos de Uso completos** (rascunhos em `docs/legal/`; o que falta preencher está em
@@ -89,7 +91,7 @@ de internet.
 |---|---|
 | `configuracao.py` | Lê as variáveis de ambiente e avisa o que falta |
 | `login.py` | Entrar com o Mercado Livre (PKCE e conferência do estado) |
-| `sessoes.py` | Sessões na memória, com prazo (8 horas com login, 15 minutos sem), limite para as sem login e código novo depois do login |
+| `sessoes.py` | Sessões na memória, com prazo (8 horas depois do login, mesmo em uso; 15 minutos sem uso para quem não voltou do Mercado Livre), limite para as sem login e código novo depois do login |
 | `relatorios.py` | Gera o relatório em segundo plano e guarda o andamento |
 | `historico.py` | Histórico em SQLite: salvar, listar, ver, achar o anterior, apagar e apagar os antigos; e as contagens do beta |
 | `historico_firestore.py` | O mesmo histórico e as mesmas contagens, no Firestore (Cloud Run), pela API REST e com o login do servidor de metadados |
@@ -99,5 +101,5 @@ de internet.
 | `paginas.py` | HTML das páginas (todo texto do Mercado Livre passa por escape) |
 | `legal.py` | Mostra a Política de Privacidade e os Termos de Uso a partir do Markdown de `docs/legal/`, com escape |
 | `app.py` | Rotas, cookies, cabeçalhos de segurança e conferência da origem dos pedidos |
-| `servidor.py` | Liga o servidor HTTP, não registra a busca (`?code=...`) no log, fecha conexões paradas depois de 60 segundos e apaga o histórico antigo todo dia |
+| `servidor.py` | Liga o servidor HTTP, não registra a busca (`?code=...`) no log, fecha conexões paradas depois de 60 segundos, apaga o histórico e as contagens antigas todo dia e as sessões vencidas a cada minuto, mesmo sem ninguém usando o site |
 | `static/` | Folha de estilo, script da página de andamento, ícones e imagem de compartilhamento da marca Anel e a fonte Geist (licença em `OFL-Geist.txt`) |

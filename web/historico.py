@@ -12,6 +12,8 @@ from datetime import datetime, timedelta, timezone
 
 import analise
 
+from . import contagens
+
 DIAS_DE_HISTORICO = 365  # relatórios mais antigos são apagados ao ligar o servidor e depois uma vez por dia
 
 ESQUEMA = """
@@ -123,11 +125,16 @@ class Historico:
             return con.execute("DELETE FROM relatorios WHERE ml_user_id = ?", (int(ml_user_id),)).rowcount
 
     def apagar_antigos(self, dias):
-        limite = (self._agora() - timedelta(days=dias)).isoformat(timespec="seconds")
+        """Apaga os relatórios e os dias de contagem do beta com mais de `dias` dias. Devolve quantos relatórios."""
+        limite = self._agora() - timedelta(days=dias)
+        antes = limite.isoformat(timespec="seconds")
         with self._conectar() as con:
             con.execute("DELETE FROM anuncios WHERE relatorio_id IN "
-                        "(SELECT id FROM relatorios WHERE criado_em < ?)", (limite,))
-            return con.execute("DELETE FROM relatorios WHERE criado_em < ?", (limite,)).rowcount
+                        "(SELECT id FROM relatorios WHERE criado_em < ?)", (antes,))
+            apagados = con.execute("DELETE FROM relatorios WHERE criado_em < ?", (antes,)).rowcount
+            # Dia de Brasília. Sai também o dia em que o limite cai: ele já tem contagens mais velhas que o limite.
+            con.execute("DELETE FROM contagens WHERE dia <= ?", (contagens.hoje(limite),))
+        return apagados
 
     # ------------------------------------------------------------ contagens do beta (ver contagens.py)
 

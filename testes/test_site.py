@@ -167,17 +167,35 @@ class ConfiguracaoTests(unittest.TestCase):
 
 
 class SessoesTests(unittest.TestCase):
-    def test_sessao_some_depois_do_prazo_sem_uso(self):
+    def test_sessao_com_login_acaba_no_prazo_contado_do_login_mesmo_em_uso(self):
+        # A Política de Privacidade promete: no máximo 8 horas depois de entrar. Usar o site não estica o prazo.
         relogio = [1000.0]
-        guardadas = sessoes.Sessoes(horas=1, agora=lambda: relogio[0])
+        guardadas = sessoes.Sessoes(horas=8, agora=lambda: relogio[0])
         sessao = guardadas.criar()
-        sessao.cliente = object()  # já entrou com o Mercado Livre
-        relogio[0] += 3000
-        self.assertIsNotNone(guardadas.obter(sessao.id))  # o uso renova o prazo
-        relogio[0] += 3000
-        self.assertIsNotNone(guardadas.obter(sessao.id))
-        relogio[0] += 3601 * 2
-        self.assertIsNone(guardadas.obter(sessao.id))
+        relogio[0] += 60  # um minuto no Mercado Livre
+        sessao.cliente = object()  # o login terminou
+        sessao = guardadas.trocar_id(sessao.id)
+        for _ in range(7):
+            relogio[0] += 3600  # usada a cada hora
+            self.assertIsNotNone(guardadas.obter(sessao.id))
+        relogio[0] += 3599
+        self.assertIsNotNone(guardadas.obter(sessao.id), "1 segundo antes das 8 horas")
+        relogio[0] += 2
+        self.assertIsNone(guardadas.obter(sessao.id), "8 horas depois do login, mesmo usada a cada hora")
+
+    def test_limpeza_apaga_a_sessao_vencida_sem_pedido_e_antes_do_prazo(self):
+        # Sem ninguém usando o site, a sessão também sai da memória: o servidor chama limpar() a cada minuto.
+        relogio = [1000.0]
+        guardadas = sessoes.Sessoes(horas=8, agora=lambda: relogio[0])
+        sessao = guardadas.criar()
+        sessao.cliente = object()
+        sessao = guardadas.trocar_id(sessao.id)
+        relogio[0] += 8 * 3600 - 61
+        guardadas.limpar(antecedencia=60)
+        self.assertIn(sessao.id, guardadas._dados, "vence daqui a 61 segundos: fica para a próxima limpeza")
+        relogio[0] += 2
+        guardadas.limpar(antecedencia=60)
+        self.assertNotIn(sessao.id, guardadas._dados, "venceria antes da próxima limpeza: sai agora")
 
     def test_sessao_sem_login_some_em_15_minutos_e_tem_limite(self):
         relogio = [1000.0]
@@ -265,6 +283,15 @@ class ContratoDoHistorico:
         self.historico.somar_contagens("2026-10-16", {"anuncios_lidos": 40})
         self.assertEqual(self.historico.ler_contagens(), {"2026-10-15": {"logins": 3, "relatorios_prontos": 1},
                                                           "2026-10-16": {"anuncios_lidos": 40}})
+
+    def test_apaga_contagens_mais_velhas_que_o_prazo_pelo_dia_de_brasilia(self):
+        for dia in ("2025-10-13", "2025-10-14", "2025-10-15", "2026-10-14"):
+            self.historico.somar_contagens(dia, {"logins": 1})
+        # 01h00 em UTC ainda é 14/10 em Brasília: o limite de 365 dias cai em 14/10/2025, às 22h00 de Brasília.
+        # O dia 14/10/2025 já tem contagens mais velhas que o limite e sai inteiro; o 15/10/2025 fica.
+        self.relogio = datetime(2026, 10, 15, 1, 0, tzinfo=timezone.utc)
+        self.historico.apagar_antigos(365)
+        self.assertEqual(self.historico.ler_contagens(), {"2025-10-15": {"logins": 1}, "2026-10-14": {"logins": 1}})
 
     def test_anuncios_do_ultimo_relatorio_de_cada_conta(self):
         self.assertEqual(self.historico.ultimo_total_de_cada_conta(), [])
@@ -1007,7 +1034,7 @@ class ConexaoParadaTests(SiteBase):
         self.assertEqual(erros, [])
 
 
-class LimpezaDoHistoricoTests(unittest.TestCase):
+class LimpezasDoServidorTests(unittest.TestCase):
     def test_apaga_o_historico_antigo_todo_dia_e_segue_depois_de_um_erro(self):
         parar = threading.Event()
         chamadas = []
@@ -1024,6 +1051,43 @@ class LimpezaDoHistoricoTests(unittest.TestCase):
         with self.assertLogs(level="ERROR"):
             servidor.apagar_antigos_todo_dia(HistoricoFalso(), parar, intervalo=0.01)
         self.assertEqual(chamadas, [365, 365, 365], "um erro não pode parar a limpeza dos dias seguintes")
+
+    def test_apaga_as_sessoes_vencidas_a_cada_intervalo_e_segue_depois_de_um_erro(self):
+        parar = threading.Event()
+        chamadas = []
+
+        class SessoesFalsas:
+            def limpar(self, antecedencia):
+                chamadas.append(antecedencia)
+                if len(chamadas) == 1:
+                    raise RuntimeError("falha qualquer")
+                if len(chamadas) == 3:
+                    parar.set()
+
+        with self.assertLogs(level="ERROR"):
+            servidor.apagar_sessoes_vencidas_sempre(SessoesFalsas(), parar, intervalo=0.01)
+        self.assertEqual(chamadas, [0.01, 0.01, 0.01], "apaga um intervalo antes do prazo, e um erro não para")
+
+    def test_o_servidor_liga_as_duas_limpezas(self):
+        parar = threading.Event()
+        self.addCleanup(parar.set)
+        historico_limpo, sessoes_limpas = threading.Event(), threading.Event()
+
+        class HistoricoFalso:
+            def apagar_antigos(self, dias):
+                historico_limpo.set()
+                return 0
+
+        class SessoesFalsas:
+            def limpar(self, antecedencia):
+                sessoes_limpas.set()
+
+        class SiteFalso:
+            historico, sessoes = HistoricoFalso(), SessoesFalsas()
+
+        servidor.ligar_limpezas(SiteFalso(), parar)
+        self.assertTrue(historico_limpo.wait(5), "a limpeza do histórico não ligou")
+        self.assertTrue(sessoes_limpas.wait(5), "a limpeza das sessões não ligou")
 
 
 if __name__ == "__main__":

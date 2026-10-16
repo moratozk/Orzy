@@ -67,6 +67,8 @@ de agora, inclusive o da página inicial, é só uma base, nada perto do modelo 
 - [x] Contagens do beta no site: a página `/contagens`, só para a conta do Nicolas, mostra contas com relatório
   guardado, anúncios por conta, logins e relatórios sem erro e com erro (só contagens, sem guardar dado novo do
   vendedor). Com isso, o site base está pronto
+- [x] Ajustes pedidos pela revisão da Política de Privacidade (16/10/2026): a sessão com login acaba 8 horas depois
+  do login, mesmo em uso, e as contagens do beta são apagadas depois de 12 meses
 - [ ] Visual final: refazer as páginas com a identidade escolhida, até um site realmente bonito
 - [ ] Escolher a hospedagem e adaptar o código a ela
 - [ ] Antes de abrir ao público: monitoramento do servidor, cópia de segurança do histórico e aviso de falha

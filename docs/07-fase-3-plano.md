@@ -30,7 +30,7 @@ estão em [docs/legal/](legal/LEIA-ME.md). A recomendação de hospedagem, com c
 - Contagens para o beta: a página `/contagens`, que só abre para a conta do Nicolas (`ORZY_CONTAS_ADMIN`), mostra
   logins, relatórios sem erro e com erro e anúncios lidos por dia, guardados sem dizer de quem, e as contas com
   relatório guardado e os anúncios por conta, tirados do histórico na hora em que a página abre. Nada novo do
-  vendedor é guardado.
+  vendedor é guardado, e as contagens com mais de 12 meses são apagadas, como o histórico.
 
 Fica de fora (ver o [02-roadmap.md](02-roadmap.md)): alertas automáticos e a Orzy Intelligence (fase 4), custos e
 margem (fase 5), alterar anúncios (fase 6), Shopee (fase 7), cobrança e cadastro com senha (o login é só pelo
@@ -57,29 +57,34 @@ Mercado Livre). As sugestões do relatório são regras fixas: o site não as ch
   O PC continua igual: os 64 testes antigos passam sem mudança.
 - `testes/firestore_simulado.py`: Firestore e servidor de metadados do Google simulados, para testar o histórico
   no Firestore sem conta e sem internet.
-- `testes/test_site.py`: 79 testes contra o Mercado Livre e o Firestore simulados. Cobrem o login inteiro, o
-  estado do OAuth, o escape de títulos, o CSV com BOM, o isolamento entre contas, token vencido, pedido de outro
-  site, histórico, cabeçalhos de segurança, uma ida e volta por HTTP real (com `HEAD`), a página inicial, os textos
-  legais (com escape), o rodapé, a hora do relatório em horário de Brasília, a limpeza diária do histórico, o
-  `robots.txt`, a descrição para buscadores, as sessões sem login (prazo e limite), o código novo da sessão depois
-  do login, a conexão parada, a palavra sem espaço que quebra no celular, a comparação com o relatório anterior,
-  a busca e o filtro da tabela, a logo, os ícones e a fonte da marca, o histórico no Firestore (os mesmos testes
-  do SQLite, mais token, prazo para o TTL e Firestore fora do ar) e as contagens do beta (o que conta, nos dois
-  históricos, a página só para quem pode e uma contagem que falha sem atrapalhar o login nem o relatório).
-- Verificado: 143 testes passam no Python 3.13 e no 3.10 (64 do PC e 79 do site); pyflakes limpo. Quebrar de
-  propósito a checagem do estado, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a
-  limpeza diária, o `HEAD`, o `robots.txt`, o prazo e o limite das sessões sem login, o código novo depois do
-  login, o tempo máximo de uma conexão, a escolha do relatório anterior, o escape dos títulos antigos, a página
-  de erro, a busca (acento, maiúscula, ordem das palavras, situação, escape), as contagens do beta (o que conta,
-  o dia de Brasília, somar em vez de trocar, o último relatório de cada conta, quem abre a página) ou, no
-  Firestore, a conta, o período, o prazo do TTL, o token, os lotes de apagar, a ordem do resumo ou a máscara que
-  não deixa uma contagem apagar as outras faz os testes falharem.
+- `testes/test_site.py`: 84 testes contra o Mercado Livre e o Firestore simulados. Cobrem o login inteiro, o estado
+  do OAuth, o escape de títulos, o CSV com BOM, o isolamento entre contas, token vencido, pedido de outro site,
+  histórico, cabeçalhos de segurança, uma ida e volta por HTTP real (com `HEAD`), a página inicial, os textos legais
+  (com escape), o rodapé, a hora do relatório em horário de Brasília, a limpeza diária do histórico, o `robots.txt`,
+  a descrição para buscadores, a sessão com login que acaba 8 horas depois do login (mesmo em uso, e apagada a cada
+  minuto sem esperar um pedido), as sessões sem login (prazo e limite), o código novo da sessão depois do login, a
+  conexão parada, a palavra sem espaço que quebra no celular, a comparação com o relatório anterior, a busca e o
+  filtro da tabela, a logo, os ícones e a fonte da marca, o histórico no Firestore (os mesmos testes do SQLite, mais
+  token, prazo para o TTL e Firestore fora do ar) e as contagens do beta (o que conta, nos dois históricos, a página
+  só para quem pode, uma contagem que falha sem atrapalhar o login nem o relatório e os dias com mais de 12 meses
+  apagados).
+- Verificado: 148 testes passam no Python 3.13 e no 3.10 (64 do PC e 84 do site); pyflakes limpo. Quebrar de
+  propósito a checagem do estado, o escape (de títulos e dos textos legais), o rodapé, a hora de Brasília, a limpeza
+  diária, o `HEAD`, o `robots.txt`, o prazo da sessão com login contado do login, a limpeza das sessões a cada
+  minuto, o prazo e o limite das sessões sem login, o código novo depois do login, o tempo máximo de uma conexão, a
+  escolha do relatório anterior, o escape dos títulos antigos, a página de erro, a busca (acento, maiúscula, ordem
+  das palavras, situação, escape), as contagens do beta (o que conta, o dia de Brasília, somar em vez de trocar, o
+  último relatório de cada conta, quem abre a página, apagar os dias antigos) ou, no Firestore, a conta, o período, o
+  prazo do TTL, o token, os lotes de apagar, a ordem do resumo ou a máscara que não deixa uma contagem apagar as
+  outras faz os testes falharem.
 
 Limites da primeira versão (propostos, a confirmar):
 - **Uma instância só**: as sessões e os relatórios em andamento ficam na memória do servidor.
 - **Até 300 anúncios por relatório**, com aviso na tela quando passa disso.
 - **Dois relatórios ao mesmo tempo** no servidor inteiro, e um por vez em cada conexão (sessão).
-- **Histórico apagado após 365 dias** (o servidor confere ao ligar e depois uma vez por dia).
+- **Histórico e contagens do beta apagados após 365 dias** (o servidor confere ao ligar e depois uma vez por dia).
+- **Sessão com login: 8 horas contadas do login**, mesmo em uso. O servidor apaga as vencidas a cada minuto, mesmo
+  sem ninguém usando o site, porque a Política promete tirar o login da memória até 8 horas depois da entrada.
 - **Sem refresh token**: quando o login vence (6 horas), a pessoa entra de novo.
 - **Sessões sem login** (quem clicou em Conectar e não voltou do Mercado Livre) somem em 15 minutos, no máximo
   1000 de uma vez. Quem entra ganha um código de sessão novo, e uma conexão parada fecha em 60 segundos.
@@ -178,15 +183,16 @@ Nenhuma é urgente: todas ficam para quando o site estiver quase pronto.
    plano Blaze com cartão), ou Render (cerca de R$ 37/mês fixos). Com o Google, também a porta de entrada: A, B ou C.
 2. Aprovar o passo 3 (mudança no app do Mercado Livre e novo Client Secret, com o PC rodando `--refazer`).
 3. Limites da primeira versão: 300 anúncios por relatório, histórico por 12 meses, uma instância.
-4. Nome e contato do responsável e um e-mail de contato para a Política de Privacidade e os Termos.
+4. Nome e CPF ou CNPJ do responsável para a Política de Privacidade e os Termos (o e-mail de contato já está:
+   orzy.suporte@gmail.com).
 5. Quando: beta fechado com 3 a 5 vendedores, ou direto ao público.
 6. Revisão de advogado antes do público: sim ou não.
 
 ## Próximo passo
 
 - Nicolas: nada agora. As decisões acima ficam para quando o site estiver quase pronto.
-- Site (thread "Site: código e login"): terminar o site base, nos passos aprovados em 15/10/2026 (segurança,
-  páginas internas no celular, comparação de relatórios e histórico no Firestore). Depois, o visual final com a
-  identidade que o Nicolas escolher. As mudanças da hospedagem entram quando ela for escolhida.
-- Hospedagem e domínio: parada até o lançamento. Nada de DNS, cobrança ou mudança no app sem o ok dele.
+- Site (thread "Site: código e login"): o site base está pronto no PR #5 (rascunho). Próximo: o visual final, quando
+  a thread da marca entregar a prévia e o Nicolas aprovar. As mudanças da hospedagem entram quando ela for escolhida.
+- Hospedagem e domínio: planeja no papel o monitoramento, a cópia de segurança do histórico e o aviso de falha, com
+  custo em reais. Nada de DNS, cobrança ou mudança no app sem o ok dele.
 - Privacidade e termos: preencher os campos marcados quando o Nicolas mandar os dados.

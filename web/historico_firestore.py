@@ -25,6 +25,7 @@ from datetime import datetime, timedelta, timezone
 
 import analise
 
+from . import contagens
 from .historico import COLUNAS_ANUNCIO, DIAS_DE_HISTORICO
 
 URL_FIRESTORE = "https://firestore.googleapis.com/v1"
@@ -243,8 +244,15 @@ class HistoricoFirestore:
         return self._apagar_documentos(self._buscar(_filtro("ml_user_id", "EQUAL", int(ml_user_id)), ("__name__",)))
 
     def apagar_antigos(self, dias):
+        """Apaga os relatórios e os dias de contagem do beta com mais de `dias` dias. Devolve quantos relatórios."""
         limite = self._agora() - timedelta(days=dias)
-        return self._apagar_documentos(self._buscar(_filtro("criado_em", "LESS_THAN", limite), ("__name__",)))
+        apagados = self._apagar_documentos(self._buscar(_filtro("criado_em", "LESS_THAN", limite), ("__name__",)))
+        # Um documento por dia de Brasília ("2026-10-15"): o nome compara como data. São poucos, então lê todos.
+        # Sai também o dia em que o limite cai: ele já tem contagens mais velhas que o limite.
+        dia_limite = contagens.hoje(limite)
+        self._apagar_documentos([d for d in self._buscar(None, ("__name__",), colecao=COLECAO_CONTAGENS)
+                                 if d["name"].rsplit("/", 1)[1] <= dia_limite])
+        return apagados
 
     # ------------------------------------------------------------ contagens do beta (ver contagens.py)
 

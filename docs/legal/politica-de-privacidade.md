@@ -17,10 +17,12 @@ de Proteção de Dados Pessoais (LGPD, Lei nº 13.709/2018).
   dos anúncios. Ele não altera nada na sua conta.
 - O acesso à sua conta fica **só na memória do servidor**, enquanto a sua sessão dura. Ele não é gravado em disco
   nem no seu navegador, e o Orzy não guarda o código que renovaria esse acesso.
-- O Orzy guarda um **histórico** dos seus relatórios (número e título de cada anúncio, visitas, vendas e situação)
-  por até 12 meses. Você apaga tudo quando quiser, com um clique.
+- O Orzy guarda um **histórico** dos seus relatórios (número e título de cada anúncio, visitas, vendas e situação) por
+  até 12 meses e mostra o que mudou de um relatório para o outro. Você apaga tudo quando quiser, com um clique.
 - O Orzy **não guarda dados dos seus compradores** nem os dados do seu cadastro no Mercado Livre (nome, e-mail,
   CPF ou CNPJ, endereço, telefone).
+- Para acompanhar a fase de testes, o Orzy conta quantos logins e relatórios o site tem por dia, **só em números**, sem
+  guardar de quem são.
 - O Orzy **não vende** dados, não mostra propaganda e não usa cookies de propaganda nem de estatística.
 - O Orzy **não é o Mercado Livre** e não tem ligação com ele.
 
@@ -78,7 +80,7 @@ não vai para a planilha e não é guardado.
 Nesse caso, o Orzy trata os dados em seu nome (como "operador", na LGPD), só para fazer a contagem de vendas que você
 pediu. O responsável por esses dados é você, como vendedor.
 
-### 2.4 Cookie e registros de acesso
+### 2.4 Cookie, registros de acesso e contagens
 
 - **Cookie de sessão:** o Orzy usa um único cookie, `orzy_sessao`, com um código aleatório que liga o seu navegador
   à sua sessão. Ele é necessário para o login funcionar e deixa de valer quando você clica em **Sair** ou, no máximo,
@@ -87,7 +89,13 @@ pediu. O responsável por esses dados é você, como vendedor.
   de erro. Ele não anota o código de acesso do Mercado Livre. Esses registros servem para manter o site funcionando
   e investigar problemas.
 - **Registros da hospedagem:** a empresa que hospeda o Orzy registra dados técnicos de cada acesso, como o endereço IP,
-  a data e a hora, a página e o navegador, para segurança e funcionamento. [CONFIRMAR com a hospedagem escolhida.]
+  a data e a hora, o endereço da página (com o que você digitar na busca de anúncios) e o navegador, para segurança e
+  funcionamento. [CONFIRMAR com a hospedagem escolhida.]
+- **Contagens de uso:** o Orzy soma, por dia, quantos logins o site teve, quantos relatórios ficaram prontos, quantos
+  deram erro e quantos anúncios foram lidos. São só números: não guardam a sua conta, o seu apelido nem os seus
+  anúncios. Numa página que só abre para a conta do responsável, ele também vê quantas contas têm relatório guardado e
+  quantos anúncios elas têm (o menor, a média e o maior), calculado na hora a partir do histórico e sem mostrar de quem
+  são. Isso serve para acompanhar a fase de testes.
 
 ### 2.5 Quando você escreve para o Orzy
 
@@ -98,9 +106,10 @@ isso só para responder.
 
 | Uso | Base legal na LGPD |
 |---|---|
-| Conectar a sua conta, gerar relatórios e sugestões, guardar e mostrar o histórico | Execução do contrato que você aceita ao usar o Orzy (art. 7º, V) |
+| Conectar a sua conta, gerar relatórios e sugestões, guardar e mostrar o histórico e o que mudou entre os relatórios | Execução do contrato que você aceita ao usar o Orzy (art. 7º, V) |
 | Contar as vendas com os dados dos pedidos | O Orzy age em seu nome, como operador. A base legal é a sua, como vendedor e responsável por esses dados |
 | Cookie de sessão e registros do servidor e da hospedagem | Legítimo interesse do Orzy em manter o site seguro e funcionando (art. 7º, IX) e, quando a lei exigir, cumprimento de obrigação legal (art. 7º, II) |
+| Contagens de uso e os números do histórico de todos juntos, para acompanhar a fase de testes | Legítimo interesse do Orzy em saber se o site funciona e quanto ele é usado (art. 7º, IX) |
 | Responder mensagens e pedidos sobre os seus dados | Execução do contrato (art. 7º, V) e cumprimento de obrigação legal (art. 7º, II) |
 | Guardar o registro dos pedidos sobre os seus dados e das respostas | Exercício regular de direitos (art. 7º, VI) |
 
@@ -109,8 +118,8 @@ isso só para responder.
 - **Mercado Livre:** para ler os seus dados, o Orzy faz pedidos ao Mercado Livre com o acesso que você autorizou.
   O Mercado Livre tem a própria
   [Declaração de Privacidade](https://www.mercadolivre.com.br/privacidade/declaracao-privacidade).
-- **Hospedagem:** [PREENCHER: nome da empresa de hospedagem], que roda o servidor e guarda o histórico em nome do Orzy,
-  seguindo as instruções do Orzy.
+- **Hospedagem:** [PREENCHER: nome da empresa de hospedagem], que roda o servidor e guarda o histórico e as contagens em
+  nome do Orzy, seguindo as instruções do Orzy.
 - **E-mail:** o Gmail, do Google, guarda as mensagens que você manda para o Orzy e as respostas.
 - **Autoridades:** quando a lei ou uma ordem judicial obrigar.
 
@@ -134,6 +143,7 @@ transferência; ver o LEIA-ME.]
 | Número do usuário e apelido | Na sessão, até ela acabar. O número também fica no histórico, ligado aos seus relatórios. |
 | Relatório completo (com preço, estoque, link e sugestões) | Na memória do servidor, enquanto a sessão dura, para você ver o relatório e baixar a planilha. |
 | Histórico: de cada relatório, a data, o período, o número da sua conta, quantos anúncios e quantos em cada situação; de cada anúncio, o número, o título, as visitas, as vendas, a situação e a pontuação das sugestões | Até você apagar, ou 12 meses depois de cada relatório. |
+| Contagens de uso por dia (só números, sem conta, apelido nem anúncio) | 12 meses. |
 | Dados dos compradores e os outros dados do seu cadastro | Não são guardados. |
 | Registros do servidor e da hospedagem | [CONFIRMAR: prazo da hospedagem escolhida.] |
 | Cópias de segurança do servidor | [CONFIRMAR: se a hospedagem faz cópias, por quantos dias um dado apagado continua nelas.] |

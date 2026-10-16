@@ -18,7 +18,8 @@ O Orzy se conecta à sua conta de vendedor do Mercado Livre, com permissão só 
 - os seus anúncios ativos, com visitas, vendas e conversão do período que você escolher;
 - a nota de qualidade que o Mercado Livre dá a cada anúncio;
 - o que mudar em cada anúncio, começando pelos que mais precisam;
-- um histórico dos seus relatórios e a planilha (CSV) de cada relatório novo.
+- um histórico dos seus relatórios, com o que mudou em cada anúncio desde o relatório anterior do mesmo período, e a
+  planilha (CSV) de cada relatório novo.
 
 O Orzy não altera anúncios, preços nem estoque, não responde perguntas e não mexe em vendas nem em pagamentos.
 
@@ -67,6 +68,8 @@ cobrado sem aceitar.
   essas regras.
 - Os números vêm do Mercado Livre. As visitas podem levar até 48 horas para aparecer lá. O Orzy não garante que os
   dados do Mercado Livre estejam completos ou certos.
+- A comparação com o relatório anterior mostra o que mudou, não o porquê: visitas e vendas mudam por muitos motivos,
+  como época do ano, preço e concorrência.
 - **Atualização dos dados:** os dados são buscados no Mercado Livre na hora em que você gera o relatório. Os relatórios
   do histórico mostram como os anúncios estavam no dia em que foram gerados e não são atualizados depois.
 

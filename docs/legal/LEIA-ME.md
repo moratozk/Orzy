@@ -57,19 +57,25 @@ quanto tempo ela guarda registros de acesso e cópias de segurança (itens 2.4 e
   LGPD: o consentimento não cobre quem só abre a página inicial, e "necessário para o contrato" é fraco para esse uso.
   Então ele só serve com o ok de um advogado. Ligar o domínio direto no Cloud Run não resolve, porque é um recurso em
   teste, e nenhum contrato de dados do Google vale para ele.
-- **Se for Google, mudam também nos textos:** a sessão acaba se o site ficar uns 15 minutos sem nenhum uso, porque o
-  servidor desliga; os registros do servidor (IP, data e página) ficam 30 dias no Cloud Logging, que por padrão guarda
-  "em qualquer centro de dados do mundo", então ou a configuração os põe em São Paulo, ou a Política diz que eles podem
-  ir para fora do Brasil com as cláusulas da ANPD; a exclusão nos sistemas do Google termina em até 180 dias; e, só com
-  o Firebase Hosting, o cookie passa a se chamar `__session`. Os registros de pedidos do Cloud Run guardam o endereço
-  completo, com o que vem depois do `?` (a busca de anúncios e o `?code=` da volta do Mercado Livre), além do IP e do
-  navegador. A Política (item 2.4) já conta a busca; o `code` sozinho não abre a conta, porque o login usa PKCE e o
-  Client Secret, mas a hospedagem pode deixar esses registros de fora se preferir. Na cobrança por pedido, o padrão do
-  Cloud Run, a CPU só funciona durante os pedidos, e a limpeza das sessões a cada minuto para entre um pedido e outro.
-  Sem instância mínima, a sessão vencida fica no máximo 15 minutos além das 8 horas, porque o servidor desliga até 15
-  minutos depois do último pedido e as sessões somem com ele; o código de acesso do Mercado Livre, que dura 6 horas, já
-  venceu antes. Com instância mínima, a sessão vencida pode ficar na memória até o próximo pedido: então é preciso a
-  cobrança por instância (CPU sempre ligada, custa mais) ou mudar a Política.
+- **Se for Google, mudam também nos textos** (plano de monitoramento da thread de hospedagem, 16/10/2026, em
+  `/mnt/project-files/orzy/hospedagem-monitoramento.md`): os registros de pedidos do Cloud Run, que guardariam o IP, o
+  endereço com a busca e o `?code=` e o navegador, ficam de fora. Então, no item 2.4, a frase dos registros da
+  hospedagem passa a dizer que o Google recebe o endereço IP para entregar as páginas, mas o Orzy não guarda IP, o
+  endereço com a busca nem o navegador; a frase dos registros do servidor fica como está. No item 6, os registros do
+  servidor ficam 30 dias num depósito em São Paulo, e o histórico e as contagens ganham uma cópia de segurança por dia,
+  guardada 7 dias em São Paulo: um dado apagado pode ficar até 7 dias nas cópias, e depois o Google conclui a exclusão
+  em até 180 dias. Um robô abre `/saude` a cada 5 minutos, então o servidor não desliga quando ninguém usa o site, e a
+  sessão dura até **Sair** ou 8 horas depois do login, como a Política já diz (ela ainda acaba se o servidor reiniciar).
+  Na cobrança por pedido, o padrão do Cloud Run, a CPU só funciona durante algum pedido, e a limpeza das sessões anda
+  com os pedidos do robô; para as 8 horas valerem, a thread do código faz a limpeza na nuvem apagar as sessões 6 minutos
+  antes do prazo, no lançamento. Os avisos de erro por e-mail ao responsável não trazem dado de vendedor; se um dia
+  trouxerem, a Política precisa contar. Só com o Firebase Hosting, o cookie passa a se chamar `__session`.
+- **Registro de quem apagou o histórico** (proposta da thread de hospedagem, aceita por esta thread em 16/10/2026):
+  quando alguém apaga o histórico, o número da conta e a hora ficam 8 dias num registro à parte, em São Paulo, só para
+  apagar de novo os relatórios dessa conta se for preciso voltar uma cópia de segurança. Sem ele, voltar uma cópia
+  traria de volta relatórios que a pessoa apagou. Quando o código fizer isso, entram na Política uma frase no item 2.4,
+  uma linha no item 3 (cumprimento de obrigação legal: garantir a eliminação pedida, arts. 7º, II, e 18, VI) e uma linha
+  no item 6 (8 dias).
 
 **Site: código e login:** os itens da seção seguinte.
 
@@ -231,7 +237,7 @@ Consultadas em 15/10/2026.
 - [Cloud Data Processing Addendum do Google Cloud](https://cloud.google.com/terms/data-processing-addendum) (lido pela
   thread de hospedagem)
 - [Onde o Cloud Logging guarda os registros](https://docs.cloud.google.com/logging/docs/region-support)
-- [Cobrança do Cloud Run: por pedido (padrão), a CPU só durante os pedidos; instância parada no máximo 15 minutos](https://docs.cloud.google.com/run/docs/configuring/cpu-allocation)
+- [Cobrança do Cloud Run: por pedido (padrão), a CPU só durante os pedidos](https://docs.cloud.google.com/run/docs/configuring/cpu-allocation)
   (lido em 16/10/2026)
 - [Transparência nas transferências pela Resolução CD/ANPD nº 19/2024](https://www.mattosfilho.com.br/en/unico/regulates-international-data-transfers/)
 - [Política de Privacidade do Google: "servidores em todo o mundo"](https://policies.google.com/privacy?hl=pt-BR)

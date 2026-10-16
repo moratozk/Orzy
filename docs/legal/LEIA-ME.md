@@ -1,6 +1,6 @@
 # Privacidade e termos do Orzy
 
-**Situação (15/10/2026):** rascunhos, escritos pelo Claude a partir do código. Nada está publicado.
+**Situação (16/10/2026):** rascunhos, escritos pelo Claude a partir do código. Nada está publicado.
 Não é parecer jurídico: antes de abrir o site ao público, o ideal é um advogado revisar.
 
 | Arquivo | O que é |
@@ -8,9 +8,8 @@ Não é parecer jurídico: antes de abrir o site ao público, o ideal é um advo
 | [politica-de-privacidade.md](politica-de-privacidade.md) | Quais dados o site usa, para que, por quanto tempo e os direitos do vendedor (LGPD) |
 | [termos-de-uso.md](termos-de-uso.md) | As regras de uso do site: o que ele faz, o que não faz, responsabilidades e lei aplicável |
 
-Os textos descrevem o site como ele está no PR #5 (rascunho, commit `2c35b04`, conferido em 15/10/2026). Se o código
-mudar nos pontos da tabela "De onde vem cada frase", os textos mudam junto. Duas frases ainda esperam um ajuste no
-código: ver "Falta no código" abaixo.
+Os textos descrevem o site como ele está no PR #5 (rascunho, commit `9c3bfdc`, conferido em 16/10/2026). Se o código
+mudar nos pontos da tabela "De onde vem cada frase", os textos mudam junto.
 
 Para achar o que falta, procure por `[PREENCHER` (só o Nicolas sabe) e `[CONFIRMAR` (depende de outra frente).
 
@@ -65,7 +64,12 @@ quanto tempo ela guarda registros de acesso e cópias de segurança (itens 2.4 e
   o Firebase Hosting, o cookie passa a se chamar `__session`. Os registros de pedidos do Cloud Run guardam o endereço
   completo, com o que vem depois do `?` (a busca de anúncios e o `?code=` da volta do Mercado Livre), além do IP e do
   navegador. A Política (item 2.4) já conta a busca; o `code` sozinho não abre a conta, porque o login usa PKCE e o
-  Client Secret, mas a hospedagem pode deixar esses registros de fora se preferir.
+  Client Secret, mas a hospedagem pode deixar esses registros de fora se preferir. Na cobrança por pedido, o padrão do
+  Cloud Run, a CPU só funciona durante os pedidos, e a limpeza das sessões a cada minuto para entre um pedido e outro.
+  Sem instância mínima, a sessão vencida fica no máximo 15 minutos além das 8 horas, porque o servidor desliga até 15
+  minutos depois do último pedido e as sessões somem com ele; o código de acesso do Mercado Livre, que dura 6 horas, já
+  venceu antes. Com instância mínima, a sessão vencida pode ficar na memória até o próximo pedido: então é preciso a
+  cobrança por instância (CPU sempre ligada, custa mais) ou mudar a Política.
 
 **Site: código e login:** os itens da seção seguinte.
 
@@ -78,7 +82,7 @@ de estatística (Google Analytics e parecidos) ou outros cookies. Se entrar algu
 
 ## O que o site precisa ter para os textos valerem
 
-Já feito no PR #5 (commit `2c35b04`, ainda em rascunho):
+Já feito no PR #5 (commit `9c3bfdc`, ainda em rascunho):
 
 1. Páginas `/privacidade` e `/termos`, que mostram os arquivos desta pasta.
 2. Junto de cada botão **Conectar com Mercado Livre**: "Ao conectar, você aceita os Termos de Uso e confirma que leu a
@@ -88,29 +92,25 @@ Já feito no PR #5 (commit `2c35b04`, ainda em rascunho):
 4. Na página do resultado, a data e a hora em que os dados foram buscados; no histórico, o aviso de que cada relatório
    mostra os anúncios como estavam naquele dia. Os termos do Mercado Livre (5.3) pedem que o aplicativo diga com que
    frequência os dados são atualizados, e os Termos (item 6) prometem isso.
-5. Relatórios com mais de 12 meses apagados ao ligar o servidor e depois a cada 24 horas.
+5. Relatórios e contagens do beta com mais de 12 meses apagados ao ligar o servidor e depois a cada 24 horas.
 6. O e-mail de contato no rodapé de todas as páginas.
 7. Sessão sem login (de quem clicou em Conectar e não voltou do Mercado Livre) apagada depois de 15 minutos, com no
    máximo 1000 de uma vez, e código novo da sessão depois do login.
 8. Contagens do beta só em números por dia, e a página `/contagens` só para as contas de `ORZY_CONTAS_ADMIN`, sem
-   mostrar de quem são os números.
-
-Falta no código (pedido à thread do código pela coordenação em 15/10/2026):
-
-- **A sessão com login acabar no servidor 8 horas depois do login.** Hoje o servidor apaga a sessão 8 horas depois do
-  último uso (`web/sessoes.py:68` a `72`), e o cookie vence 8 horas depois do login. Quem usa o site até o cookie vencer
-  deixa o código de acesso, o apelido e o relatório na memória por até mais 8 horas, mas a Política (itens 2.4 e 6)
-  promete "no máximo 8 horas depois de você entrar".
-- **As contagens do beta apagadas depois de 12 meses**, como o histórico. Hoje elas não têm prazo. Não dizem de quem
-  são, mas com poucos vendedores no beta um dia pode apontar para uma pessoa se for cruzado com o histórico (o único
-  login do dia, por exemplo), e a LGPD só deixa de valer para dados que não dá para ligar de volta à pessoa com esforço
-  razoável (art. 12). Por isso a Política conta que as contagens existem, dá a base legal (legítimo interesse) e promete
-  12 meses (item 6).
+   mostrar de quem são os números. Com poucos vendedores no beta, um dia pode apontar para uma pessoa se for cruzado com
+   o histórico (o único login do dia, por exemplo), e a LGPD só deixa de valer para dados que não dá para ligar de volta
+   à pessoa com esforço razoável (art. 12). Por isso a Política conta que as contagens existem, dá a base legal
+   (legítimo interesse) e promete 12 meses (item 6).
+9. Sessão com login apagada do servidor no máximo 8 horas depois do login, mesmo que a pessoa continue usando o site: o
+   prazo conta da hora do login, e o servidor confere a cada minuto, mesmo sem visitas, e apaga um minuto antes do prazo
+   (no Cloud Run, ver "Se for Google" acima). O cookie vence no mesmo prazo.
 
 Regras que continuam valendo:
 
 - Antes de guardar um dado novo, pedir e-mail, pôr cookies ou estatística, usar IA ou mudar a hospedagem de país,
   atualizar a Política.
+- `ORZY_HORAS_SESSAO` muda o prazo da sessão e do cookie (padrão: 8 horas). Mais de 8 só depois de mudar a Política
+  (itens 2.4 e 6), que promete 8.
 - Se o responsável virar empresa (CNPJ): guardar data, hora e IP de cada acesso por 6 meses, em sigilo (Marco Civil
   da Internet, art. 15). Hoje o site não guarda IP.
 
@@ -181,23 +181,24 @@ comunicar incidentes (art. 14). Os textos prometem o prazo normal de 15 dias, qu
 
 ## De onde vem cada frase
 
-Código do PR #5 (commit `2c35b04`, branch `claude/project-thread-y5cpt9`):
+Código do PR #5 (commit `9c3bfdc`, branch `claude/project-thread-y5cpt9`):
 
 | O que os textos dizem | Onde está no código |
 |---|---|
-| O código de acesso fica só na memória do servidor | `web/sessoes.py:21` e `web/login.py` |
+| O código de acesso fica só na memória do servidor | `web/sessoes.py:24` e `web/login.py` |
 | O código de renovação é descartado | `web/login.py:52` |
 | De `/users/me` ficam só o número e o apelido | `web/login.py:60` |
-| O que o histórico guarda (SQLite no PC e no Render; Firestore no Cloud Run, com os mesmos campos) | `web/historico.py:17` a `34`; `web/historico_firestore.py:188` a `199` |
-| Histórico apagado com mais de 12 meses, ao ligar e depois a cada 24 horas | `web/historico.py:15`; `web/servidor.py:55` a `69` e `81` a `82`; no Firestore, também o campo `expira_em` (`web/historico_firestore.py:193`) |
-| O que mudou desde o relatório anterior do mesmo período, sem dizer por quê | `web/comparacao.py`; `web/historico.py:105` a `116`; `web/paginas.py:593` a `594` |
+| O que o histórico guarda (SQLite no PC e no Render; Firestore no Cloud Run, com os mesmos campos) | `web/historico.py:19` a `36`; `web/historico_firestore.py:189` a `200` |
+| Histórico e contagens do beta apagados com mais de 12 meses, ao ligar e depois a cada 24 horas | `web/historico.py:17` e `127` a `137`; `web/historico_firestore.py:246` a `255`; `web/servidor.py:56` a `70`, `88` a `92` e `104`; no Firestore, os relatórios também têm o campo `expira_em` (`web/historico_firestore.py:194`) |
+| O que mudou desde o relatório anterior do mesmo período, sem dizer por quê | `web/comparacao.py`; `web/historico.py:107` a `118`; `web/paginas.py:593` a `594` |
 | Cookie `orzy_sessao`: HttpOnly, SameSite=Lax, Secure em HTTPS, dura 8 horas | `web/app.py:115`, `131` e `283` a `287`; `web/configuracao.py:81` |
-| Sessão sem login apagada depois de 15 minutos; código novo depois do login | `web/sessoes.py:12` a `13`, `47` a `54` e `68` a `72`; `web/app.py:128` |
+| Sessão sem login apagada depois de 15 minutos; código novo depois do login | `web/sessoes.py:15` a `16`, `51` a `60` e `80` a `93`; `web/app.py:128` |
+| Sessão com login apagada do servidor no máximo 8 horas depois do login, mesmo em uso, conferida a cada minuto | `web/sessoes.py:27`, `58` e `74` a `93`; `web/servidor.py:73` a `92` e `104`; `web/app.py:123` a `131` |
 | Até 300 anúncios por relatório | `web/configuracao.py:80` |
 | Um relatório por vez em cada conexão | `web/relatorios.py:79` a `80` |
-| O registro do servidor anota só o caminho, sem o código do Mercado Livre nem a busca | `web/servidor.py:48` a `52`; `web/app.py:66` |
-| Contagens do beta: só números por dia, sem conta, apelido nem anúncio | `web/contagens.py:14` a `20`; `web/relatorios.py:91` a `119`; `web/app.py:126`; `web/historico.py:36` a `41` e `134` a `140` |
-| Página `/contagens` só para as contas de `ORZY_CONTAS_ADMIN`, sem mostrar de quem são os números | `web/app.py:237` a `242`; `web/configuracao.py:68` a `72`; `web/historico.py:150` a `155` |
+| O registro do servidor anota só o caminho, sem o código do Mercado Livre nem a busca | `web/servidor.py:49` a `53`; `web/app.py:66` |
+| Contagens do beta: só números por dia, sem conta, apelido nem anúncio | `web/contagens.py:14` a `20`; `web/relatorios.py:91` a `119`; `web/app.py:126`; `web/historico.py:38` a `43` e `141` a `147` |
+| Página `/contagens` só para as contas de `ORZY_CONTAS_ADMIN`, sem mostrar de quem são os números | `web/app.py:237` a `242`; `web/configuracao.py:68` a `72`; `web/historico.py:157` a `162` |
 | O que o relatório lê de cada anúncio | `painel-ml/meus_anuncios.py:28` |
 | Dos pedidos, só o anúncio e a quantidade | `painel-ml/meus_anuncios.py:137` a `159` |
 | "Não somos o Mercado Livre", os links para os dois textos e o e-mail de contato no rodapé | `web/paginas.py:14` e `85` a `86` |
@@ -230,6 +231,8 @@ Consultadas em 15/10/2026.
 - [Cloud Data Processing Addendum do Google Cloud](https://cloud.google.com/terms/data-processing-addendum) (lido pela
   thread de hospedagem)
 - [Onde o Cloud Logging guarda os registros](https://docs.cloud.google.com/logging/docs/region-support)
+- [Cobrança do Cloud Run: por pedido (padrão), a CPU só durante os pedidos; instância parada no máximo 15 minutos](https://docs.cloud.google.com/run/docs/configuring/cpu-allocation)
+  (lido em 16/10/2026)
 - [Transparência nas transferências pela Resolução CD/ANPD nº 19/2024](https://www.mattosfilho.com.br/en/unico/regulates-international-data-transfers/)
 - [Política de Privacidade do Google: "servidores em todo o mundo"](https://policies.google.com/privacy?hl=pt-BR)
   e [estruturas de transferência de dados](https://policies.google.com/privacy/frameworks?hl=pt-BR) (cláusulas da

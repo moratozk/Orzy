@@ -1,6 +1,6 @@
 # 06 · Status
 
-**Atualizado em:** 16/10/2026
+**Atualizado em:** 17/10/2026
 **Fase atual:** 3, construindo o site (código em rascunho no PR #5, sem merge). A fase 2 está concluída.
 Plano e custos em [07-fase-3-plano.md](07-fase-3-plano.md). Nada vai ao ar antes de o site estar quase pronto.
 
@@ -17,10 +17,11 @@ Agora:
   site); as contagens do beta (feito: a página `/contagens`, só para a conta do Nicolas); depois, o visual
   final que a marca entregar e o Nicolas aprovar. Arquivos: `web/`, `testes/`,
   `painel-ml/`, `docs/01` a `docs/07` (menos `docs/legal/`), o README e o PR #5 (rascunho).
-- **Identidade visual e logo**: fecha os arquivos da Anel (favicon, ícones, imagens, cores claro e escuro, guia) e
-  avisa a thread do código; depois desenha o visual final das páginas como prévia e CSS prontos, sem estilo ou
-  script dentro do HTML e sem nada de fora (tudo sai de `/static`). Arquivos em `/mnt/project-files/orzy/marca/`;
-  não mexe em `web/`. A troca no site espera o ok do Nicolas na prévia.
+- **Identidade visual e logo**: a primeira prévia do visual final (o site base com as cores novas) não foi aprovada
+  em 16/10/2026. Em 17/10/2026 o Nicolas escolheu o layout Lima, com fundo escuro, e a thread está fazendo as outras
+  páginas, para entregar em `/mnt/project-files/orzy/marca/visual-final/` como prévia e CSS prontos, sem estilo ou
+  script dentro do HTML e sem nada de fora (tudo sai de `/static`). Não mexe em `web/`. A troca no site espera o ok
+  do Nicolas na prévia.
 
 Esperando:
 
@@ -38,7 +39,8 @@ Esperando:
 Com o Nicolas: a linha "Ficha técnica: X de Y campos" numa rodada do programa do PC (fecha a fase 2); nome e CPF
 ou CNPJ para os textos legais, quando quiser; 3 a 5 vendedores pequenos para o beta; e, perto do lançamento, a
 hospedagem, a mudança no app do Mercado Livre, o advogado e o ID da conta dele no Mercado Livre (o que o
-`conectar.py` mostra) para a página de contagens.
+`conectar.py` mostra) para a página de contagens. Antes da fase 5: decidir quando cobrar dos vendedores e abrir
+o CNPJ.
 
 - Pesquisa anterior de hospedagem e LGPD: `/mnt/project-files/orzy/hospedagem-e-lgpd.md`.
 - Domínio: orzy.com.br responde com uma página temporária que o Nicolas colocou no Firebase (DNS no Registro.br).
@@ -69,6 +71,14 @@ um plano inicial": serve de referência, não de regra. Ele aprovou a nova ordem
 automáticos e Orzy Intelligence, fase 5 ERP básico (custos e margem), fase 6 executar mudanças com aprovação e
 fase 7 Shopee (era a fase 4). A fase 3 ganhou busca e filtro na tabela de anúncios, cuidados antes de abrir ao
 público e contagens no beta. Texto do plano e comparação em `/mnt/project-files/orzy/plano/`.
+
+Em 16/10/2026 o Nicolas definiu o objetivo: "um sistema erp COMPLETO junto com a integração de uma ia que faz a
+análise dos dados", e pediu que, ao criar a conta, um botão leve ao Mercado Livre e o Orzy puxe tudo (anúncios,
+fotos, estoque, vendas e visitas). Em 17/10/2026 ele aprovou um novo roadmap, que substitui a ordem acima: fase 4
+conta, importação completa e Orzy Intelligence, começando com a troca para Django e PostgreSQL; fase 5 empresa,
+produtos, custos e margem; fase 6 pedidos, estoque e compras; fase 7 financeiro; fase 8 mudanças no Mercado Livre com
+aprovação (era a 6); fase 9 Shopee e multicanal (era a 7); e fase 10 nota fiscal, por um emissor que já existe. A
+fase 3 e o beta não mudam. Proposta em `/mnt/project-files/orzy/plano/erp-completo-proposta.md`.
 
 ## Decisões de 14/10/2026
 

@@ -26,13 +26,25 @@ Estimativas de 15/10/2026, com US$ 1 = R$ 5,04 (cotação de 14/10/2026). Os pre
 
 Nada foi contratado. Detalhes e fontes em [07-fase-3-plano.md](07-fase-3-plano.md).
 
-## Fases 4 e 5 (do plano de 15/10/2026)
+## Fases 4 a 10 (ERP completo, aprovado em 17/10/2026)
 
-- **Fase 4 (alertas automáticos):** agendador que busca os números todo dia, banco para os alertas e, se for usado,
-  o aviso por e-mail ou WhatsApp. A Orzy Intelligence cobra por uso (regras abaixo).
-- **Fase 5 (ERP):** banco relacional, como o PostgreSQL, se for o escolhido.
+Estimativas de 16/10/2026, com US$ 1 = R$ 5,04. Os preços do banco vêm de uma tabela de terceiros sem data: conferir
+no site do Google antes de contratar. Fontes na proposta, em `/mnt/project-files/orzy/plano/erp-completo-proposta.md`
+(seção 6).
 
-O plano de cada fase traz a estimativa em reais por mês antes de qualquer contratação.
+| Item | Desde | Estimativa |
+|---|---|---|
+| Banco PostgreSQL no Cloud SQL em São Paulo, menor máquina (db-f1-micro) | Fase 4 | cerca de R$ 70 por mês com disco (uns US$ 12 só a máquina). Máquina compartilhada, sem garantia de disponibilidade do Google |
+| Banco maior (db-g1-small) | Quando crescer | cerca de R$ 200 por mês com disco (uns US$ 38 só a máquina) |
+| Servidor e agendador (Cloud Run) | Fase 4 | provavelmente R$ 0 no começo, pela cota grátis; calcular no plano da fase 4 |
+| Orzy Intelligence | Fase 4 | por uso (regras abaixo); o custo por vendedor por mês vai no plano da fase 4 |
+| Aviso por e-mail ou WhatsApp | Fase 4 | a decidir; o WhatsApp cobra por conversa |
+| Emissor de nota fiscal | Fase 10 | por nota ou mensalidade; o faturador do próprio Mercado Livre é uma opção, com custo e quem pode usar a validar |
+| Certificado digital A1 | Fase 10 | pago por cada vendedor, por ano; preço a confirmar |
+| Cobrar dos vendedores | Antes da fase 5 | CNPJ, contador e meio de pagamento: custo do negócio, não do código |
+
+A partir da fase 4 o Orzy tem custo fixo todo mês, mesmo sem vendedor pagante. Por isso a cobrança é decidida antes
+da fase 5. O plano de cada fase traz a estimativa em reais por mês antes de qualquer contratação.
 
 ## Regras para qualquer custo novo
 

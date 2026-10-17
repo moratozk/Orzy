@@ -32,9 +32,10 @@ estão em [docs/legal/](legal/LEIA-ME.md). A recomendação de hospedagem, com c
   relatório guardado e os anúncios por conta, tirados do histórico na hora em que a página abre. Nada novo do
   vendedor é guardado, e as contagens com mais de 12 meses são apagadas, como o histórico.
 
-Fica de fora (ver o [02-roadmap.md](02-roadmap.md)): alertas automáticos e a Orzy Intelligence (fase 4), custos e
-margem (fase 5), alterar anúncios (fase 6), Shopee (fase 7), cobrança e cadastro com senha (o login é só pelo
-Mercado Livre). As sugestões do relatório são regras fixas: o site não as chama de IA nem de inteligência artificial.
+Fica de fora (ver o [02-roadmap.md](02-roadmap.md)): a conta guardada com a importação completa, os alertas
+automáticos e a Orzy Intelligence (fase 4), o ERP (fases 5, 6, 7 e 10), alterar anúncios (fase 8), Shopee (fase 9),
+cobrança e cadastro com senha (o login é só pelo Mercado Livre). As sugestões do relatório são regras fixas: o site
+não as chama de IA nem de inteligência artificial, e não anuncia o ERP antes de ele existir.
 
 ## Plano em 5 passos (espera o ok do Nicolas)
 

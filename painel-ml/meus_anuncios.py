@@ -12,6 +12,7 @@ As regras das situações e das sugestões ficam no analise.py.
 
 import argparse
 import csv
+import io
 import sys
 import textwrap
 import time
@@ -103,7 +104,15 @@ def buscar_categorias(cliente, detalhes):
     return categorias
 
 
-def buscar_visitas(cliente, ids, dias):
+def _andamento(progresso, n, total):
+    """Mostra o andamento no Prompt de Comando, ou avisa quem pediu (o site mostra numa página)."""
+    if progresso:
+        progresso(n, total)
+    elif n % 10 == 0 or n == total:
+        print(f"  {n}/{total}", end="\r", flush=True)
+
+
+def buscar_visitas(cliente, ids, dias, progresso=None):
     visitas = {}
     ultimo_erro = None
     for n, item_id in enumerate(ids, 1):
@@ -115,10 +124,10 @@ def buscar_visitas(cliente, ids, dias):
         except ml_api.ErroML as e:
             visitas[item_id] = None
             ultimo_erro = e
-        if n % 10 == 0 or n == len(ids):
-            print(f"  {n}/{len(ids)}", end="\r", flush=True)
+        _andamento(progresso, n, len(ids))
         time.sleep(PAUSA_ENTRE_CHAMADAS)
-    print()
+    if progresso is None:
+        print()
     sem_visitas = sum(1 for v in visitas.values() if v is None)
     if sem_visitas:
         print(f"  Não consegui ler as visitas de {sem_visitas} anúncio(s). Último erro: {ultimo_erro}")
@@ -156,7 +165,7 @@ def buscar_vendas(cliente, user_id, dias):
     return vendas
 
 
-def buscar_qualidade(cliente, ids):
+def buscar_qualidade(cliente, ids, progresso=None):
     """Nota de qualidade que o Mercado Livre dá a cada anúncio e o que ele pede para melhorar.
 
     Ela é um extra: se não der para ler, o relatório sai do mesmo jeito, sem a nota.
@@ -177,10 +186,10 @@ def buscar_qualidade(cliente, ids):
                 # o problema também não é de um anúncio só. Nesses casos, não adianta continuar perguntando.
                 if isinstance(e, ml_api.ErroLogin) or e.status == 403 or (not qualidade and n >= 3):
                     break
-        if n % 10 == 0 or n == len(ids):
-            print(f"  {n}/{len(ids)}", end="\r", flush=True)
+        _andamento(progresso, n, len(ids))
         time.sleep(PAUSA_ENTRE_CHAMADAS)
-    print()
+    if progresso is None:
+        print()
     sem_nota = len(ids) - len(qualidade)
     if sem_nota:
         print(f"  Não consegui ler a nota de qualidade de {sem_nota} anúncio(s). Último erro: {ultimo_erro}")
@@ -246,28 +255,36 @@ def _o_que_mudar(sugestoes):
     return " | ".join(f"{n}) {s['texto']}" for n, s in enumerate(sugestoes, 1))
 
 
-def salvar_csv(linhas, dias):
+def montar_csv(linhas, dias):
+    """O CSV do relatório como texto. O PC salva num arquivo; o site entrega direto ao navegador."""
     cabecalho = ["id", "titulo", "preco", "estoque", f"visitas_{dias}d", f"vendas_{dias}d",
                  "conversao_%", "situacao", "o_que_olhar", "o_que_mudar", "qualidade_ml", "fotos",
                  "ficha_tecnica", "link"]
+    f = io.StringIO(newline="")
+    escritor = csv.writer(f, delimiter=";")  # ";" é o separador do Excel em português
+    escritor.writerow(cabecalho)
+    for l in linhas:
+        escritor.writerow([
+            l["id"], l["titulo"], _num_br(l["preco"]), _texto(l["estoque"]),
+            _texto(l["visitas"]), _texto(l["vendas"]),
+            _num_br(l["conversao"] * 100 if l["conversao"] is not None else None, 1),
+            l["situacao"], l["o_que_olhar"], _o_que_mudar(l["sugestoes"]), l["qualidade"],
+            _texto(l["fotos"]), l["ficha"], l["link"],
+        ])
+    return f.getvalue()
+
+
+def salvar_csv(linhas, dias):
+    texto = montar_csv(linhas, dias).encode("utf-8-sig")  # o BOM faz o Excel ler os acentos certos
     destino = ARQ_RELATORIO
     try:
-        f = open(destino, "w", encoding="utf-8-sig", newline="")
+        f = open(destino, "wb")
     except PermissionError:
         # O arquivo anterior provavelmente está aberto no Excel.
         destino = destino.with_name(f"relatorio_anuncios_{datetime.now():%Y%m%d_%H%M%S}.csv")
-        f = open(destino, "w", encoding="utf-8-sig", newline="")
+        f = open(destino, "wb")
     with f:
-        escritor = csv.writer(f, delimiter=";")  # ";" é o separador do Excel em português
-        escritor.writerow(cabecalho)
-        for l in linhas:
-            escritor.writerow([
-                l["id"], l["titulo"], _num_br(l["preco"]), _texto(l["estoque"]),
-                _texto(l["visitas"]), _texto(l["vendas"]),
-                _num_br(l["conversao"] * 100 if l["conversao"] is not None else None, 1),
-                l["situacao"], l["o_que_olhar"], _o_que_mudar(l["sugestoes"]), l["qualidade"],
-                _texto(l["fotos"]), l["ficha"], l["link"],
-            ])
+        f.write(texto)
     return destino
 
 
@@ -306,6 +323,48 @@ def mostrar_resumo(linhas, dias):
 
 # ---------------------------------------------------------------- principal
 
+def coletar(cliente, user_id, dias, limite=None, etapa=None, progresso=None):
+    """Busca tudo que o relatório precisa, na ordem. Devolve um dicionário com os argumentos de montar_linhas.
+
+    etapa(texto) recebe o nome de cada etapa; progresso(feitos, total) recebe o andamento das chamadas
+    por anúncio. O PC mostra os dois no Prompt de Comando; o site mostra numa página de andamento.
+    limite corta a lista de anúncios (o site lê só uma quantidade fixa por relatório).
+    """
+    def dizer(texto):
+        if etapa:
+            etapa(texto)
+
+    dizer("Buscando anúncios ativos...")
+    ids = listar_ids_ativos(cliente, user_id)
+    if limite:
+        ids = ids[:limite]
+    if not ids:
+        return {"ids": []}
+    achados = "1 anúncio encontrado" if len(ids) == 1 else f"{len(ids)} anúncios encontrados"
+    dizer(f"{achados}. Buscando detalhes...")
+    detalhes = buscar_detalhes(cliente, ids)
+
+    dizer("Buscando a ficha técnica de cada categoria...")
+    categorias = buscar_categorias(cliente, detalhes)
+
+    dizer("Buscando visitas (uma consulta por anúncio, pode levar um tempinho)...")
+    visitas = buscar_visitas(cliente, ids, dias, progresso)
+
+    dizer("Buscando vendas...")
+    try:
+        vendas = buscar_vendas(cliente, user_id, dias)
+    except ml_api.ErroLogin:
+        raise
+    except ml_api.ErroML as e:
+        print(f"  Não consegui ler as vendas ({e}). Elas vão aparecer como '?'.")
+        vendas = None
+
+    dizer("Buscando a nota de qualidade do Mercado Livre (uma consulta por anúncio)...")
+    qualidade = buscar_qualidade(cliente, ids, progresso)
+    return {"ids": ids, "detalhes": detalhes, "categorias": categorias,
+            "visitas": visitas, "vendas": vendas, "qualidade": qualidade}
+
+
 def main():
     parser = argparse.ArgumentParser(description="Relatório dos seus anúncios ativos no Mercado Livre")
     parser.add_argument("--dias", type=int, default=30, help="período em dias, de 1 a 150 (padrão: 30)")
@@ -314,41 +373,17 @@ def main():
     try:
         cliente = ml_api.MercadoLivre()
         eu = cliente.obter_usuario()
-        user_id = eu["id"]
         print(f"Conta: {eu.get('nickname')}  |  período: últimos {dias} dias")
-
-        print("Buscando anúncios ativos...")
-        ids = listar_ids_ativos(cliente, user_id)
-        if not ids:
-            print("Nenhum anúncio ativo nessa conta.")
-            return
-        achados = "1 anúncio encontrado" if len(ids) == 1 else f"{len(ids)} anúncios encontrados"
-        print(f"  {achados}. Buscando detalhes...")
-        detalhes = buscar_detalhes(cliente, ids)
-
-        print("Buscando a ficha técnica de cada categoria...")
-        categorias = buscar_categorias(cliente, detalhes)
-
-        print("Buscando visitas (uma consulta por anúncio, pode levar um tempinho)...")
-        visitas = buscar_visitas(cliente, ids, dias)
-
-        print("Buscando vendas...")
-        try:
-            vendas = buscar_vendas(cliente, user_id, dias)
-        except ml_api.ErroLogin:
-            raise
-        except ml_api.ErroML as e:
-            print(f"  Não consegui ler as vendas ({e}). Elas vão aparecer como '?'.")
-            vendas = None
-
-        print("Buscando a nota de qualidade do Mercado Livre (uma consulta por anúncio)...")
-        qualidade = buscar_qualidade(cliente, ids)
-
+        dados = coletar(cliente, eu["id"], dias, etapa=print)
     except ml_api.ErroML as e:
         print("\nNão deu certo:", e)
         sys.exit(1)
 
-    linhas = montar_linhas(ids, detalhes, visitas, vendas, categorias, qualidade)
+    if not dados["ids"]:
+        print("Nenhum anúncio ativo nessa conta.")
+        return
+
+    linhas = montar_linhas(**dados)
     mostrar_resumo(linhas, dias)
     destino = salvar_csv(linhas, dias)
     print(f"\nRelatório completo salvo em: {destino}")

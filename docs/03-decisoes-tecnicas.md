@@ -4,7 +4,7 @@ Cada decisão com o motivo. Mudar alguma delas é uma conversa, não um detalhe.
 
 | Decisão | Por quê |
 |---|---|
-| Python 3, só biblioteca padrão | Instalar o Python é o único passo de instalação. Sem `pip`, sem versão quebrando. |
+| Python 3, só biblioteca padrão até a fase 3 | Instalar o Python é o único passo de instalação. Sem `pip`, sem versão quebrando. Na fase 4 o site passa para Django (ver abaixo). |
 | Roda no Prompt de Comando do Windows | É o ambiente do Nicolas. Os comandos no LEIA-ME são exatamente o que ele digita. |
 | Redirect URI `https://www.google.com` | O Mercado Livre não aceita `localhost`. Depois do login, o código aparece no endereço do navegador e a pessoa cola no programa. |
 | PKCE opcional, igual ao que está no app | O app pode ou não exigir PKCE. O `conectar.py` pergunta e segue o que foi configurado. |
@@ -27,3 +27,14 @@ Cada decisão com o motivo. Mudar alguma delas é uma conversa, não um detalhe.
 | Testes com um Mercado Livre simulado (`testes/ml_simulado.py`) | Dá para testar tudo sem conta e sem internet. Também só biblioteca padrão. |
 | Site no orzy.com.br na fase 3, com um servidor guardando o Client Secret | O Orzy é para outros vendedores. Cada um criar o próprio app no Mercado Livre é difícil demais, e o Secret dentro de um programa distribuído pode ser copiado por qualquer um. Escolha do Nicolas em 14/10/2026. |
 | Um app só, "OrzyApp", na conta do Nicolas | Serve para o teste e é editado na fase 3 (Redirect URI do site e Client Secret novo). Só vira outro app se o Orzy passar para uma conta de empresa, que é o que o Mercado Livre recomenda para o dono da solução. |
+| Alertas e comparações dizem o que mudou, sem afirmar a causa nem garantir resultado | Os dados mostram o que aconteceu, não o porquê. Do plano do Nicolas de 15/10/2026; os Termos (item 6) já dizem que as sugestões não garantem resultado. |
+| Regras e contas ficam fora do modelo de IA sempre que der | Custo zero, resultado repetível e fácil de explicar. A Orzy Intelligence entra só onde regra não resolve. |
+| Nenhuma mudança em anúncio sem aprovação do vendedor e sem registro (fase 8) | Uma mudança errada custa dinheiro ao vendedor. O registro guarda quem aprovou, quando, o valor antigo e o novo. Vem depois de custos, margem e estoque (fases 5 e 6), para conferir antes de mudar preço ou estoque. |
+| Django com PostgreSQL (Cloud SQL em São Paulo) no começo da fase 4; Next.js e TypeScript do plano de 15/10/2026 ficam de fora | O ERP precisa de login com papéis, telas de cadastro e um banco relacional com histórico de mudanças. O Django traz isso pronto e continua em Python, então a coleta e as regras de `painel-ml/` entram sem reescrever; Next.js seriam duas linguagens para o Nicolas. O Firestore fica só para o beta, e o histórico do beta vai para o PostgreSQL. Cada tabela leva o número da empresa, com testes de isolamento entre contas. Aprovado pelo Nicolas em 17/10/2026. |
+| Login só pelo Mercado Livre até a fase 5 | Ninguém cria senha e o Orzy não guarda senha. Na fase 4 a conta Orzy é criada no clique em "Conectar com Mercado Livre"; na fase 5 entram o login com e-mail e senha e outros usuários da mesma empresa. |
+| Refresh token guardado com criptografia e a chave fora do banco (fase 4) | Se o banco vazar, o acesso às contas dos vendedores não serve sem a chave. Até a fase 8 o Orzy só lê as contas. |
+| Fotos: o Orzy guarda só os links do Mercado Livre | As fotos já ficam nos servidores do Mercado Livre. Copiar custaria disco e tráfego, e os termos do Mercado Livre pedem apagar as cópias quando o vendedor sai. A regra de segurança do site que só mostra imagens próprias passa a liberar o endereço de imagens do Mercado Livre. |
+| Permissão nova no OrzyApp só quando chega o módulo que usa | Pedir tudo no primeiro dia assusta quem conecta e vai contra a regra do plano do Nicolas de pedir só o necessário. Cada permissão nova faz o vendedor autorizar de novo. |
+| Desconectar apaga os dados da conta, e o Orzy também apaga quando o vendedor tira a permissão no Mercado Livre (fase 4) | Os termos do Mercado Livre (item 14) pedem isso. |
+| Sem nome, CPF e endereço do comprador até a fase 10, e nunca para a IA | Dados de compradores trazem obrigações da LGPD e risco de vazamento. A importação traz as vendas sem eles. |
+| Nota fiscal só por um emissor que já existe (fase 10) | Regras por estado, a reforma tributária mudando a nota até 2033, o certificado de cada vendedor e multa para o vendedor se a nota sair errada. |

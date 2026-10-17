@@ -1,0 +1,659 @@
+/* Visual base do site com a logo, as cores e a fonte da marca Anel (/mnt/project-files/orzy/marca/LEIA-ME.md).
+   O visual final vem depois (docs/02-roadmap.md, fase 3). */
+
+:root {
+  --fundo: #f3f5f8;         /* Névoa */
+  --texto: #0d1321;         /* Tinta: 17:1 sobre o fundo */
+  --fraco: #5a6475;         /* Grafite: 5,5:1 sobre o fundo, 6:1 sobre o cartão */
+  --cartao: #ffffff;
+  --borda: #e3e7ed;
+  --destaque: #3f6212;      /* Musgo, para links, botão secundário e foco: 6,5:1 sobre o fundo, 7:1 sobre o cartão */
+  --destaque-texto: #ffffff;
+  --botao: #c4f135;         /* Lima: fundo do botão principal. Lima nunca é texto no tema claro (1,3:1) */
+  --botao-texto: #0d1321;   /* Tinta sobre Lima: 14:1 */
+  --marca-ponto: #6fb700;   /* Lima forte: só o ponto da logo, é enfeite e nunca texto */
+  --aviso: #fff4d6;
+  --aviso-borda: #e7c26a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fundo: #0d1321;       /* Tinta */
+    --texto: #e6eaf0;       /* 15:1 sobre o fundo, 14:1 sobre o cartão */
+    --fraco: #aeb6c4;       /* 9:1 sobre o fundo, 8:1 sobre o cartão */
+    --cartao: #151d2e;
+    --borda: #263044;
+    --destaque: #c4f135;    /* Lima: 14:1 sobre o fundo, 12,8:1 sobre o cartão */
+    --destaque-texto: #0d1321;
+    --botao: #c4f135;
+    --botao-texto: #0d1321;
+    --marca-ponto: #c4f135;
+    --aviso: #3a3117;
+    --aviso-borda: #8a6d24;
+  }
+}
+
+/* Geist e Geist Mono: Copyright 2024 The Geist Project Authors, SIL Open Font License 1.1 (web/static/OFL-Geist.txt).
+   Servidas pelo próprio site: a Política de Privacidade promete que o site não carrega nada de outras empresas. */
+@font-face {
+  font-family: "Geist";
+  src: url("/static/geist.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/static/geist-mono.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 16px/1.5 "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--fundo);
+  color: var(--texto);
+  overflow-wrap: break-word;  /* apelido ou título sem espaço não empurra a página para o lado no celular */
+}
+
+a { color: var(--destaque); }
+
+.topo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 16px;
+  background: var(--cartao);
+  border-bottom: 1px solid var(--borda);
+}
+
+.marca { display: inline-flex; align-items: center; color: var(--texto); text-decoration: none; }
+.marca svg { display: block; }
+.marca-ponto { fill: var(--marca-ponto); }
+
+nav { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+nav form { margin: 0; }
+
+.link {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--destaque);
+  cursor: pointer;
+}
+
+main { max-width: 960px; margin: 0 auto; padding: 20px 16px 40px; }
+
+h1 { font-size: 1.6rem; line-height: 1.25; margin: 0.4em 0 0.6em; }
+h2 { font-size: 1.15rem; margin: 1.4em 0 0.4em; }
+h3 { font-size: 1rem; margin: 0 0 4px; }
+
+.botao {
+  display: inline-block;
+  background: var(--botao);
+  color: var(--botao-texto);
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.botao.secundario {
+  background: transparent;
+  color: var(--destaque);
+  border: 1px solid var(--destaque);
+}
+
+.cartao {
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+}
+
+.cartoes {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 20px;
+}
+
+.cartoes .cartao h2 { margin-top: 0; }
+
+.ajuda { color: var(--fraco); font-size: 0.92rem; }
+
+.aviso {
+  background: var(--aviso);
+  border: 1px solid var(--aviso-borda);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.tabela {
+  overflow-x: auto;
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+}
+
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--borda); vertical-align: top; }
+th { font-weight: 600; color: var(--fraco); }
+td.n, th.n, .n { text-align: right; white-space: nowrap; }
+
+select, input[type="checkbox"], input[type="search"] { font: inherit; }
+select, input[type="search"] {
+  max-width: 100%;  /* um nome de situação comprido não passa da caixa num celular */
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--borda);
+  background: var(--cartao);
+  color: var(--texto);
+}
+
+label { display: block; font-weight: 600; margin-bottom: 6px; }
+.filtro input[type="search"] { width: 100%; max-width: 360px; margin-bottom: 12px; }
+label input { margin-right: 6px; }
+
+.resumo {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.resumo li {
+  display: flex;
+  gap: 8px;
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+.anuncio { border-top: 1px solid var(--borda); padding: 12px 0; }
+.anuncio ul { margin: 6px 0; padding-left: 20px; }
+
+progress { width: 100%; height: 14px; }
+
+.rodape {
+  margin-top: 40px;
+  padding: 16px;
+  border-top: 1px solid var(--borda);
+  color: var(--fraco);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+[hidden] { display: none; }
+
+/* ------------------------------------------------------------------ página inicial
+   Vai no fim do estilo.css. Usa as cores do topo do arquivo (--fundo, --texto, --fraco, --cartao, --borda,
+   --destaque) e acrescenta as cores das situações, que a página do relatório também pode usar.
+   Tudo da página inicial fica dentro de .inicio, para não mexer nas outras páginas. */
+
+:root {
+  --mono: "Geist Mono", ui-monospace, "Cascadia Mono", "Segoe UI Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  --sombra: rgb(16 24 40 / 0.16);
+  --sit-vsv: #b42318;  --sit-vsv-fundo: #fdecea;   /* visita sem venda */
+  --sit-cp: #b54708;   --sit-cp-fundo: #fdf0e3;    /* converte pouco */
+  --sit-pv: #8a5a00;   --sit-pv-fundo: #fbf3dc;    /* pouca visita */
+  --sit-vpv: #0b6e86;  --sit-vpv-fundo: #e1f3f7;   /* vende, mas pouco visto */
+  --sit-vb: #177334;   --sit-vb-fundo: #e4f4e8;    /* vendendo bem */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sombra: rgb(0 0 0 / 0.5);
+    --sit-vsv: #ff9a8f;  --sit-vsv-fundo: #3b1f1d;
+    --sit-cp: #ffb870;   --sit-cp-fundo: #3b2a18;
+    --sit-pv: #f2c55c;   --sit-pv-fundo: #352d14;
+    --sit-vpv: #6fd3e8;  --sit-vpv-fundo: #14313a;
+    --sit-vb: #7ad996;   --sit-vb-fundo: #17321f;
+  }
+}
+
+.sit-vsv { --sit: var(--sit-vsv); --sit-fundo: var(--sit-vsv-fundo); }
+.sit-cp { --sit: var(--sit-cp); --sit-fundo: var(--sit-cp-fundo); }
+.sit-pv { --sit: var(--sit-pv); --sit-fundo: var(--sit-pv-fundo); }
+.sit-vpv { --sit: var(--sit-vpv); --sit-fundo: var(--sit-vpv-fundo); }
+.sit-vb { --sit: var(--sit-vb); --sit-fundo: var(--sit-vb-fundo); }
+
+/* Selo da situação: parece uma etiqueta carimbada, na cor da situação. */
+.selo {
+  display: inline-block;
+  margin: 0;
+  padding: 3px 7px;
+  border: 1.5px solid currentColor;
+  border-radius: 4px;
+  background: var(--sit-fundo, transparent);
+  color: var(--sit, var(--texto));
+  font: 700 0.72rem/1.25 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.inicio {
+  display: grid;
+  gap: 56px;
+  padding-block: 8px 8px;
+}
+
+.inicio h2 {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.inicio h3 { margin: 0; font-size: 1.02rem; line-height: 1.3; }
+
+.inicio p { margin: 0; }
+
+.inicio .secao-lide {
+  max-width: 62ch;
+  margin-bottom: 20px;
+  color: var(--fraco);
+}
+
+.inicio .secao-pe { margin-top: 14px; color: var(--fraco); }
+
+/* ------------------------------------------------------------------ abertura */
+
+.inicio .abertura {
+  display: grid;
+  gap: 32px;
+  align-items: center;
+}
+
+.inicio .abertura-texto { display: grid; gap: 16px; min-width: 0; }
+
+.inicio .sobretitulo {
+  color: var(--fraco);
+  font: 600 0.78rem/1.3 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.inicio h1 {
+  margin: 0;
+  max-width: 17ch;
+  font-size: clamp(2rem, 1.35rem + 2.9vw, 3.05rem);
+  font-weight: 800;
+  line-height: 1.07;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.inicio .lide { max-width: 54ch; font-size: 1.08rem; color: var(--fraco); }
+
+.inicio .acao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 22px;
+  margin-top: 4px;
+}
+
+.inicio .link-secundario { font-weight: 600; text-underline-offset: 3px; }
+
+.inicio .aceite { max-width: 46ch; color: var(--fraco); font-size: 0.84rem; }
+
+.inicio .botao-grande {
+  padding: 14px 22px;
+  border-radius: 10px;
+  font-size: 1.05rem;
+}
+
+.inicio .botao:hover { filter: brightness(1.08); }
+
+.inicio .botao:focus-visible,
+.inicio a:focus-visible,
+.inicio summary:focus-visible {
+  outline: 2px solid var(--destaque);
+  outline-offset: 3px;
+}
+
+.inicio .garantias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--fraco);
+  font-size: 0.92rem;
+}
+
+.inicio .garantias li { display: flex; align-items: baseline; gap: 8px; }
+
+.inicio .garantias li::before {
+  content: "";
+  flex: none;
+  width: 0.55em;
+  height: 0.3em;
+  border-left: 2px solid var(--sit-vb);
+  border-bottom: 2px solid var(--sit-vb);
+  transform: translateY(-0.2em) rotate(-45deg);
+}
+
+/* Cartão de exemplo do relatório */
+
+.inicio .exemplo {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  box-shadow: 0 18px 40px -24px var(--sombra);
+}
+
+.inicio .exemplo figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 10px 16px;
+  background: var(--fundo);
+  border-bottom: 1px solid var(--borda);
+  color: var(--fraco);
+  font: 600 0.72rem/1.4 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.inicio .exemplo-lista { margin: 0; padding: 0; list-style: none; }
+
+.inicio .exemplo-lista > li {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+}
+
+.inicio .exemplo-lista > li + li { border-top: 1px solid var(--borda); }
+
+.inicio .exemplo-titulo { font-weight: 700; line-height: 1.3; }
+
+.inicio .exemplo-dados {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  color: var(--fraco);
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.inicio .exemplo-lista ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.9rem;
+}
+
+.inicio .exemplo-lista ul li::marker { color: var(--fraco); }
+
+.inicio .exemplo-nota { color: var(--fraco); font-size: 0.82rem; }
+
+.inicio .exemplo-rodape {
+  padding: 10px 16px 12px;
+  border-top: 1px dashed var(--borda);
+  color: var(--fraco);
+  font-size: 0.8rem;
+}
+
+/* ------------------------------------------------------------------ como funciona */
+
+.inicio .passos {
+  display: grid;
+  gap: 14px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: passo;
+}
+
+.inicio .passos li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 14px;
+  align-content: start;
+  counter-increment: passo;
+}
+
+.inicio .passos li::before {
+  content: counter(passo);
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1.5px solid var(--texto);
+  border-radius: 50%;
+  font: 700 0.95rem/1 var(--mono);
+}
+
+.inicio .passos h3 { align-self: center; }
+
+.inicio .passos p { color: var(--fraco); }
+
+/* ------------------------------------------------------------------ situações */
+
+.inicio .matriz { display: grid; gap: 10px; }
+
+.inicio .eixo { display: none; }
+
+.inicio .situacao {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  justify-items: start;
+  min-width: 0;
+  padding: 14px 16px;
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+}
+
+.inicio .situacao-topo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px 12px;
+  justify-self: stretch;
+}
+
+.inicio .situacao .selo { font-size: 0.75rem; }
+
+.inicio .ordem {
+  color: var(--fraco);
+  font: 500 0.72rem/1.3 var(--mono);
+  letter-spacing: 0.04em;
+}
+
+.inicio .regra {
+  color: var(--fraco);
+  font: 500 0.8rem/1.4 var(--mono);
+}
+
+/* ------------------------------------------------------------------ o que confere */
+
+.inicio .conferidos { margin: 0; border-top: 1px solid var(--borda); }
+
+.inicio .conferidos > div {
+  display: grid;
+  gap: 4px 28px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--borda);
+}
+
+.inicio .conferidos dt { font-weight: 700; }
+
+.inicio .conferidos dt small {
+  display: block;
+  margin-top: 2px;
+  color: var(--fraco);
+  font: 500 0.78rem/1.4 var(--mono);
+}
+
+.inicio .conferidos dd { max-width: 62ch; margin: 0; }
+
+/* ------------------------------------------------------------------ seus dados */
+
+.inicio .cartoes { margin-top: 12px; }
+
+.inicio .cartoes .cartao { display: grid; gap: 6px; align-content: start; margin: 0; }
+
+.inicio .cartoes .cartao p { color: var(--fraco); }
+
+/* ------------------------------------------------------------------ perguntas */
+
+.inicio .perguntas { border-top: 1px solid var(--borda); }
+
+.inicio .perguntas details { border-bottom: 1px solid var(--borda); }
+
+.inicio .perguntas summary {
+  position: relative;
+  padding: 14px 36px 14px 0;
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+
+.inicio .perguntas summary::-webkit-details-marker { display: none; }
+
+.inicio .perguntas summary::after {
+  content: "+";
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  color: var(--fraco);
+  font: 600 1.25rem/1 var(--mono);
+}
+
+.inicio .perguntas details[open] summary::after { content: "−"; }
+
+.inicio .perguntas details p {
+  max-width: 62ch;
+  padding-bottom: 16px;
+  color: var(--fraco);
+}
+
+/* ------------------------------------------------------------------ chamada final */
+
+.inicio .chamada {
+  display: grid;
+  gap: 16px;
+  align-items: center;
+  padding: 24px;
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+}
+
+.inicio .chamada h2 { margin-bottom: 6px; }
+
+.inicio .chamada p { color: var(--fraco); }
+
+.inicio .chamada-acao { display: grid; gap: 10px; max-width: 22rem; }
+
+/* ------------------------------------------------------------------ telas maiores */
+
+@media (min-width: 720px) {
+  .inicio { gap: 72px; }
+  .inicio .conferidos > div { grid-template-columns: 16rem minmax(0, 1fr); }
+  .inicio .chamada { grid-template-columns: minmax(0, 1fr) auto; padding: 28px 32px; }
+}
+
+@media (min-width: 880px) {
+  .inicio .passos { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+
+  /* As situações viram uma tabela: visitas nas linhas, vendas nas colunas. As linhas da tabela são o
+     fundo da grade aparecendo no espaço de 1px entre as células. */
+  .inicio .matriz {
+    grid-template-columns: 8.5rem minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "canto  semvenda comvenda"
+      "poucas pv       vpv"
+      "muitas vsv      cp"
+      "muitas vsv      vb";
+    gap: 1px;
+    overflow: hidden;
+    background: var(--borda);
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+  }
+  .inicio .eixo {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 10px 14px;
+    background: var(--fundo);
+    color: var(--fraco);
+    font: 600 0.72rem/1.35 var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .inicio .eixo-canto { grid-area: canto; }
+  .inicio .eixo-sem-venda { grid-area: semvenda; }
+  .inicio .eixo-com-venda { grid-area: comvenda; }
+  .inicio .eixo-poucas { grid-area: poucas; }
+  .inicio .eixo-muitas { grid-area: muitas; }
+  .inicio .situacao { padding: 16px 18px; border: 0; border-radius: 0; }
+  .inicio .situacao.sit-vsv { grid-area: vsv; }
+  .inicio .situacao.sit-cp { grid-area: cp; }
+  .inicio .situacao.sit-pv { grid-area: pv; }
+  .inicio .situacao.sit-vpv { grid-area: vpv; }
+  .inicio .situacao.sit-vb { grid-area: vb; }
+}
+
+@media (min-width: 860px) {
+  .inicio .abertura { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 44px; align-items: start; }
+  .inicio .abertura-texto { padding-top: 36px; }
+}
+
+@media (max-width: 479px) {
+  /* No celular, o botão ocupa a linha toda: fica fácil de tocar e o texto não quebra no meio. */
+  .inicio .botao-grande { flex: 1 1 100%; text-align: center; }
+  .inicio .chamada { padding: 20px 18px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .inicio .botao { transition: filter 0.15s ease; }
+}
+
+/* ------------------------------------------------------------------ textos legais */
+
+/* Política de Privacidade e Termos de Uso, vindos de docs/legal/ (ver web/legal.py). */
+.legal { max-width: 760px; }
+.legal ul, .legal ol { padding-left: 22px; }
+.legal li { margin: 4px 0; }
+.legal .tabela { margin: 12px 0; }
+.legal blockquote {
+  margin: 12px 0;
+  padding: 0 12px;
+  background: var(--aviso);
+  border: 1px solid var(--aviso-borda);
+  border-radius: 8px;
+}
+.legal code { font-size: 0.9em; }

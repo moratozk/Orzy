@@ -6,4 +6,8 @@ tokens.json
 # Relatórios gerados
 relatorio_anuncios*.csv
 
+# Histórico do site (dados dos vendedores) e o que o servidor cria
+*.db
+*.db-journal
+
 __pycache__/

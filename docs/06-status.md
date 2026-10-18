@@ -1,8 +1,9 @@
 # 06 · Status
 
-**Atualizado em:** 17/10/2026
-**Fase atual:** 3, construindo o site (código em rascunho no PR #5, sem merge). A fase 2 está concluída.
-Plano e custos em [07-fase-3-plano.md](07-fase-3-plano.md). Nada vai ao ar antes de o site estar quase pronto.
+**Atualizado em:** 18/10/2026
+**Fase atual:** 4, começando pelo passo 1: o site base do PR #5 entra no main e passa para Django com PostgreSQL, com
+o visual novo. As fases 2 e 3 (site base) estão concluídas. Pela ordem aprovada em 18/10/2026, nada vai ao ar antes
+de o sistema inteiro funcionar (fase 10). Plano em `/mnt/project-files/orzy/plano/nova-ordem-sistema-completo.md`.
 
 ## Quem faz o quê (15/10/2026, nova divisão)
 
@@ -12,16 +13,14 @@ tempo, e poucas ficam ativas de cada vez, porque cada thread ativa gasta o limit
 
 Agora:
 
-- **Site: código e login**: nesta ordem, a busca e o filtro em "Todos os anúncios" (feito); a logo e as cores da
-  Anel no site base (feito: favicon, ícones, imagem de compartilhamento e a fonte Geist servida pelo próprio
-  site); as contagens do beta (feito: a página `/contagens`, só para a conta do Nicolas); depois, o visual
-  final que a marca entregar e o Nicolas aprovar. Arquivos: `web/`, `testes/`,
-  `painel-ml/`, `docs/01` a `docs/07` (menos `docs/legal/`), o README e o PR #5 (rascunho).
-- **Identidade visual e logo**: a primeira prévia do visual final (o site base com as cores novas) não foi aprovada
-  em 16/10/2026. Em 17/10/2026 o Nicolas escolheu o layout Lima, com fundo escuro, e a thread está fazendo as outras
-  páginas, para entregar em `/mnt/project-files/orzy/marca/visual-final/` como prévia e CSS prontos, sem estilo ou
-  script dentro do HTML e sem nada de fora (tudo sai de `/static`). Não mexe em `web/`. A troca no site espera o ok
-  do Nicolas na prévia.
+- **Site: código e login**: a fase 4, pelo passo 1: juntar o PR #5 no main (ok do Nicolas em 18/10/2026) e passar o
+  site para Django com PostgreSQL, já com o visual novo de `/mnt/project-files/orzy/marca/visual-final/`. Feito antes,
+  no site base: a busca e o filtro em "Todos os anúncios", a logo e as cores da Anel e as contagens do beta. Arquivos:
+  `web/`, `testes/`, `painel-ml/`, `docs/01` a `docs/07` (menos `docs/legal/`), o README e o PR #5.
+- **Identidade visual e logo**: em 17/10/2026 o Nicolas escolheu o layout Lima, com fundo escuro, e em 18/10/2026 a
+  thread entregou o pacote em `/mnt/project-files/orzy/marca/visual-final/` (as páginas públicas prontas e modelos
+  das telas do sistema, conferidos com a regra de segurança do site). Não mexe em `web/`. Depois desenha as telas do
+  ERP no mesmo visual, fase a fase, e segue ajustando o visual com o Nicolas.
 
 Esperando:
 
@@ -29,18 +28,21 @@ Esperando:
   textos em `/privacidade` e `/termos`. A thread conferiu a Política e os Termos contra o site base do PR #5
   (PR #10, mesclado em 15/10/2026), e os dois ajustes que ela pediu no código estão no PR #5: a sessão com login
   acaba 8 horas depois do login, mesmo em uso, e as contagens do beta são apagadas depois de 12 meses. Nome e CPF
-  ou CNPJ quando o Nicolas mandar, e a hospedagem quando for escolhida.
-- **Hospedagem e domínio**: perto do lançamento, prepara no papel o monitoramento, a cópia de segurança do
-  histórico e o aviso de falha, com custo em reais. Depois da escolha do Nicolas: deploy, Client Secret no
-  servidor, DNS, Redirect URI e logo nova no OrzyApp. A recomendação está em
+  ou CNPJ quando o Nicolas mandar, e a hospedagem quando for escolhida. No começo da fase 4, recebe as mudanças da
+  Política e dos Termos para a conta guardada, os dados importados e a IA.
+- **Hospedagem e domínio**: refaz o plano para o sistema completo (PostgreSQL num plano grátis até o lançamento,
+  tarefas em segundo plano para a importação e a sincronia, e-mail dos alertas) e traz o custo do endereço de teste
+  do fim da fase 4 para o ok do Nicolas. No lançamento: monitoramento, cópia de segurança, deploy, Client Secret no
+  servidor, DNS, Redirect URI e logo nova no OrzyApp. A recomendação de hoje está em
   `/mnt/project-files/orzy/hospedagem-recomendacao.md`. Nada pago, de DNS ou de mudança no app sem o ok dele.
 - **Página inicial do site**: entregou a página, que já está no PR #5. Thread encerrada.
 
-Com o Nicolas: a linha "Ficha técnica: X de Y campos" numa rodada do programa do PC (fecha a fase 2); nome e CPF
-ou CNPJ para os textos legais, quando quiser; 3 a 5 vendedores pequenos para o beta; e, perto do lançamento, a
-hospedagem, a mudança no app do Mercado Livre, o advogado e o ID da conta dele no Mercado Livre (o que o
-`conectar.py` mostra) para a página de contagens. Antes da fase 5: decidir quando cobrar dos vendedores e abrir
-o CNPJ.
+Com o Nicolas (seção 5 do plano da nova ordem): a linha "Ficha técnica: X de Y campos" numa rodada do programa do PC
+(fecha a fase 2); no fim da fase 4, o ok no endereço de teste (cartão no plano Blaze do Google e o endereço no
+OrzyApp) e a conta na API da Anthropic, com crédito pré-pago e limite de gasto; antes da fase 8, rever os preços dos
+planos; no começo da fase 8, a conta de desenvolvedor no Mercado Pago; nome e CPF ou CNPJ antes de outra pessoa usar
+com dados de verdade; e, antes do lançamento, o advogado, o CNPJ e o contador, a porta de entrada do orzy.com.br e o
+ID da conta dele no Mercado Livre (o que o `conectar.py` mostra).
 
 - Pesquisa anterior de hospedagem e LGPD: `/mnt/project-files/orzy/hospedagem-e-lgpd.md`.
 - Domínio: orzy.com.br responde com uma página temporária que o Nicolas colocou no Firebase (DNS no Registro.br).
@@ -77,8 +79,16 @@ análise dos dados", e pediu que, ao criar a conta, um botão leve ao Mercado Li
 fotos, estoque, vendas e visitas). Em 17/10/2026 ele aprovou um novo roadmap, que substitui a ordem acima: fase 4
 conta, importação completa e Orzy Intelligence, começando com a troca para Django e PostgreSQL; fase 5 empresa,
 produtos, custos e margem; fase 6 pedidos, estoque e compras; fase 7 financeiro; fase 8 mudanças no Mercado Livre com
-aprovação (era a 6); fase 9 Shopee e multicanal (era a 7); e fase 10 nota fiscal, por um emissor que já existe. A
-fase 3 e o beta não mudam. Proposta em `/mnt/project-files/orzy/plano/erp-completo-proposta.md`.
+aprovação (era a 6); fase 9 Shopee e multicanal (era a 7); e fase 10 nota fiscal, por um emissor que já existe.
+Proposta em `/mnt/project-files/orzy/plano/erp-completo-proposta.md`.
+
+Em 17/10/2026 (19:32 UTC) o Nicolas mudou a ordem: o site só vai ao ar quando o painel, a integração com o Mercado
+Livre, o pagamento, a assinatura e a IA estiverem funcionando; antes, ele testa e dá uma conta demo para o professor
+dele. Em 18/10/2026 ele aprovou a nova ordem, sem beta com vendedores convidados ("Sem convidados"): fases 4 a 7 como
+acima, fase 8 planos, assinatura e pagamento, fase 9 testes completos (os dele e a demo do professor) e fase 10 o
+lançamento. Mudanças no Mercado Livre, Shopee e nota fiscal ficam para depois do lançamento. O PR #5 entra no main
+como base da fase 4, e o visual novo vai direto para o sistema novo. Plano em
+`/mnt/project-files/orzy/plano/nova-ordem-sistema-completo.md`.
 
 ## Decisões de 14/10/2026
 
@@ -202,31 +212,32 @@ fase 3 e o beta não mudam. Proposta em `/mnt/project-files/orzy/plano/erp-compl
   do Mercado Livre veio em português e as fotos foram lidas (1 foto).
 - [x] Fase 2: conferir as sugestões com o anúncio aberto no site (15/10/2026: 1 foto, título curto e frete grátis batem).
 - [ ] Fase 2: ver a contagem da ficha técnica na tela (linha "Ficha técnica: X de Y campos"). Não segura a fase.
-- [ ] Fase 3: o login do site com o Mercado Livre de verdade (depende da Redirect URI do site no app).
+- [ ] O login do site com o Mercado Livre de verdade (no endereço de teste, no fim da fase 4, com a Redirect URI dele
+  no app).
 
 ## Próximo passo
 
-1. Nicolas: nada urgente. As decisões de [07-fase-3-plano.md](07-fase-3-plano.md) (hospedagem, app, limites,
-   contato, revisão de advogado, beta ou público) ficam para quando o site estiver quase pronto.
+1. Nicolas: nada urgente agora. O que ele providencia e quando está na seção 5 de
+   `/mnt/project-files/orzy/plano/nova-ordem-sistema-completo.md`; a primeira coisa é o ok no endereço de teste, no
+   fim da fase 4.
 2. Nicolas: quando puder, baixar o ZIP de novo do GitHub. Para não fazer login de novo, copiar o `config.json` e o
    `tokens.json` da pasta `painel-ml` usada por último para a nova. Rodar `python meus_anuncios.py` e mandar o
    texto do que apareceu no cmd (sem print). Ver a linha "Ficha técnica: X de Y campos".
-3. Site: o site base está pronto. Os passos que o Nicolas aprovou em 15/10/2026 (segurança, páginas internas no
-   celular, comparação de relatórios e histórico no Firestore), a busca, o filtro, a marca Anel, as contagens do
-   beta e os dois ajustes pedidos pela revisão da Política estão no PR #5. Próximo, pela divisão de 15/10/2026: o
-   visual final, quando a thread da marca entregar a prévia e o Nicolas aprovar.
-   A hospedagem e o que vem com ela (monitoramento e cópia de segurança) ficam para perto de lançar.
+3. Site: o site base está pronto no PR #5. Próximo: a fase 4, pelo passo 1 (o PR #5 no main e a troca para Django com
+   PostgreSQL, com o visual novo). O endereço de teste entra no fim da fase 4, com o ok do Nicolas; a hospedagem do
+   lançamento e o que vem com ela (monitoramento e cópia de segurança) ficam para a fase 10.
 
 Na conversa, mandar só o texto do que apareceu no cmd, sem print. **Nunca** mandar o Client Secret,
 o `config.json`, o `tokens.json` nem o banco do site.
 
 ## Em aberto
 
-- Qual vendedor com mais anúncios vai testar.
+- Conta com mais anúncios para conferir: sem vendedores convidados (18/10/2026), ficam a loja de teste do Mercado
+  Livre e, se ele quiser, a conta do professor.
 - O que "propósito" e "quantos usuários" do formulário do app mudam: a documentação do Mercado Livre não fala.
-- Hospedagem: Google, com Cloud Run e Firestore em São Paulo (recomendado, R$ 0 no teste), ou Render (cerca de
-  R$ 37/mês). No Google, falta escolher a porta de entrada; o Firebase Hosting do orzy.com.br fica fora das cláusulas
-  da ANPD. Decide na hora de lançar.
+- Hospedagem do sistema completo: a thread "Hospedagem e domínio" refaz o plano (Cloud Run em São Paulo e um banco
+  PostgreSQL num plano grátis até o lançamento). A porta de entrada do orzy.com.br decide na hora de lançar; o
+  Firebase Hosting fica fora das cláusulas da ANPD.
 - Termos do Mercado Livre para desenvolvedores (lidos em 15/10/2026): não fixam prazo para guardar dados. O histórico
   de 12 meses, privado e que o vendedor apaga, é compatível na leitura mais razoável; confirmar com advogado.
 - Se existirem os arquivos de plano originais da conversa anterior, juntar com estes.

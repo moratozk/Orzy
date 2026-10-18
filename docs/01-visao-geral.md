@@ -5,10 +5,10 @@
 Um programa para vendedores do Mercado Livre (e depois da Shopee): se conecta à conta do vendedor,
 mostra quais anúncios vendem e quais não vendem e sugere o que mudar em cada um para vender mais.
 
-Hoje roda no PC. Na fase 3 vira um site em **orzy.com.br**, onde o vendedor só clica em "Conectar com Mercado Livre".
-Começa como um MVP de custo zero e, módulo por módulo, vira um ERP completo para a loja, com a Orzy Intelligence (a
-IA do Orzy) analisando os dados. Pedido do Nicolas em 16/10/2026: "um sistema erp COMPLETO junto com a integração de
-uma ia que faz a análise dos dados".
+Hoje roda no PC. O site em **orzy.com.br**, onde o vendedor só clica em "Conectar com Mercado Livre", está sendo
+construído módulo por módulo como um ERP completo para a loja, com a Orzy Intelligence (a IA do Orzy) analisando os
+dados, e só vai ao ar com tudo funcionando (decisão do Nicolas de 17/10/2026; fase 10 do roadmap). Pedido do Nicolas
+em 16/10/2026: "um sistema erp COMPLETO junto com a integração de uma ia que faz a análise dos dados".
 
 Na fase 4, a conta do vendedor é criada no próprio clique em "Conectar com Mercado Livre", e o Orzy puxa tudo da
 conta: anúncios, fotos (só os links), estoque, vendas dos últimos 12 meses e visitas dos últimos 150 dias. Depois
@@ -18,23 +18,25 @@ Rumo (Plano de Desenvolvimento do Nicolas, 15/10/2026): três partes. Acompanhar
 achar problemas e oportunidades e recomendar o que fazer, com regras e, depois, com a Orzy Intelligence; e o ERP,
 que em 16/10/2026 passou de custos e margem para o ERP completo (produtos, custos e margem, pedidos, estoque,
 compras, financeiro e nota fiscal). Primeiro o Orzy observa, depois entende e recomenda, e só com autorização do
-vendedor executa. A ordem, aprovada por ele em 17/10/2026, está no [02-roadmap.md](02-roadmap.md).
+vendedor executa. A ordem, aprovada por ele em 18/10/2026 com tudo pronto antes de lançar, está no
+[02-roadmap.md](02-roadmap.md).
 
 ## Para quem
 
 - **Usuários:** vendedores do Mercado Livre que querem saber o que mudar nos próprios anúncios e, com o ERP, cuidar
   da loja inteira (estoque, vendas, custos e financeiro). Primeiro, pequenos vendedores, com dezenas ou centenas de
   anúncios.
-- **Quem desenvolve:** Nicolas. Ele testa com a conta conectada no PC dele e, para ter mais números,
-  com vendedores que autorizem o app.
+- **Quem desenvolve:** Nicolas. Ele testa com a conta conectada no PC dele e, do fim da fase 4 em diante, num
+  endereço de teste fechado. Antes de abrir, um professor dele testa uma conta demo.
 - **Ambiente de desenvolvimento:** Windows, Prompt de Comando, Python 3.
 - **Programação:** ele roda os comandos seguindo o passo a passo. Instruções precisam dizer exatamente o que digitar.
 
 ## Princípios
 
-1. **Custo zero primeiro.** Até a fase 2 tudo roda no PC, sem servidor e sem serviço pago. O site da fase 3 tem custo
-   de hospedagem. A partir da fase 4 o Orzy tem custo fixo todo mês (o banco), mesmo sem vendedor pagante. Qualquer
-   custo novo é avisado antes, com estimativa ([05-custos.md](05-custos.md)).
+1. **Custo zero primeiro.** Até o lançamento o Orzy fica perto de R$ 0: é feito e testado no ambiente do Claude e no
+   GitHub e, do fim da fase 4 em diante, num endereço de teste fechado (menos de R$ 1 por mês no Google, banco num
+   plano grátis e centavos de IA). O banco pago e a taxa do pagamento começam no lançamento. Qualquer custo novo é
+   avisado antes, com estimativa ([05-custos.md](05-custos.md)).
 2. **Só a biblioteca padrão do Python até a fase 3.** Nada de `pip install` enquanto der para evitar. Na fase 4 o
    site passa para Django com PostgreSQL, que entram num `requirements.txt` (o servidor instala sozinho); a coleta e
    as regras de `painel-ml/` entram sem reescrever.

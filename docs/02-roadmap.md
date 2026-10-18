@@ -3,18 +3,22 @@
 O objetivo do Orzy é ser um ERP completo para quem vende no Mercado Livre (e depois na Shopee), com a Orzy
 Intelligence analisando os dados. Hoje ele é um painel que mostra quais anúncios vendem e o que mudar em cada um; o
 ERP entra módulo por módulo a partir da fase 4.
-O Nicolas desenvolve e testa com a conta conectada no PC dele e, para ter mais números,
-com vendedores que autorizem o app.
+Decisão do Nicolas (17/10/2026): o site só vai ao ar quando o sistema inteiro estiver funcionando, com o painel, a
+integração com o Mercado Livre, o pagamento, a assinatura e a IA. Antes, ele testa e dá uma conta demo para o
+professor dele. Ele desenvolve e testa com a conta conectada no PC dele e, do fim da fase 4 em diante, num endereço
+de teste fechado.
 
 Cada fase só começa quando a anterior estiver funcionando com dados reais.
 Antes de escrever código grande numa fase, o plano dela (3 a 6 passos) é mostrado e espera o ok do Nicolas.
 
 Rumo, do Plano de Desenvolvimento do Nicolas (15/10/2026), usado como referência e não como regra ("é só um plano
-inicial"): primeiro o Orzy observa, depois entende e recomenda, e só com autorização do vendedor executa. A ordem das
-fases 4 a 7 saiu desse plano e foi aprovada por ele em 15/10/2026. Em 16/10/2026 ele definiu o objetivo: "um sistema
-erp COMPLETO junto com a integração de uma ia que faz a análise dos dados", e que, ao criar a conta, um botão leve ao
-Mercado Livre e o Orzy puxe tudo para o sistema. As fases 4 a 10 abaixo saíram desse pedido e foram aprovadas por ele
-em 17/10/2026. Planos, comparação e proposta em `/mnt/project-files/orzy/plano/`.
+inicial"): primeiro o Orzy observa, depois entende e recomenda, e só com autorização do vendedor executa. Em 16/10/2026
+ele definiu o objetivo: "um sistema erp COMPLETO junto com a integração de uma ia que faz a análise dos dados", e que,
+ao criar a conta, um botão leve ao Mercado Livre e o Orzy puxe tudo para o sistema. Os módulos do ERP saíram desse
+pedido e foram aprovados por ele em 17/10/2026. Em 18/10/2026 ele aprovou a ordem abaixo, com tudo pronto antes de
+lançar e sem beta com vendedores convidados: as fases 4 a 7 como antes, depois planos e pagamento (8), testes
+completos (9) e o lançamento (10). Mudanças no Mercado Livre, Shopee e nota fiscal ficam para depois do lançamento.
+Planos, comparação e propostas em `/mnt/project-files/orzy/plano/`.
 
 ## Fase 1 · Painel do Mercado Livre funcionando (concluída em 14/10/2026)
 
@@ -45,12 +49,12 @@ da mesma situação. Agora o programa lê o próprio anúncio e diz o que mudar 
 - [x] Conferir as sugestões com o anúncio aberto no site (15/10/2026: 1 foto, título curto e frete grátis batem)
 - [ ] Ver a contagem da ficha técnica na tela ("Ficha técnica: X de Y campos") na próxima rodada. Não segura a fase.
 
-## Fase 3 · Site no orzy.com.br (em construção, sem publicar)
+## Fase 3 · Site base (pronto no PR #5; o lançamento foi para a fase 10)
 
 Decidido pelo Nicolas em 14/10/2026: é aqui que o Orzy vira site, para outros vendedores usarem sem instalar nada.
-Plano em 5 passos, custos, LGPD e decisões em [07-fase-3-plano.md](07-fase-3-plano.md). O código está num PR de
-rascunho: não entra no main nem vai para o ar antes do ok do Nicolas. Decidido por ele em 15/10/2026: o site só vai
-ao ar quando estiver quase pronto (95%), sem endereço temporário.
+Plano em 5 passos, custos, LGPD e decisões em [07-fase-3-plano.md](07-fase-3-plano.md). O código está no PR #5, que
+entra no main como base da fase 4 (ok do Nicolas em 18/10/2026). Entrar no main não põe nada no ar: o repositório não
+publica sozinho.
 
 Ordem decidida pelo Nicolas em 15/10/2026: primeiro o **site base**, funcionando; depois aprimorar até um site
 realmente bonito, com a identidade visual (logo, cores e letras) da thread "Identidade visual e logo". O visual
@@ -73,14 +77,10 @@ de agora, inclusive o da página inicial, é só uma base, nada perto do modelo 
   vendedor). Com isso, o site base está pronto
 - [x] Ajustes pedidos pela revisão da Política de Privacidade (16/10/2026): a sessão com login acaba 8 horas depois
   do login, mesmo em uso, e as contagens do beta são apagadas depois de 12 meses
-- [ ] Visual final: refazer as páginas com a identidade escolhida, até um site realmente bonito
-- [ ] Escolher a hospedagem e adaptar o código a ela
-- [ ] Antes de abrir ao público: monitoramento do servidor, cópia de segurança do histórico e aviso de falha
-- [ ] Preencher os textos legais (nome e CPF ou CNPJ do responsável e a hospedagem; o e-mail de contato já está) e,
-  se o Nicolas quiser, revisão de advogado
-- [ ] Cadastrar a Redirect URI do site no OrzyApp e lançar, testando primeiro com a conta do Nicolas
-- [ ] Beta fechado com 3 a 5 vendedores pequenos (dezenas ou centenas de anúncios), contando contas conectadas,
-  relatórios concluídos sem erro e anúncios por conta (só contagens, sem guardar dado novo do vendedor)
+
+O que faltava para abrir (o visual final, a hospedagem, o monitoramento, os textos legais preenchidos, a Redirect URI
+do site e o lançamento) foi para as fases 4 e 10 em 18/10/2026, e o beta fechado com 3 a 5 vendedores saiu (escolha
+do Nicolas: "Sem convidados").
 
 - O vendedor entra no orzy.com.br e clica em **Conectar com Mercado Livre**. Ninguém precisa criar app.
 - Um servidor pequeno guarda o Client Secret do app do Orzy. O Secret nunca vai dentro de um programa distribuído.
@@ -99,30 +99,36 @@ Antes de começar, o plano da fase mostra:
 ## Fase 4 · Conta, importação completa e Orzy Intelligence
 
 Pedido do Nicolas em 16/10/2026: ao criar a conta, um botão leva ao Mercado Livre, o vendedor autoriza e o Orzy puxa
-tudo para o sistema. É também a primeira versão útil do plano dele: conexão, histórico e alertas.
+tudo para o sistema. Plano em 5 passos aprovado por ele em 18/10/2026
+(`/mnt/project-files/orzy/plano/nova-ordem-sistema-completo.md`, seção 2).
 
-- Antes de tudo: trocar o site para Django com PostgreSQL (Cloud SQL em São Paulo), levando o login, os relatórios,
-  as regras e o histórico do beta. É quando o Orzy passa a guardar os dados das contas. Custo em reais aprovado antes.
-- Conta criada no clique em "Conectar com Mercado Livre", sem senha. O refresh token fica guardado com criptografia
-  e a chave fora do banco. Ele é de uso único: só um processo por vendedor renova de cada vez, e o novo é salvo antes
-  de qualquer outra coisa.
-- Primeira carga em segundo plano, com progresso: anúncios de todos os status, variações, descrição, ficha técnica,
-  fotos (só os links do Mercado Livre), estoque, preço, frete, vendas dos últimos 12 meses (sem dados pessoais do
-  comprador), visitas dos últimos 150 dias, nota de qualidade e reputação
-- Sincronia todo dia (os termos do Mercado Livre pedem dados atualizados a cada 24 horas) e pelas notificações do
-  Mercado Livre; registro das falhas
-- Desconectar e apagar tudo, também quando o vendedor tira a permissão no Mercado Livre
-- Alertas de queda e de oportunidade, comparando períodos equivalentes, sem afirmar a causa, por ordem de impacto e
-  urgência, numa central de alertas (aviso por e-mail ou WhatsApp a decidir, com custo)
-- Guardar cada recomendação e o que aconteceu depois; o vendedor marca se ajudou ou não
-- **Orzy Intelligence (o módulo de IA, pago por uso):** só onde regra não resolve: explicar os achados e sugerir
-  título e descrição. Pedido do Nicolas (15/10/2026): tem de ser muito eficiente e o mais otimizada possível. Regras
-  de custo e de otimização em [05-custos.md](05-custos.md). Nunca recebe dados de compradores. Até ela existir, as
-  sugestões do relatório são regras fixas e o site não as chama de IA. Antes de ligar, a Política de Privacidade
-  precisa dizer qual empresa faz a IA, em que país e com quais cláusulas da ANPD.
+1. **Base nova:** o PR #5 entra no main e o site passa para Django com PostgreSQL (num plano grátis até o
+   lançamento), levando o login, os relatórios, as regras e o histórico, já com o visual novo da thread "Identidade
+   visual e logo" (`/mnt/project-files/orzy/marca/visual-final/`). Os testes de hoje passam para o sistema novo. É
+   quando o Orzy passa a guardar os dados das contas.
+2. **Conta e acesso guardado:** a conta é criada no clique em "Conectar com Mercado Livre", sem senha. O refresh token
+   fica guardado com criptografia e a chave fora do banco. Ele é de uso único: só um processo por vendedor renova de
+   cada vez, e o novo é salvo antes de qualquer outra coisa. Desconectar apaga tudo, e o Orzy também apaga quando o
+   vendedor tira a permissão no Mercado Livre.
+3. **Importação completa:** primeira carga em segundo plano, com progresso: anúncios de todos os status, variações,
+   descrição, ficha técnica, fotos (só os links do Mercado Livre), estoque, preço, frete, vendas dos últimos 12 meses
+   (sem dados pessoais do comprador), visitas dos últimos 150 dias, nota de qualidade e reputação. Conferida na conta
+   do Nicolas com um programa de conferência no PC, que mostra só contagens e não pede nada novo para instalar.
+4. **Sincronia e alertas:** atualização todo dia (os termos do Mercado Livre pedem dados atualizados a cada 24 horas)
+   e pelas notificações do Mercado Livre, com registro das falhas. Alertas de queda e de oportunidade, comparando
+   períodos equivalentes, sem afirmar a causa, por ordem de impacto e urgência, numa central de alertas (aviso por
+   e-mail ou WhatsApp a decidir, com custo). Cada recomendação fica guardada com o que aconteceu depois, e o vendedor
+   marca se ajudou ou não.
+5. **Orzy Intelligence e endereço de teste:** a IA (o módulo pago por uso) entra só onde regra não resolve: explicar
+   os achados e sugerir título e descrição. Pedido do Nicolas (15/10/2026): tem de ser muito eficiente e o mais
+   otimizada possível; regras de custo em [05-custos.md](05-custos.md). Nunca recebe dados de compradores. No fim da
+   fase, com o ok do Nicolas e o custo em reais, o sistema vai para um endereço de teste fechado, só para a conta dele
+   (o orzy.com.br não muda).
 
-Antes de começar: Política de Privacidade e Termos atualizados (conta guardada, dados importados, IA) e o custo em
-reais por mês (banco, agendador, IA e aviso).
+No começo da fase, as mudanças da Política de Privacidade e dos Termos (conta guardada, dados importados, IA) vão para
+a thread "Privacidade e termos", prontas antes de outra pessoa usar. Antes de a IA ligar, a Política diz qual empresa
+faz a IA, em que país e com quais cláusulas da ANPD. Até a IA existir, as sugestões do relatório são regras fixas e o
+site não as chama de IA.
 
 ## Fase 5 · Base do ERP: empresa, produtos, custos e margem
 
@@ -133,7 +139,7 @@ reais por mês (banco, agendador, IA e aviso).
 - Margem por venda, anúncio e produto, num painel com menu lateral
 - Orzy Intelligence: margem baixa, promoção ou frete grátis que come o lucro, preço sugerido (só sugestão)
 
-Antes de começar: decidir como cobrar dos vendedores (o Orzy tem custo fixo desde a fase 4).
+Como cobrar dos vendedores fica para a fase 8.
 
 ## Fase 6 · Pedidos, estoque e compras
 
@@ -149,9 +155,49 @@ Antes de começar: decidir como cobrar dos vendedores (o Orzy tem custo fixo des
 - Resultado do mês e exportação para o contador
 - Orzy Intelligence: tarifa fora do normal e previsão de caixa
 
-## Fase 8 · Mudanças no Mercado Livre com aprovação
+## Fase 8 · Planos, assinatura e pagamento
 
-Era a fase 6 até 17/10/2026.
+Nova em 18/10/2026: o lançamento já sai com a assinatura funcionando.
+
+- Rever os preços e o que cada plano inclui: os de 17/10/2026 (Grátis até 10 anúncios, Essencial R$ 29,90 até 50,
+  Profissional R$ 59,90 até 300) eram para um lançamento só com o relatório. O plano Grátis com limite continua.
+  Ideias em `/mnt/project-files/orzy/plano/precos-e-planos.md`
+- A página "Escolha seu plano" como primeiro passo de "Criar conta"
+- Assinatura mensal (e anual, se o Nicolas quiser) pelo Mercado Pago: cobrança automática, aviso de pagamento
+  recusado, troca de plano, cancelamento a um clique e os limites de cada plano no sistema
+- Testada no modo de teste do Mercado Pago, com usuários e cartões de teste: ninguém paga de verdade
+- Termos com preço, renovação, cancelamento, reembolso e o direito de arrependimento de 7 dias do Código de Defesa do
+  Consumidor
+
+## Fase 9 · Testes completos
+
+Nova em 18/10/2026. Sem beta com vendedores convidados (escolha do Nicolas): o site abre logo depois destes testes.
+
+- Revisão de segurança do sistema inteiro antes de qualquer outra pessoa entrar
+- Testes de ponta a ponta do Nicolas com a conta dele: criar conta, importar, alertas, ERP, assinar um plano com
+  cartão de teste, cancelar e apagar tudo
+- Uma loja de teste do Mercado Livre (usuários de teste) para simular vendas, devoluções e estoque sem mexer na conta
+  dele
+- Conta demo para o professor do Nicolas, com uma loja de exemplo de dados inventados. Se ele quiser conectar a conta
+  dele do Mercado Livre, a Política e os Termos já estão publicados
+- O Nicolas ajusta aos poucos com o que o professor disser, e cada ajuste é testado de novo
+
+## Fase 10 · Lançamento no orzy.com.br
+
+- Política e Termos revisados pelo advogado, com o nome e o CPF ou CNPJ do responsável
+- Banco pago, porta de entrada do orzy.com.br, DNS, OrzyApp (Redirect URI do site e logo nova), monitoramento, cópia
+  de segurança e Mercado Pago de verdade (conta verificada, CNPJ e contador para cobrar). Cada passo com o ok do
+  Nicolas e o custo em reais antes
+- Como o ERP e a IA já existem, o site anuncia os dois desde o primeiro dia
+
+## Depois do lançamento
+
+Na ordem já aprovada, ajustada pelo que os primeiros clientes pedirem. Cada uma ganha um número de fase quando
+começar.
+
+### Mudanças no Mercado Livre com aprovação
+
+Era a fase 8 até 18/10/2026 (e a fase 6 até 17/10/2026).
 
 - O vendedor revisa e aprova cada mudança; nada muda sozinho
 - Preço, estoque, título, descrição e outros campos que a API deixa, conferindo margem (fase 5) e estoque (fase 6)
@@ -159,24 +205,25 @@ Era a fase 6 até 17/10/2026.
 - Permissão de escrita no app (os vendedores autorizam de novo) e mudança nos Termos e na Política, que hoje dizem
   que o Orzy só lê a conta
 
-## Fase 9 · Shopee e multicanal
+### Shopee e multicanal
 
-Era a fase 7 até 17/10/2026 (e a fase 4 até 15/10/2026).
+Era a fase 9 até 18/10/2026 (a fase 7 até 17/10/2026 e a fase 4 até 15/10/2026).
 
 - Shopee em todos os módulos: anúncios, pedidos, estoque e financeiro
-- Estoque único entre os canais, usando a escrita da fase 8
+- Estoque único entre os canais, usando a escrita das mudanças com aprovação
 
-## Fase 10 · Nota fiscal
+### Nota fiscal
+
+Era a fase 10 até 18/10/2026.
 
 - Emitir a NF-e das vendas por um emissor que já existe (o faturador do próprio Mercado Livre ou uma API de nota
   fiscal paga por nota). O Orzy não constrói emissor próprio: a nota muda com a reforma tributária até 2033
 - Entrada das compras pelo XML da nota do fornecedor
 - Aqui o Orzy passa a tratar dados dos compradores (nome, CPF e endereço): Política e Termos mudam e o advogado revisa
   antes. Cada vendedor precisa do próprio certificado digital A1
-- Se os vendedores do beta pedirem nota fiscal antes, ela pode subir para logo depois do financeiro
+- Se os primeiros clientes pedirem nota fiscal antes, ela pode vir logo depois do lançamento
 
-## Depois (sem ordem definida ainda)
+### Sem ordem definida
 
 - Atendimento: perguntas e mensagens, com sugestão de resposta da Orzy Intelligence
 - Aplicativo de celular e outros canais (Amazon, Magalu, loja própria)
-- Planos pagos por volume de anúncios, contas conectadas e recursos de IA

@@ -1,6 +1,9 @@
 # 07 · Fase 3: site no orzy.com.br (plano)
 
-**Atualizado em:** 15/10/2026
+**Atualizado em:** 18/10/2026
+**Desde 18/10/2026:** o site base deste plano está pronto e vira a base da fase 4. O lançamento (passos 2 a 5 abaixo)
+saiu da fase 3 e foi para as fases 9 e 10, com o sistema completo, e o beta fechado com 3 a 5 vendedores saiu (escolha
+do Nicolas: "Sem convidados"). Ver o [02-roadmap.md](02-roadmap.md).
 **Situação:** construindo o site, com o código em rascunho (PR aberto, sem merge). Nada foi contratado, publicado nem
 mexido no app do Mercado Livre. Decisão do Nicolas (15/10/2026): o site só vai ao ar quando estiver quase pronto
 ("só vai pro ar quando estiver 95% concluído"), e não num endereço temporário. As decisões dele estão no fim.
@@ -33,9 +36,9 @@ estão em [docs/legal/](legal/LEIA-ME.md). A recomendação de hospedagem, com c
   vendedor é guardado, e as contagens com mais de 12 meses são apagadas, como o histórico.
 
 Fica de fora (ver o [02-roadmap.md](02-roadmap.md)): a conta guardada com a importação completa, os alertas
-automáticos e a Orzy Intelligence (fase 4), o ERP (fases 5, 6, 7 e 10), alterar anúncios (fase 8), Shopee (fase 9),
-cobrança e cadastro com senha (o login é só pelo Mercado Livre). As sugestões do relatório são regras fixas: o site
-não as chama de IA nem de inteligência artificial, e não anuncia o ERP antes de ele existir.
+automáticos e a Orzy Intelligence (fase 4), o ERP (fases 5, 6 e 7), cobrança (fase 8), alterar anúncios, Shopee e
+nota fiscal (depois do lançamento) e cadastro com senha (o login é só pelo Mercado Livre). As sugestões do relatório
+são regras fixas: o site não as chama de IA nem de inteligência artificial, e não anuncia o ERP antes de ele existir.
 
 ## Plano em 5 passos (espera o ok do Nicolas)
 
@@ -46,8 +49,9 @@ não as chama de IA nem de inteligência artificial, e não anuncia o ERP antes 
 3. **App do Mercado Livre:** cadastrar a Redirect URI do site, gerar o Client Secret que vai só para o servidor e
    revisar os campos do formulário (quantos usuários, propósito). Isso muda o app, então só com o ok.
 4. **Lançar:** com os textos legais preenchidos (e revisados por advogado, se ele quiser), testar primeiro com a
-   conta do Nicolas e um anúncio, no endereço escolhido (o do próprio servidor no beta fechado, ou o orzy.com.br).
-5. **Beta fechado:** 3 a 5 vendedores convidados, acompanhar erros; só depois aberto ao público.
+   conta do Nicolas e um anúncio, primeiro no endereço de teste fechado (fim da fase 4) e depois no orzy.com.br.
+5. **Testes antes de abrir:** os do Nicolas e a conta demo do professor (fase 9). O beta fechado com 3 a 5 vendedores
+   convidados saiu em 18/10/2026 (escolha do Nicolas: "Sem convidados").
 
 ## O que já está no código (PR de rascunho)
 
@@ -116,7 +120,8 @@ Paulo, porque o teste sai de graça e o contrato do Google Cloud cobre a LGPD. O
 um valor fixo e o código quase sem mudança. A escolha fica para a hora de lançar.
 
 A porta de entrada (quem recebe as visitas) também fica para a hora de lançar:
-- **A. Endereço do próprio Cloud Run** (`....run.app`): R$ 0, coberto pelo contrato. Serve para o beta fechado.
+- **A. Endereço do próprio Cloud Run** (`....run.app`): R$ 0, coberto pelo contrato. Serve para o endereço de teste
+  fechado, do fim da fase 4 em diante.
 - **B. Firebase Hosting no orzy.com.br** (onde está a página temporária): R$ 0, mas fica fora das cláusulas da ANPD.
   Só com o ok de um advogado.
 - **C. Balanceador de carga do Google no orzy.com.br:** cerca de R$ 92/mês, coberto pelo contrato.
@@ -140,7 +145,7 @@ que ele aprovou em 15/10/2026.
 
 ## Mercado Livre: o que o app precisa
 
-1. **Redirect URI:** incluir a do site (`https://orzy.com.br/retorno`, ou a do endereço escolhido para o beta) e
+1. **Redirect URI:** incluir a do site (`https://orzy.com.br/retorno`, e antes a do endereço de teste fechado) e
    manter a do PC (`https://www.google.com`).
 2. **Client Secret:** o Mercado Livre tem um só por app. Gerar um novo invalida o atual, então o PC precisa rodar
    `python conectar.py --refazer` de novo (com o segredo novo). O segredo do site fica só no painel de hospedagem.
@@ -186,14 +191,15 @@ Nenhuma é urgente: todas ficam para quando o site estiver quase pronto.
 3. Limites da primeira versão: 300 anúncios por relatório, histórico por 12 meses, uma instância.
 4. Nome e CPF ou CNPJ do responsável para a Política de Privacidade e os Termos (o e-mail de contato já está:
    orzy.suporte@gmail.com).
-5. Quando: beta fechado com 3 a 5 vendedores, ou direto ao público.
+5. Quando: decidido em 18/10/2026. Sem beta com vendedores convidados: o site abre depois dos testes do Nicolas e da
+   demo do professor (fase 9), com o sistema completo (fase 10).
 6. Revisão de advogado antes do público: sim ou não.
 
 ## Próximo passo
 
 - Nicolas: nada agora. As decisões acima ficam para quando o site estiver quase pronto.
-- Site (thread "Site: código e login"): o site base está pronto no PR #5 (rascunho). Próximo: o visual final, quando
-  a thread da marca entregar a prévia e o Nicolas aprovar. As mudanças da hospedagem entram quando ela for escolhida.
+- Site (thread "Site: código e login"): o site base está pronto no PR #5. Próximo: a fase 4, pelo passo 1 (o PR #5
+  no main e a troca para Django com PostgreSQL, com o visual novo). Ver o [06-status.md](06-status.md).
 - Hospedagem e domínio: planeja no papel o monitoramento, a cópia de segurança do histórico e o aviso de falha, com
   custo em reais. Nada de DNS, cobrança ou mudança no app sem o ok dele.
 - Privacidade e termos: preencher os campos marcados quando o Nicolas mandar os dados.

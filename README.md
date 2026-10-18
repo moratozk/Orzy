@@ -2,8 +2,8 @@
 
 Programa para vendedores do Mercado Livre (e depois da Shopee): se conecta à conta do vendedor,
 mostra quais anúncios vendem e quais não vendem e sugere o que mudar em cada um.
-Hoje roda no PC; na fase 3 vira um site em orzy.com.br.
-Começa com custo zero e vai virar, módulo por módulo, um ERP completo com a Orzy Intelligence analisando os dados.
+Hoje roda no PC. Está virando, módulo por módulo, um ERP completo com a Orzy Intelligence analisando os dados, e o
+site em orzy.com.br só vai ao ar com tudo funcionando (fase 10).
 
 ## Por onde começar
 

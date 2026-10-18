@@ -64,6 +64,8 @@ Legenda: **[doc]** está na documentação oficial · **[código]** é como o pa
   de leitura que o app já tem (15/10/2026: Profissional, 88/100). A regra das fotos não veio com o nome
   `PICTURES_QUANTITY_MIN` da documentação, então o painel reconhece o pedido pelo grupo `PICTURES`.
 - [ ] Fase 2: as fotos trazem `max_size` e a categoria traz `settings.max_title_length`.
+- [ ] Fase 3: o login do site (`/entrar` e `/retorno`) com a Redirect URI do site cadastrada no app. Hoje só foi
+  testado com o Mercado Livre simulado.
 
 ## Fontes
 

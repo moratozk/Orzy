@@ -10,7 +10,8 @@ from . import legal
 from .paginas import NAO_ENCONTRADO, erro, so_metodo
 
 # Robôs de busca ficam nas páginas públicas: as outras pedem login e só ligariam o servidor à toa.
-ROBOTS = "User-agent: *\nDisallow: /entrar\nDisallow: /retorno\nDisallow: /relatorio\nDisallow: /historico\n"
+ROBOTS = ("User-agent: *\nDisallow: /entrar\nDisallow: /retorno\nDisallow: /relatorio\nDisallow: /historico\n"
+          "Disallow: /conta\n")
 ERRO_INTERNO = "Algo deu errado do nosso lado. Tente de novo em alguns minutos."
 RECUSADO = "Pedido recusado. Volte à página e tente de novo."
 

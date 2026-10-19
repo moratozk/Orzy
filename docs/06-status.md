@@ -1,8 +1,9 @@
 # 06 · Status
 
 **Atualizado em:** 19/10/2026
-**Fase atual:** 4. O passo 1 está pronto (PR #12): o site passou para Django com PostgreSQL em `sistema/`, com o
-visual novo, e o site base antigo (`web/`) saiu. Próximo: o passo 2 (conta e acesso guardado), com o ok do Nicolas.
+**Fase atual:** 4. Os passos 1 e 2 estão prontos (PR #12 e PR #13): o site passou para Django com PostgreSQL em
+`sistema/`, com o visual novo, e a conta é criada no Conectar, com o acesso ao Mercado Livre guardado com criptografia.
+Próximo: o passo 3 (importação completa), com o ok do Nicolas.
 As fases 2 e 3 (site base) estão concluídas. Pela ordem aprovada em 18/10/2026, nada vai ao ar antes de o sistema
 inteiro funcionar (fase 10). Plano em `/mnt/project-files/orzy/plano/nova-ordem-sistema-completo.md`.
 
@@ -15,8 +16,9 @@ tempo, e poucas ficam ativas de cada vez, porque cada thread ativa gasta o limit
 Agora:
 
 - **Site: código e login**: a fase 4. O passo 1 está pronto (PR #12, 19/10/2026): o sistema em Django com
-  PostgreSQL, em `sistema/`, com o visual novo de `/mnt/project-files/orzy/marca/visual-final/`. Próximo: o passo 2,
-  conta e acesso guardado, depois do ok do Nicolas. Arquivos: `sistema/`, `testes/`, `painel-ml/`,
+  PostgreSQL, em `sistema/`, com o visual novo de `/mnt/project-files/orzy/marca/visual-final/`. O passo 2 também
+  (PR #13, 19/10/2026): a conta, o acesso guardado com criptografia, a página "Sua conta" e o "Desconectar e apagar
+  tudo". Próximo: o passo 3, importação completa, depois do ok do Nicolas. Arquivos: `sistema/`, `testes/`, `painel-ml/`,
   `requirements.txt`, `docs/01` a `docs/07` (menos `docs/legal/`) e o README.
 - **Identidade visual e logo**: em 17/10/2026 o Nicolas escolheu o layout Lima, com fundo escuro, e em 18/10/2026 a
   thread entregou o pacote em `/mnt/project-files/orzy/marca/visual-final/` (as páginas públicas prontas e modelos
@@ -31,8 +33,9 @@ Esperando:
   (PR #10, mesclado em 15/10/2026), e os dois ajustes que ela pediu no código estão no PR #5: a sessão com login
   acaba 8 horas depois do login, mesmo em uso, e as contagens do beta são apagadas depois de 12 meses. Nome e CPF
   ou CNPJ quando o Nicolas mandar, e a hospedagem quando for escolhida. Na fase 4, recebe as mudanças da Política e
-  dos Termos para a conta guardada (passo 2), os dados importados (passo 3) e a IA. O passo 1 não mudou o que fica
-  guardado, mas as referências ao código em `docs/legal/LEIA-ME.md` apontam para o `web/`, que saiu: a lista com os
+  dos Termos para a conta guardada (passo 2, pronto: o que mudou e as frases que ficaram velhas estão em
+  `/mnt/project-files/orzy/sistema/passo-2-conta-e-acesso.md`), os dados importados (passo 3) e a IA. Até a Política
+  mudar, ninguém além do Nicolas usa o sistema. O passo 1 não mudou o que fica guardado, mas as referências ao código em `docs/legal/LEIA-ME.md` apontam para o `web/`, que saiu: a lista com os
   arquivos do `sistema/` está em `/mnt/project-files/orzy/sistema/referencias-da-politica-no-codigo.md`.
 - **Hospedagem e domínio**: refaz o plano para o sistema completo (PostgreSQL num plano grátis até o lançamento,
   tarefas em segundo plano para a importação e a sincronia, e-mail dos alertas) e traz o custo do endereço de teste
@@ -98,6 +101,15 @@ Em 19/10/2026 ficou pronto o passo 1 da fase 4 (PR #12, com o "pode seguir" do N
 para Django com PostgreSQL, em `sistema/`, já com o visual novo, e o `web/` saiu. O banco guarda o mesmo que o site
 base guardava (o histórico e as contagens), e o que a Política promete continua valendo: o acesso ao Mercado Livre
 só na memória, um cookie só, a sessão de no máximo 8 horas e o histórico de 12 meses. Nada foi publicado.
+
+No mesmo dia ficou pronto o passo 2 (PR #13, com outro "pode seguir" do Nicolas): a conta é criada no clique em
+Conectar, sem senha, e o código que renova o acesso ao Mercado Livre (o refresh token) vai para o banco cifrado, com a
+chave fora dele. A página "Sua conta" mostra o que fica guardado e tem o "Desconectar e apagar tudo", que também tira
+a permissão do Orzy no Mercado Livre. Escolhas feitas no lugar do Nicolas, que ele pode mudar: quando o Mercado Livre
+recusa o acesso (permissão tirada ou senha trocada, que dão o mesmo erro), o acesso sai na hora e a conta com o
+histórico espera 30 dias por um novo Conectar. Isso muda o que a Política promete (o acesso só na memória): até a
+thread "Privacidade e termos" atualizar o texto, com o ok do Nicolas, ninguém além dele usa o sistema. Nada foi
+publicado.
 
 ## Decisões de 14/10/2026
 
@@ -181,6 +193,18 @@ só na memória, um cookie só, a sessão de no máximo 8 horas e o histórico d
   - `requirements.txt` com Django, psycopg, gunicorn e WhiteNoise; o programa do PC continua sem nada para instalar;
   - o GitHub roda os testes do sistema a cada PR, com um PostgreSQL só para o teste;
   - saíram `web/`, `testes/test_site.py` e `testes/firestore_simulado.py`: sem o beta, o Firestore não é usado.
+- Fase 4, passo 2 (PR #13, 19/10/2026):
+  - `sistema/contas/models.py`: a tabela das contas (número e apelido no Mercado Livre, quando entrou, o último
+    Conectar e o acesso guardado cifrado). Os relatórios guardados passam a ser da conta e saem com ela pelo próprio
+    banco; os que já existiam ganham uma conta sem acesso guardado (migração `0002`);
+  - `sistema/contas/cofre.py`: a cifra AES-256-GCM (biblioteca `cryptography`), com a chave em `ORZY_CHAVE_ACESSO`;
+  - `sistema/contas/acesso.py`: guardar no Conectar, renovar um de cada vez com o código novo salvo antes, perder o
+    acesso quando o Mercado Livre recusa (as sessões da conta acabam em todos os navegadores), a conferência de todo
+    dia, as contas sem acesso há 30 dias e o "Desconectar e apagar tudo";
+  - a página "Sua conta" (`/conta`), aberta pelo círculo com as iniciais no topo, e a página de conta apagada;
+  - o relatório renova o login sozinho quando o token de acesso vence (6 horas), em vez de pedir um novo Conectar;
+  - `painel-ml/ml_api.py` ganhou `tirar_permissao`, que o programa do PC não usa, e o Mercado Livre simulado ganhou
+    o `DELETE` da permissão.
 
 ## O que foi testado (com dados simulados)
 
@@ -226,8 +250,23 @@ só na memória, um cookie só, a sessão de no máximo 8 horas e o histórico d
 - No navegador (Chromium), com login e relatórios simulados: as páginas públicas e todas as telas do sistema, de 320
   a 1280 px, sem nada empurrando a página para o lado. O gunicorn ligado com a configuração do sistema: um processo,
   as limpezas no mesmo processo e o registro sem IP e sem a busca.
-- Testes rodados: 151 (64 do PC, no Python 3.10 e no 3.13, e 87 do sistema, no 3.13 com o PostgreSQL 16). Quebrar
-  de propósito 11 pontos do sistema faz os testes falharem: o código de renovação descartado, o prazo de 8 horas, o
+- Sistema (fase 4, passo 2), 109 testes: a cifra (abre só com a mesma chave e na mesma conta, não abre mexida, e
+  cada vez sai diferente), o Conectar que cria a conta e o Conectar de novo que atualiza a mesma, o login sem o
+  código de renovação, a conta que não salva (o login não conclui), o código de renovação e o token de acesso que não
+  aparecem abertos em nenhuma tabela, 4 renovações ao mesmo tempo sem nenhuma recusada, o código novo salvo antes de
+  o token sair, o token vencido ou recusado que renova sozinho, a permissão tirada (o acesso sai, as sessões da conta
+  acabam em todos os navegadores, o histórico fica e o Conectar de novo volta), o erro passageiro e a chave trocada
+  que não apagam nada, a conferência de todo dia (renova só quem não renovou e percebe quem tirou a permissão), as
+  contas sem acesso há 30 dias (com o histórico, pelo banco), a página "Sua conta", o "Desconectar e apagar tudo"
+  (pede confirmação e o código do formulário, apaga só a conta certa, encerra as sessões e tira a permissão, também
+  sem o token da sessão, e apaga mesmo quando o Mercado Livre não confirma) e as páginas sem login.
+- Testes rodados no passo 2: 173 (64 do PC, no Python 3.10 e no 3.13, e 109 do sistema, no 3.13 com o PostgreSQL
+  16). Quebrar de propósito 31 pontos faz os testes falharem, entre eles: a trava da renovação, salvar o código novo,
+  o erro que apaga o acesso, as sessões que acabam junto, a conta na conferência da cifra, a chave conferida, o
+  Conectar de novo, a conferência de todo dia, o prazo de 30 dias, o apagar pelo banco, o tirar a permissão e a
+  confirmação para apagar.
+- Testes rodados no passo 1: 151 (64 do PC, no Python 3.10 e no 3.13, e 87 do sistema, no 3.13 com o PostgreSQL 16).
+  Quebrar de propósito 11 pontos do sistema faz os testes falharem: o código de renovação descartado, o prazo de 8 horas, o
   escape dos títulos, quem abre `/contagens`, o relatório guardado de outra conta, a confirmação para apagar, o
   código novo depois do login, as etapas do andamento, a compressão, o dia das contagens apagadas e a conferência
   do endereço.
@@ -256,6 +295,8 @@ só na memória, um cookie só, a sessão de no máximo 8 horas e o histórico d
 - [ ] Fase 2: ver a contagem da ficha técnica na tela (linha "Ficha técnica: X de Y campos"). Não segura a fase.
 - [ ] O login do site com o Mercado Livre de verdade (no endereço de teste, no fim da fase 4, com a Redirect URI dele
   no app).
+- [ ] A renovação pelo acesso guardado e o "Desconectar e apagar tudo" com o Mercado Livre de verdade (no mesmo
+  endereço de teste).
 
 ## Próximo passo
 
@@ -265,9 +306,10 @@ só na memória, um cookie só, a sessão de no máximo 8 horas e o histórico d
 2. Nicolas: quando puder, baixar o ZIP de novo do GitHub. Para não fazer login de novo, copiar o `config.json` e o
    `tokens.json` da pasta `painel-ml` usada por último para a nova. Rodar `python meus_anuncios.py` e mandar o
    texto do que apareceu no cmd (sem print). Ver a linha "Ficha técnica: X de Y campos".
-3. Sistema: o passo 1 da fase 4 está pronto (PR #12). Próximo: o passo 2 (a conta criada no Conectar e o acesso
-   guardado com criptografia), com o ok do Nicolas. O endereço de teste entra no fim da fase 4, com o ok dele; a
-   hospedagem do lançamento e o que vem com ela (monitoramento e cópia de segurança) ficam para a fase 10.
+3. Sistema: os passos 1 e 2 da fase 4 estão prontos (PR #12 e PR #13). Próximo: o passo 3 (importação completa:
+   anúncios de todos os status, fotos só pelos links, estoque, 12 meses de vendas sem dados do comprador e 150 dias
+   de visitas), com o ok do Nicolas. O endereço de teste entra no fim da fase 4, com o ok dele; a hospedagem do
+   lançamento e o que vem com ela (monitoramento e cópia de segurança) ficam para a fase 10.
 
 Na conversa, mandar só o texto do que apareceu no cmd, sem print. **Nunca** mandar o Client Secret,
 o `config.json`, o `tokens.json` nem o banco do site.

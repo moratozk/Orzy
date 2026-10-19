@@ -1,6 +1,5 @@
 """Relatório e histórico. Todas as páginas pedem login: quem não tem volta para a página inicial."""
 
-import functools
 import logging
 
 import meus_anuncios
@@ -8,22 +7,11 @@ from contas.sessoes import logada
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
-from publico.paginas import erro, nao_encontrado, so_metodo, ver_outra
+from publico.paginas import com_login, erro, nao_encontrado, so_metodo, ver_outra
 
 from . import busca, comparacao, contagens, telas
 from .geracao import ERRO, GERANDO, PRONTO, RELATORIOS, ErroRelatorio, dias_pedidos, em_andamento
 from .historico import HISTORICO
-
-
-def com_login(view):
-    """Passa a sessão para a página, ou manda para a página inicial quem não entrou com o Mercado Livre."""
-    @functools.wraps(view)
-    def envolvida(request, *args, **kwargs):
-        sessao = logada(request)
-        if sessao is None:
-            return redirect("/")
-        return view(request, sessao, *args, **kwargs)
-    return envolvida
 
 
 def _relatorio_da_sessao(request, relatorio_id):
@@ -53,6 +41,10 @@ def gerar(request, sessao):
 
 @so_metodo("GET")
 def ver(request, relatorio_id):
+    if logada(request) is None:
+        # A sessão acabou enquanto a página estava aberta (Sair em outra aba, o prazo, a conta sem acesso): a página
+        # inicial tem o Conectar.
+        return redirect("/")
     relatorio = _relatorio_da_sessao(request, relatorio_id)
     if relatorio is None:
         return nao_encontrado(request)

@@ -4,10 +4,12 @@ import re
 from datetime import datetime, timezone
 from unittest import mock
 
+from contas import acesso
+from contas.models import Conta
 from relatorios.geracao import ERRO, PASSOS, PRONTO, Relatorio
 from relatorios.historico import HISTORICO
 
-from .base import CONTA, Navegador, SistemaBase, com_configuracao
+from .base import CONTA, Navegador, SistemaBase, codigo_guardado, com_configuracao
 
 
 class RelatorioTests(SistemaBase):
@@ -161,18 +163,57 @@ class RelatorioTests(SistemaBase):
         for caminho in ("", "/csv", "/andamento.json"):
             self.assertEqual(self.abrir(f"/relatorio/{relatorio_id}{caminho}", outra).status_code, 404, caminho)
 
-    def test_token_vencido_pede_novo_login_sem_renovar_sozinho(self):
+    def test_token_vencido_ou_recusado_renova_com_o_acesso_guardado(self):
         self.semear()
         self.entrar()
-        self.ml.revogar_access_tokens()
-        antes = len(self.chamadas_de_token())
-        relatorio = self.esperar(self.gerar())
-        self.assertEqual(relatorio.estado, ERRO)
-        self.assertIn("venceu", relatorio.mensagem)
-        self.assertEqual(len(self.chamadas_de_token()), antes, "o site não pode renovar com refresh token")
-        texto = self.texto(self.abrir(f"/relatorio/{relatorio.id}"))
-        self.assertIn("Não deu para gerar o relatório", texto)
-        self.assertIn("Tentar de novo", texto)
+        codigo = codigo_guardado()
+        antigo = self.sessao()["cliente"].tokens["access_token"]
+        self.ml.revogar_access_tokens()  # o Mercado Livre recusa o token de acesso antes da hora
+        self.assertEqual(self.esperar(self.gerar()).estado, PRONTO)
+        self.assertEqual(len(self.chamadas_de_token()), 2, "o login e uma renovação")
+        novo = codigo_guardado()
+        self.assertFalse(self.ml.refresh_ainda_vale(codigo), "o código de antes já foi usado")
+        self.assertTrue(self.ml.refresh_ainda_vale(novo), "o código novo ficou guardado")
+        tokens = self.sessao()["cliente"].tokens
+        self.assertNotEqual(tokens["access_token"], antigo)
+        self.assertNotIn("refresh_token", tokens, "o código de renovação não fica na sessão")
+
+        tokens["expira_em"] = 0  # o token de acesso venceu (6 horas)
+        self.assertEqual(self.esperar(self.gerar()).estado, PRONTO)
+        self.assertEqual(len(self.chamadas_de_token()), 3)
+        self.assertTrue(self.ml.refresh_ainda_vale(codigo_guardado()))
+
+    def test_permissao_tirada_no_mercado_livre_apaga_o_acesso_e_encerra_as_sessoes(self):
+        self.semear()
+        self.entrar()
+        outro_navegador = Navegador()
+        self.entrar(outro_navegador)
+        self.esperar(self.gerar())
+        outra_conta = self.entrar_sem_mercado_livre({"id": 999, "apelido": "OUTRA"}, Navegador())
+        dados = self.sessao()  # o dicionário da sessão continua aqui depois de a sessão acabar
+        self.ml.revogar_tudo()  # a pessoa tirou a permissão do Orzy no Mercado Livre
+        with self.assertLogs(level="INFO") as registro:
+            relatorio_id = self.gerar()
+            relatorio = dados["relatorios"][relatorio_id]
+            relatorio.thread.join(timeout=30)
+        self.assertEqual((relatorio.estado, relatorio.mensagem), (ERRO, acesso.MENSAGEM_SEM_ACESSO))
+        self.assertIn("o acesso foi apagado", "\n".join(registro.output))
+        guardada = Conta.objects.get(ml_user_id=CONTA)
+        self.assertEqual(guardada.acesso, "")
+        self.assertIsNotNone(guardada.sem_acesso_desde)
+        self.assertEqual(len(HISTORICO.listar(CONTA)), 1, "o histórico espera a pessoa conectar de novo")
+        for navegador in (self.client, outro_navegador):
+            self.assertEqual(self.sessao(navegador), {}, "as sessões da conta acabam em todos os navegadores")
+        self.assertTrue(self.sessao(outra_conta), "a sessão de outra conta continua")
+        resposta = self.abrir(f"/relatorio/{relatorio_id}")
+        self.assertEqual((resposta.status_code, resposta["Location"]), (302, "/"), "a página inicial tem o Conectar")
+
+        self.entrar()  # conectar de novo guarda um acesso novo
+        guardada = Conta.objects.get(ml_user_id=CONTA)
+        self.assertTrue(guardada.acesso)
+        self.assertIsNone(guardada.sem_acesso_desde)
+        self.assertEqual(self.esperar(self.gerar()).estado, PRONTO)
+        self.assertEqual(len(HISTORICO.listar(CONTA)), 2)
 
     def test_conta_sem_anuncios_avisa_sem_erro(self):
         self.entrar()
@@ -203,12 +244,12 @@ class RelatorioTests(SistemaBase):
         self.semear()
         self.entrar()
         relatorio_id = self.esperar(self.gerar()).id
-        for caminho in ("/relatorio", f"/relatorio/{relatorio_id}", "/historico"):
+        for caminho in ("/relatorio", f"/relatorio/{relatorio_id}", "/historico", "/conta"):
             texto = self.texto(self.abrir(caminho))
             rodape = texto[texto.index('<footer class="si-rodape">'):]
             for link in ('href="/privacidade"', 'href="/termos"', 'href="mailto:orzy.suporte@gmail.com"'):
                 self.assertIn(link, rodape, caminho)
-            self.assertIn('<span class="app-avatar si-avatar" aria-hidden="true" title="Conectado como LOJA_TESTE">LT'
-                          '</span>', texto)
+            self.assertIn('<a class="app-avatar si-avatar" href="/conta" title="Sua conta: LOJA_TESTE"', texto, caminho)
+            self.assertIn('<span class="so-leitor">Sua conta</span><span aria-hidden="true">LT</span></a>', texto)
             self.assertIsNotNone(re.search(r'<form class="si-sair-form" method="post" action="/sair">'
                                            r'<input type="hidden" name="csrfmiddlewaretoken"', texto), caminho)

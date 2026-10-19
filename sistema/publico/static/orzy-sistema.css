@@ -4,7 +4,10 @@
    site), formulários que funcionam sem JavaScript e a situação "Sem dados", que o pacote não tem. */
 
 /* ================================================================== topo e abas */
-.si-avatar { display: grid; place-items: center; cursor: default; }
+/* o avatar leva à página da conta */
+.si-avatar { display: grid; place-items: center; text-decoration: none; transition: box-shadow 0.2s; }
+.si-avatar .ico { width: 18px; height: 18px; }
+.si-avatar:hover, .si-avatar[aria-current="page"] { box-shadow: 0 0 0 2px var(--tinta), 0 0 0 4px var(--lima); }
 .si-sair-form { display: flex; margin: 0; }
 .si-sair {
   height: 40px;
@@ -320,6 +323,26 @@
 .si-falhou p { max-width: 46ch; margin: 0; color: var(--apoio-escuro); }
 .si-falhou .kpi-acoes-botao { margin-top: 10px; }
 
+/* ================================================================== sua conta (/conta) */
+.si-conta {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 22px;
+  border: 1px solid var(--linha-escura);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.008)), var(--noite);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.si-conta h2 { margin: 0; color: var(--branco); font-size: 15.5px; font-weight: 600; }
+.si-conta-dados { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 2px 0 6px; }
+.si-conta-dados div { min-width: 0; padding: 12px 14px; border: 1px solid var(--linha-escura); border-radius: 14px; }
+.si-conta-dados dt { color: var(--sutil-escuro); font-size: 12px; }
+.si-conta-dados dd { display: grid; gap: 2px; margin: 4px 0 0; color: var(--branco); font-size: 14.5px; overflow-wrap: anywhere; }
+.si-conta-dados b { font-weight: 600; }
+.si-conta-dados small { color: var(--apoio-escuro); font-size: 12px; }
+.si-conta .si-ajuda b { color: var(--texto-claro); font-weight: 600; }
+
 /* ================================================================== histórico */
 /* a linha do tempo rola para o lado com quantos relatórios houver (o modelo tinha 6 colunas fixas) */
 .hi-relatorios { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(172px, calc((100% - 60px) / 6)); }
@@ -384,6 +407,7 @@ a.hi-ir { display: inline; }
 @media (max-width: 1100px) {
   .si-contagens { grid-template-columns: minmax(0, 1fr); }
   .si-cartoes { grid-template-columns: minmax(0, 1fr); }
+  .si-conta-dados { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 1000px) {
   .si-comecar { grid-template-columns: minmax(0, 1fr); max-width: 640px; }
@@ -400,6 +424,8 @@ a.hi-ir { display: inline; }
   .si-opcoes span { justify-content: center; width: 100%; padding: 0 6px; }
   .si-botao { justify-self: stretch; justify-content: center; }
   .si-prontos { padding: 18px 16px; }
+  .si-conta { padding: 18px 16px; }
+  .si-conta-dados { grid-template-columns: minmax(0, 1fr); }
   .si-pendencias { grid-template-columns: minmax(0, 1fr); }
   /* três caixas na primeira linha; ficha técnica e nota do ML, que são textos, dividem a segunda */
   .si-numeros { grid-template-columns: repeat(6, minmax(0, 1fr)); }

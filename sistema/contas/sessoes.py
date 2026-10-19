@@ -1,7 +1,8 @@
 """Sessões do sistema, guardadas só na memória do servidor (o SESSION_ENGINE do Django aponta para cá).
 
-O token de acesso do Mercado Livre fica aqui: nunca vai para o navegador, para arquivo ou para o banco. Se o servidor
-reiniciar, todo mundo conecta de novo. Por isso o sistema roda com um processo só (ver gunicorn.conf.py).
+O token de acesso do Mercado Livre fica aqui: nunca vai para o navegador, para arquivo ou para o banco (o código que o
+renova fica no banco, cifrado: ver acesso.py). Se o servidor reiniciar, todo mundo conecta de novo. Por isso o sistema
+roda com um processo só (ver gunicorn.conf.py).
 
 Uma sessão com login acaba `horas` depois do login, mesmo em uso: é o prazo do cookie, e a Política de Privacidade
 promete apagar o login, o apelido e os relatórios da memória no máximo 8 horas depois de a pessoa entrar. Quem clicou
@@ -24,6 +25,12 @@ MAX_LOGIN_PENDENTE = 1000  # robôs que só abrem /entrar não enchem a memória
 
 def _logada(dados):
     return dados.get("cliente") is not None
+
+
+def _conta(dados):
+    """O número da conta do Mercado Livre de uma sessão com login, ou None."""
+    usuario = dados.get("usuario") if _logada(dados) else None
+    return int(usuario["id"]) if usuario and usuario.get("id") is not None else None
 
 
 @dataclass
@@ -86,6 +93,12 @@ class Sessoes:
     def encerrar(self, chave):
         with self._trava:
             self._dados.pop(chave, None)
+
+    def encerrar_da_conta(self, ml_user_id):
+        """Encerra as sessões com login desta conta em todos os navegadores: a conta foi apagada ou perdeu o acesso."""
+        with self._trava:
+            for chave in [c for c, g in self._dados.items() if _conta(g.dados) == int(ml_user_id)]:
+                del self._dados[chave]
 
     def limpar(self, antecedencia=0):
         """Apaga as sessões vencidas sem esperar o próximo pedido, e também as que vencem nos próximos `antecedencia`

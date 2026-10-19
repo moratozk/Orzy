@@ -1,16 +1,16 @@
 """O que fica guardado no banco: o histórico dos relatórios e as contagens do beta.
 
-Só o que a Política de Privacidade diz (seção 6): de cada relatório, a data, o período, o número da conta, quantos
-anúncios e quantos em cada situação; de cada anúncio, o número, o título, as visitas, as vendas, a situação e a
-pontuação das sugestões. Nada de token, preço, estoque, link ou dado de comprador. As contagens são só números por
-dia, sem dizer de qual conta.
+Só o que a Política de Privacidade diz (seção 6): de cada relatório, a data, o período, a conta, quantos anúncios e
+quantos em cada situação; de cada anúncio, o número, o título, as visitas, as vendas, a situação e a pontuação das
+sugestões. Nada de token, preço, estoque, link ou dado de comprador. Cada relatório é de uma conta (contas/models.py)
+e sai com ela, pelo próprio banco. As contagens são só números por dia, sem dizer de qual conta.
 """
 
 from django.db import models
 
 
 class RelatorioGuardado(models.Model):
-    ml_user_id = models.BigIntegerField(db_index=True)  # o número da conta no Mercado Livre
+    conta = models.ForeignKey("contas.Conta", on_delete=models.DB_CASCADE, related_name="relatorios")
     criado_em = models.DateTimeField(db_index=True)
     dias = models.PositiveSmallIntegerField()
     total = models.PositiveIntegerField()  # quantos anúncios
@@ -21,7 +21,7 @@ class RelatorioGuardado(models.Model):
 
 
 class AnuncioGuardado(models.Model):
-    relatorio = models.ForeignKey(RelatorioGuardado, on_delete=models.CASCADE, related_name="anuncios")
+    relatorio = models.ForeignKey(RelatorioGuardado, on_delete=models.DB_CASCADE, related_name="anuncios")
     item_id = models.CharField(max_length=40)
     titulo = models.TextField()
     visitas = models.IntegerField(null=True)  # vazio quando o Mercado Livre não respondeu

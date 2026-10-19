@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block titulo %}Erro{% endblock %}
+{% block titulo %}{% if titulo %}{{ titulo }}{% else %}Erro{% endif %}{% endblock %}
 {% block estilos %}<link rel="stylesheet" href="{% static 'orzy-site.css' %}">
 <link rel="stylesheet" href="{% static 'orzy-erro.css' %}">{% endblock %}
 {% block scripts %}<script src="{% static 'orzy-base.js' %}" defer></script>
@@ -8,8 +8,8 @@
 <script src="{% static 'orzy-iniciar.js' %}" defer></script>{% endblock %}
 {% block tela %}erro{% endblock %}
 {% block corpo %}
-{% comment %}A página de erro do visual novo: o título fica, a mensagem muda (publico/paginas.erro). O ponto do anel
-cai e fica no chão; o anel apaga.{% endcomment %}
+{% comment %}A página de erro do visual novo: a mensagem muda (publico/paginas.erro) e o título também pode mudar
+(a conta apagada usa esta página). O ponto do anel cai e fica no chão; o anel apaga.{% endcomment %}
 <section class="tela t-erro site" id="t-erro" data-tela="erro" aria-label="Página de erro">
   <div class="er-pagina">
     <div class="er-topo sc-dentro">
@@ -40,12 +40,12 @@ cai e fica no chão; o anel apaga.{% endcomment %}
 
       <div class="er-texto">
         {% if codigo %}<p class="sc-rotulo er-codigo">Erro {{ codigo }}</p>{% endif %}
-        <h1 class="er-titulo">Algo não deu certo</h1>
+        <h1 class="er-titulo">{% if titulo %}{{ titulo }}{% else %}Algo não deu certo{% endif %}</h1>
         <p class="er-mensagem">{{ mensagem }}</p>
         <div class="er-acoes">
           <a class="sc-botao sc-botao-lima sc-botao-g" href="/">Voltar ao início<span class="sc-botao-seta" aria-hidden="true"><svg class="ico"><use href="#i-seta"/></svg></span></a>
         </div>
-        <p class="er-ajuda">Se continuar acontecendo, escreva para <span class="er-email">{{ contato }}</span></p>
+        <p class="er-ajuda">{% if titulo %}Alguma dúvida? Escreva{% else %}Se continuar acontecendo, escreva{% endif %} para <span class="er-email">{{ contato }}</span></p>
       </div>
     </main>
 

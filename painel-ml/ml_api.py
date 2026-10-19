@@ -261,6 +261,15 @@ def renovar_token(config, tokens, gravar=True):
     return montar_tokens(resposta, anterior=tokens)
 
 
+def tirar_permissao(config, access_token, user_id):
+    """Tira a permissão do app na conta, como o vendedor faz no Mercado Livre: o login e a renovação deixam de valer.
+
+    Usado pelo "Desconectar e apagar tudo" do sistema do site; o programa do PC não usa.
+    """
+    url = f"{API_BASE}/users/{int(user_id)}/applications/{config['client_id']}"
+    return _requisicao("DELETE", url, cabecalhos={"Authorization": "Bearer " + access_token}, tentativas=2)
+
+
 # ---------------------------------------------------------------- cliente
 
 class ClienteML:

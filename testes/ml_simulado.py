@@ -10,6 +10,7 @@ Imita só o pedaço da API que o painel usa:
   - visitas por anúncio
   - busca de pedidos pagos
   - nota de qualidade do anúncio (/item/{id}/performance)
+  - tirar a permissão do app (DELETE /users/{id}/applications/{app_id})
 Também simula os problemas mais comuns: erro 429 (muitas chamadas), login vencido,
 falta de permissão e falha numa chamada.
 
@@ -111,6 +112,8 @@ class MLSimulado:
         # O que fazer nas próximas chamadas, em ordem: um status HTTP (ex.: 429),
         # "derrubar" (fecha a conexão sem responder) ou "html" (página no lugar dos dados).
         self.falhas = []
+        self.espera_no_token = 0  # segundos antes de responder em /oauth/token (para testar renovações ao mesmo tempo)
+        self.permissao_tirada = 0  # quantas vezes o app pediu para tirar a permissão
 
         self._codes = {}          # code -> dados da autorização
         self._access = {}         # access token -> expira em (timestamp)
@@ -255,6 +258,9 @@ class MLSimulado:
             def do_POST(self):
                 simulado._atender(self, "POST")
 
+            def do_DELETE(self):
+                simulado._atender(self, "DELETE")
+
         self._servidor = ThreadingHTTPServer(("127.0.0.1", porta), Handler)
         threading.Thread(target=self._servidor.serve_forever, daemon=True).start()
         self.base = f"http://127.0.0.1:{self._servidor.server_address[1]}"
@@ -300,6 +306,8 @@ class MLSimulado:
 
         if metodo == "POST" and url.path == "/oauth/token":
             return self._token(req, corpo)
+        if metodo == "DELETE":
+            return self._tirar_permissao(req, url.path)
         if metodo != "GET":
             return self._erro(req, 405, "method_not_allowed", "método não suportado")
         if url.path == "/authorization":
@@ -372,7 +380,22 @@ class MLSimulado:
             "refresh_token": refresh,
         }
 
+    def _tirar_permissao(self, req, caminho):
+        m = re.fullmatch(r"/users/(\d+)/applications/(\w+)", caminho)
+        if not m:
+            return self._erro(req, 404, "not_found", "resource not found")
+        if not self._token_valido(req):
+            return self._erro(req, 401, "unauthorized", "invalid access token")
+        if int(m.group(1)) != self.usuario["id"] or m.group(2) != self.app["client_id"]:
+            return self._erro(req, 403, "forbidden", "user or application does not match the token")
+        self.revogar_tudo()
+        with self._trava:
+            self.permissao_tirada += 1
+        return self._json(req, 200, {"user_id": m.group(1), "app_id": m.group(2), "msg": "Autorización eliminada."})
+
     def _token(self, req, corpo):
+        if self.espera_no_token:
+            time.sleep(self.espera_no_token)
         if corpo.get("client_id") != self.app["client_id"] or corpo.get("client_secret") != self.app["client_secret"]:
             return self._erro(req, 401, "invalid_client", "invalid client_id or client_secret")
         tipo = corpo.get("grant_type")

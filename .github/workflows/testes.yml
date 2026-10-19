@@ -1,6 +1,7 @@
 # Roda os testes a cada PR e a cada mudança na main, contra o Mercado Livre simulado: os do programa do PC
 # (painel-ml/) no Windows e no Linux, e os do sistema em Django (sistema/) com um PostgreSQL só para o teste.
-# Não usa conta do Mercado Livre nem segredo nenhum: o Client Secret e a senha do banco abaixo são de mentira.
+# Não usa conta do Mercado Livre nem segredo nenhum: o Client Secret, a senha do banco e a chave do acesso guardado
+# abaixo são de mentira.
 name: Testes
 
 on:
@@ -54,6 +55,7 @@ jobs:
       ORZY_ML_CLIENT_SECRET: segredo-de-teste
       ORZY_URL_BASE: https://orzy.test
       ORZY_BANCO_URL: postgresql://orzy:orzy-teste@127.0.0.1:5432/orzy
+      ORZY_CHAVE_ACESSO: AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6

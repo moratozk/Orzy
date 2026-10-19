@@ -1,12 +1,14 @@
 """Histórico dos relatórios e contagens do beta, no PostgreSQL (os modelos estão em models.py).
 
 Guarda só o que o relatório mostra: número e título dos anúncios e os números deles. Nada de token e nenhum dado de
-comprador. As contagens do beta (ver contagens.py) são só números por dia, sem dizer de qual conta.
+comprador. Cada relatório é de uma conta (contas.Conta): sem a conta, não guarda, e quando ela sai o histórico sai
+junto. As contagens do beta (ver contagens.py) são só números por dia, sem dizer de qual conta.
 """
 
 from datetime import timedelta
 
 import analise
+from contas.models import Conta
 from django.db import connection, transaction
 from django.db.models import Max
 
@@ -34,23 +36,30 @@ class Historico:
         self._agora = agora
 
     def salvar(self, ml_user_id, dias, linhas):
+        """Guarda o relatório na conta. Devolve o número dele, ou None se a conta não existe mais (foi apagada enquanto
+        o relatório rodava): o relatório não traz a conta de volta."""
         resumo = {situacao: sum(1 for l in linhas if l["situacao"] == situacao) for situacao in analise.ORDEM}
         with transaction.atomic():
+            # A linha da conta fica travada até o fim: quem apaga a conta espera, e apaga este relatório junto.
+            conta = Conta.objects.select_for_update().filter(ml_user_id=int(ml_user_id)).first()
+            if conta is None:
+                return None
             guardado = RelatorioGuardado.objects.create(
-                ml_user_id=int(ml_user_id), criado_em=self._agora().replace(microsecond=0), dias=dias,
-                total=len(linhas), resumo=resumo)
+                conta=conta, criado_em=self._agora().replace(microsecond=0), dias=dias, total=len(linhas),
+                resumo=resumo)
             AnuncioGuardado.objects.bulk_create(
                 AnuncioGuardado(relatorio=guardado, item_id=l["id"], titulo=l["titulo"], visitas=l["visitas"],
                                 vendas=l["vendas"], situacao=l["situacao"], pontos=l["pontos"]) for l in linhas)
         return guardado.id
 
     def listar(self, ml_user_id):
-        guardados = RelatorioGuardado.objects.filter(ml_user_id=int(ml_user_id)).order_by("-id")[:MAX_NA_LISTA]
+        guardados = (RelatorioGuardado.objects.filter(conta__ml_user_id=int(ml_user_id))
+                     .order_by("-id")[:MAX_NA_LISTA])
         return [_cabecalho(g) for g in guardados]
 
     def ver(self, ml_user_id, relatorio_id):
         """Um relatório guardado, só se for da conta pedida. Devolve None se não for."""
-        guardado = RelatorioGuardado.objects.filter(id=int(relatorio_id), ml_user_id=int(ml_user_id)).first()
+        guardado = RelatorioGuardado.objects.filter(id=int(relatorio_id), conta__ml_user_id=int(ml_user_id)).first()
         if guardado is None:
             return None
         anuncios = guardado.anuncios.order_by("id").values_list(*CAMPOS_ANUNCIO)
@@ -62,15 +71,15 @@ class Historico:
 
         Devolve o número dele, ou None se não houver (ou se o relatório pedido não for da conta).
         """
-        este = RelatorioGuardado.objects.filter(id=int(relatorio_id), ml_user_id=int(ml_user_id)).first()
+        este = RelatorioGuardado.objects.filter(id=int(relatorio_id), conta__ml_user_id=int(ml_user_id)).first()
         if este is None:
             return None
-        return (RelatorioGuardado.objects.filter(ml_user_id=este.ml_user_id, dias=este.dias, id__lt=este.id)
+        return (RelatorioGuardado.objects.filter(conta_id=este.conta_id, dias=este.dias, id__lt=este.id)
                 .order_by("-id").values_list("id", flat=True).first())
 
     def apagar(self, ml_user_id):
-        """Apaga todos os relatórios da conta. Devolve quantos foram apagados."""
-        _, apagados = RelatorioGuardado.objects.filter(ml_user_id=int(ml_user_id)).delete()
+        """Apaga todos os relatórios da conta (a conta fica). Devolve quantos foram apagados."""
+        _, apagados = RelatorioGuardado.objects.filter(conta__ml_user_id=int(ml_user_id)).delete()
         return apagados.get(RelatorioGuardado._meta.label, 0)
 
     def apagar_antigos(self, dias):
@@ -103,7 +112,7 @@ class Historico:
 
     def ultimo_total_de_cada_conta(self):
         """Quantos anúncios tem o último relatório guardado de cada conta, do menor para o maior, sem dizer a conta."""
-        ultimos = RelatorioGuardado.objects.values("ml_user_id").annotate(ultimo=Max("id")).values("ultimo")
+        ultimos = RelatorioGuardado.objects.values("conta").annotate(ultimo=Max("id")).values("ultimo")
         return sorted(RelatorioGuardado.objects.filter(id__in=ultimos).values_list("total", flat=True))
 
 

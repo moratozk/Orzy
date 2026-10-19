@@ -3,11 +3,12 @@
 from unittest import mock
 
 import ml_api
+from contas.models import Conta
 from contas.sessoes import GUARDADAS
 from django.db import connection
 from relatorios.historico import HISTORICO
 
-from .base import CLIENT_ID, CONTA, SECRET, Navegador, SistemaBase
+from .base import CLIENT_ID, CONTA, SECRET, Navegador, SistemaBase, codigo_guardado
 
 
 class LoginTests(SistemaBase):
@@ -50,16 +51,29 @@ class LoginTests(SistemaBase):
         self.assertEqual(resposta.status_code, 400)
         self.assertIn("Você não autorizou o acesso", self.texto(resposta))
 
-    def test_login_guarda_o_token_so_na_memoria(self):
+    def test_login_guarda_o_token_na_memoria_e_o_codigo_de_renovacao_cifrado_no_banco(self):
         self.entrar()
         sessao = self.sessao()
         self.assertEqual(sessao["usuario"], {"id": CONTA, "apelido": "LOJA_TESTE"})
-        self.assertNotIn("refresh_token", sessao["cliente"].tokens)
+        tokens = sessao["cliente"].tokens
+        self.assertNotIn("refresh_token", tokens)
         self.assertFalse(ml_api.ARQ_TOKENS.exists(), "o login do site não pode ir para o disco")
         self.assertFalse(ml_api.ARQ_CONFIG.exists())
         self.assertEqual(set(self.client.cookies), {"orzy_sessao"}, "nem o código contra pedidos de outros sites")
-        self.assertNotIn(sessao["cliente"].tokens["access_token"], self.client.cookies["orzy_sessao"].value)
+        self.assertNotIn(tokens["access_token"], self.client.cookies["orzy_sessao"].value)
         self.assertNotIn("django_session", connection.introspection.table_names(), "nenhuma sessão vai para o banco")
+
+        conta = Conta.objects.get(ml_user_id=CONTA)
+        self.assertEqual(conta.apelido, "LOJA_TESTE")
+        codigo = codigo_guardado()
+        self.assertTrue(self.ml.refresh_ainda_vale(codigo), "o código guardado é o que o Mercado Livre mandou")
+        # Nem o código de renovação nem o token de acesso aparecem abertos em alguma tabela.
+        with connection.cursor() as cursor:
+            for tabela in connection.introspection.table_names():
+                cursor.execute("SELECT * FROM " + connection.ops.quote_name(tabela))
+                linhas = repr(cursor.fetchall())
+                self.assertNotIn(codigo, linhas, tabela)
+                self.assertNotIn(tokens["access_token"], linhas, tabela)
 
     def test_login_troca_o_codigo_da_sessao(self):
         resposta = self.abrir("/entrar")
@@ -82,7 +96,7 @@ class LoginTests(SistemaBase):
         self.assertIsNone(GUARDADAS.obter(antes))
 
     def test_sem_login_volta_para_o_inicio(self):
-        for caminho in ("/relatorio", "/historico", "/historico/1"):
+        for caminho in ("/relatorio", "/relatorio/abc", "/historico", "/historico/1", "/conta"):
             resposta = self.abrir(caminho)
             self.assertEqual((resposta.status_code, resposta["Location"]), (302, "/"), caminho)
 

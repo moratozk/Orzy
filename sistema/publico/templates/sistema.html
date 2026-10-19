@@ -9,8 +9,8 @@
 {% comment %}
   O topo e as abas do sistema (relatório, histórico e contagens), do pacote do visual novo
   (orzy/marca/visual-final/paginas/modelo-painel.html). O beta tem só Relatório e Histórico; avisos, ajustes e a busca
-  do topo chegam com as fases seguintes. O rodapé não está no modelo: leva aos textos legais de todas as telas, como no
-  site de antes.
+  do topo chegam com as fases seguintes. O avatar leva à página da conta (/conta), como o botão da conta do modelo. O
+  rodapé não está no modelo: leva aos textos legais de todas as telas, como no site de antes.
 {% endcomment %}
 <section class="tela {% block classe_da_tela %}t-painel{% endblock %}">
   <div class="app">
@@ -23,7 +23,7 @@
         <a{% if aba == "historico" %} class="ativo"{% endif %} href="/historico"{% if caminho == "/historico" %} aria-current="page"{% endif %}><svg class="ico" aria-hidden="true"><use href="#i-relogio"/></svg>Histórico</a>
       </nav>
       <div class="app-ferramentas">
-        {% if conta.iniciais %}<span class="app-avatar si-avatar" aria-hidden="true" title="Conectado como {{ conta.apelido }}">{{ conta.iniciais }}</span>{% endif %}
+        <a class="app-avatar si-avatar" href="/conta" title="Sua conta: {{ conta.apelido }}"{% if caminho == "/conta" %} aria-current="page"{% endif %}><span class="so-leitor">Sua conta</span>{% if conta.iniciais %}<span aria-hidden="true">{{ conta.iniciais }}</span>{% else %}<svg class="ico" aria-hidden="true"><use href="#i-usuario"/></svg>{% endif %}</a>
         <form class="si-sair-form" method="post" action="/sair">{% csrf_token %}<button class="si-sair" type="submit">Sair</button></form>
       </div>
     </header>

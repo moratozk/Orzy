@@ -1,6 +1,8 @@
 """A conta e o acesso guardado: o cofre, o Conectar que cria a conta, a renovação um de cada vez, a conferência de
-todo dia, as contas que perderam o acesso, a página "Sua conta" e o "Desconectar e apagar tudo"."""
+todo dia, as contas que perderam o acesso, a página "Sua conta" e o "Desconectar e apagar tudo", também pelo
+comando de quem pede por e-mail."""
 
+import io
 import threading
 from datetime import timedelta
 from unittest import mock
@@ -9,6 +11,7 @@ import ml_api
 from contas import acesso, cofre, login
 from contas.models import Conta
 from contas.views import APAGADA, APAGADA_SEM_O_MERCADO_LIVRE
+from django.core.management import CommandError, call_command
 from django.db import DatabaseError, connections
 from django.test import SimpleTestCase
 from relatorios import datas
@@ -308,3 +311,57 @@ class DesconectarTests(SistemaBase):
         self.assertTrue(Conta.objects.filter(ml_user_id=CONTA).exists())
         self.assertEqual(self.ml.permissao_tirada, 0)
         self.assertTrue(self.sessao(), "a sessão continua")
+
+
+class ApagarPorComandoTests(SistemaBase):
+    """python manage.py apagar_conta, para os pedidos de apagar que chegam por e-mail."""
+
+    def comando(self, *args, resposta=""):
+        saida = io.StringIO()
+        with mock.patch("builtins.input", return_value=resposta) as pergunta:
+            call_command("apagar_conta", *args, stdout=saida)
+        return saida.getvalue(), pergunta
+
+    def test_pergunta_e_apaga_a_conta_com_tudo_e_tira_a_permissao(self):
+        self.semear()
+        self.entrar()
+        self.esperar(self.gerar())
+        criar_conta(999)
+        HISTORICO.salvar(999, 30, [LINHA])
+
+        saida, pergunta = self.comando(str(CONTA), resposta=f" {CONTA} ")
+        self.assertEqual(pergunta.call_args.args[0],
+                         f"Apagar a conta {CONTA} (LOJA_TESTE), o acesso guardado e o histórico (1 relatório)? "
+                         "Para confirmar, digite o número da conta: ")
+        self.assertEqual(saida, f"Apaguei a conta {CONTA}, o acesso guardado e o histórico (1 relatório).\n"
+                                "O Mercado Livre confirmou que tirou a permissão do Orzy.\n")
+        self.assertEqual(self.ml.permissao_tirada, 1)
+        self.assertEqual(list(Conta.objects.values_list("ml_user_id", flat=True)), [999])
+        self.assertEqual(list(RelatorioGuardado.objects.values_list("conta__ml_user_id", flat=True)), [999])
+        self.assertEqual(AnuncioGuardado.objects.count(), 1, "só o da outra conta")
+
+    def test_sem_confirmar_ou_com_outro_numero_nao_apaga_nada(self):
+        self.entrar()
+        criar_conta(999)
+        for resposta in ("", "999", "sim"):
+            with self.assertRaisesMessage(CommandError, "Nada foi apagado."):
+                self.comando(str(CONTA), resposta=resposta)
+        with mock.patch("builtins.input", side_effect=EOFError), self.assertRaisesMessage(CommandError, "--no-input"):
+            call_command("apagar_conta", str(CONTA), stdout=io.StringIO())
+        with self.assertRaisesMessage(CommandError, "Não existe conta com o número 123 no Orzy. Nada foi apagado."):
+            self.comando("123", resposta="123")
+        self.assertEqual(sorted(Conta.objects.values_list("ml_user_id", flat=True)), sorted([CONTA, 999]))
+        self.assertTrue(codigo_guardado(), "o acesso guardado continua")
+        self.assertEqual(self.ml.permissao_tirada, 0)
+
+    def test_sem_perguntar_apaga_mesmo_sem_a_confirmacao_do_mercado_livre(self):
+        self.entrar()
+        self.ml.erros_por_rota[f"/users/{CONTA}/applications"] = 403
+        with self.assertLogs(level="WARNING") as registro:
+            saida, pergunta = self.comando(str(CONTA), "--no-input")
+        pergunta.assert_not_called()
+        self.assertIn("Não consegui tirar a permissão do Orzy no Mercado Livre", "\n".join(registro.output))
+        self.assertEqual(saida, f"Apaguei a conta {CONTA}, o acesso guardado e o histórico (0 relatórios).\n"
+                                "Não consegui tirar a permissão do Orzy no Mercado Livre: a pessoa pode tirar por "
+                                "lá.\n")
+        self.assertFalse(Conta.objects.exists())

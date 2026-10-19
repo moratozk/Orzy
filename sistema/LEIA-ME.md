@@ -40,6 +40,10 @@ sistema vai para um endereço de teste fechado, só para a conta dele, com o ok 
    "Desconectar e apagar tudo" (com confirmação): apaga a conta, o acesso guardado e o histórico, encerra as sessões
    da conta em todos os navegadores e tira a permissão do Orzy no Mercado Livre. Se o Mercado Livre não confirmar, o
    Orzy apaga do lado dele mesmo assim e avisa em `/conta/apagada`.
+9. **Apagar a pedido, por e-mail:** `python manage.py apagar_conta <número da conta>` faz o mesmo que o "Desconectar
+   e apagar tudo". Pergunta antes e pede o número de novo para confirmar; com `--no-input`, apaga sem perguntar. O
+   comando roda fora do servidor, e as sessões ficam na memória dele: uma sessão aberta da conta continua até Sair, até
+   8 horas depois do login ou até o servidor reiniciar, sem guardar mais nada.
 
 O sistema usa as mesmas regras e a mesma coleta do PC (`painel-ml/analise.py`, `painel-ml/meus_anuncios.py` e
 `painel-ml/ml_api.py`), sem copiar código: `orzy/__init__.py` põe a pasta `painel-ml/` no caminho do Python.
@@ -160,9 +164,13 @@ No fim da fase 4, com a thread "Hospedagem e domínio", para o endereço de test
 - **Conferência de saúde** por `/saude` com o endereço de `ORZY_URL_BASE`, ou só pela porta (o padrão do Cloud Run):
   com outro endereço, o sistema responde 400.
 - **Registro em JSON, uma linha por evento,** para a hospedagem separar erro de aviso.
-- **Uma linha à parte quando alguém apaga o histórico** (o número da conta e a hora, guardados 8 dias), para apagar de
-  novo se uma cópia de segurança precisar ser restaurada. Pede antes uma frase na Política (thread "Privacidade e
-  termos"); o plano está em `/mnt/project-files/orzy/hospedagem-monitoramento.md`.
+- **Uma linha à parte quando a pessoa apaga:** no "Apagar meu histórico", no "Desconectar e apagar tudo" e no
+  `apagar_conta`. Uma linha só, com o número da conta, a hora e o que saiu (o histórico, ou a conta com tudo), para
+  apagar de novo se uma cópia de segurança do banco precisar ser restaurada. Fica fora do banco e fora do registro
+  comum de 30 dias, pelo prazo das cópias de segurança do banco mais 1 dia (8 dias, com cópias de 7 dias): a thread de
+  hospedagem acerta o prazo quando escolher o banco. O que o Orzy apaga sozinho (12 meses, 30 dias sem acesso) não
+  precisa dela. Entra junto com a frase na Política (thread "Privacidade e termos"), antes do endereço de teste; o
+  plano está em `/mnt/project-files/orzy/hospedagem-monitoramento.md`.
 - **O banco:** o PostgreSQL do plano grátis que a thread de hospedagem escolher, com o contrato conferido pela thread
   de privacidade (LGPD) antes de entrar dado de outra pessoa; `python manage.py migrate` antes de ligar.
 - **`ORZY_CONTAS_ADMIN`** com o ID da conta do Nicolas no Mercado Livre, para ele abrir `/contagens`.
@@ -184,7 +192,7 @@ No fim da fase 4, com a thread "Hospedagem e domínio", para o endereço de test
 
 | Arquivo | O que faz |
 |---|---|
-| `manage.py` | Os comandos do Django (`migrate`, `collectstatic`, `runserver`, `test`) |
+| `manage.py` | Os comandos do Django (`migrate`, `collectstatic`, `runserver`, `test`) e o `apagar_conta` |
 | `gunicorn.conf.py` | O servidor na hospedagem: um processo, a porta de `PORT` e uma linha de registro por pedido, sem IP e sem a busca |
 | `orzy/settings.py` | Configuração do Django: banco, cookie, cabeçalhos de segurança, arquivos de `/static/` e registro |
 | `orzy/configuracao.py` | Lê as variáveis de ambiente e avisa o que falta |
@@ -198,6 +206,7 @@ No fim da fase 4, com a thread "Hospedagem e domínio", para o endereço de test
 | `contas/models.py` | A tabela das contas |
 | `contas/cofre.py` | Cifra e abre o código de renovação (AES-256-GCM, com a chave de `ORZY_CHAVE_ACESSO`) |
 | `contas/acesso.py` | O acesso guardado: salvar no Conectar, renovar um de cada vez, perder quando o Mercado Livre recusa, a conferência de todo dia, as contas sem acesso há 30 dias e apagar tudo |
+| `contas/management/commands/apagar_conta.py` | Apagar uma conta a pedido, por e-mail, como o "Desconectar e apagar tudo" |
 | `relatorios/geracao.py` | Gera o relatório em segundo plano e guarda o andamento |
 | `relatorios/models.py` e `relatorios/historico.py` | O histórico e as contagens no PostgreSQL: salvar, listar, ver, achar o anterior, apagar e apagar os antigos |
 | `relatorios/comparacao.py` | O que mudou entre dois relatórios do histórico (mesma conta e mesmo período) |

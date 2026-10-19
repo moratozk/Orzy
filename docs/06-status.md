@@ -205,6 +205,13 @@ publicado.
   - o relatório renova o login sozinho quando o token de acesso vence (6 horas), em vez de pedir um novo Conectar;
   - `painel-ml/ml_api.py` ganhou `tirar_permissao`, que o programa do PC não usa, e o Mercado Livre simulado ganhou
     o `DELETE` da permissão.
+- Depois do passo 2 (19/10/2026), com as respostas da thread "Privacidade e termos" (em `docs/legal/LEIA-ME.md`):
+  - a frase da página inicial diz que quem apaga tudo, na hora, é o "Desconectar e apagar tudo", na página Sua conta;
+  - `python manage.py apagar_conta <número da conta>` faz o mesmo que o botão, para quem pede por e-mail;
+  - no `sistema/LEIA-ME.md` ("Antes de publicar"), a linha à parte de quando a pessoa apaga vale para os dois botões
+    e para o comando, guardada pelo prazo das cópias de segurança do banco mais 1 dia;
+  - Testes: 112 do sistema (eram 109), com o comando (pergunta antes, não apaga sem o número certo, apaga mesmo sem
+    a confirmação do Mercado Livre) e a frase nova da página inicial.
 
 ## O que foi testado (com dados simulados)
 

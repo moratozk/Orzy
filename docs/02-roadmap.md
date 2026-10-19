@@ -118,8 +118,8 @@ tudo para o sistema. Plano em 5 passos aprovado por ele em 18/10/2026
    a conta, o acesso e o histórico, encerra as sessões em todos os navegadores e tira a permissão do Orzy no Mercado
    Livre. Quando o Mercado Livre recusa o acesso guardado (permissão tirada e senha trocada dão o mesmo erro), o
    Orzy apaga o acesso na hora e encerra as sessões; a conta e o histórico saem 30 dias depois, se a pessoa não
-   conectar de novo. A Política de Privacidade e a página inicial ainda não falam disso: as mudanças vão para a
-   thread "Privacidade e termos", prontas antes de outra pessoa usar.
+   conectar de novo. A Política de Privacidade ainda não fala disso: as mudanças vão para a thread "Privacidade e
+   termos", prontas antes de outra pessoa usar.
 3. **Importação completa:** primeira carga em segundo plano, com progresso: anúncios de todos os status, variações,
    descrição, ficha técnica, fotos (só os links do Mercado Livre), estoque, preço, frete, vendas dos últimos 12 meses
    (sem dados pessoais do comprador), visitas dos últimos 150 dias, nota de qualidade e reputação. Conferida na conta

@@ -7,7 +7,7 @@ from relatorios import contagens, geracao
 from relatorios.geracao import ERRO, PRONTO
 from relatorios.historico import HISTORICO
 
-from .base import CONTA, LINHA, SistemaBase, com_configuracao
+from .base import CONTA, LINHA, SistemaBase, com_configuracao, criar_conta
 
 
 class ContagensSiteTests(SistemaBase):
@@ -23,8 +23,9 @@ class ContagensSiteTests(SistemaBase):
         self.esperar(self.gerar())
         self.assertEqual(self.contados(), {"logins": 1, "relatorios_prontos": 2, "erros_mercado_livre": 0,
                                            "erros_inesperados": 0, "anuncios_lidos": 2})
-        self.ml.revogar_access_tokens()  # o login venceu: conta como erro do Mercado Livre
+        self.ml.erros_por_rota["/users/"] = 403  # o Mercado Livre recusou: conta como erro do Mercado Livre
         self.assertEqual(self.esperar(self.gerar()).estado, ERRO)
+        del self.ml.erros_por_rota["/users/"]
         with mock.patch.object(geracao.meus_anuncios, "coletar", side_effect=RuntimeError("falha")), \
                 self.assertLogs(level="ERROR"):
             self.assertEqual(self.esperar(self.gerar()).estado, ERRO)
@@ -51,8 +52,9 @@ class ContagensSiteTests(SistemaBase):
         self.assertEqual(self.abrir("/contagens").status_code, 404, "conta fora de ORZY_CONTAS_ADMIN")
 
         # Mais duas contas no histórico: uma com 1 anúncio e outra com 6, o limite desta configuração.
-        HISTORICO.salvar(987654321, 30, [LINHA])
-        HISTORICO.salvar(555666777, 30, [LINHA] * 6)
+        for numero, linhas in ((987654321, [LINHA]), (555666777, [LINHA] * 6)):
+            criar_conta(numero)
+            HISTORICO.salvar(numero, 30, linhas)
         with com_configuracao(contas_admin=frozenset({CONTA}), max_anuncios=6):
             self.entrar()
             resposta = self.abrir("/contagens")

@@ -1,4 +1,4 @@
-"""Limpezas em segundo plano: o histórico antigo (uma vez por dia) e as sessões vencidas (a cada minuto).
+"""Limpezas em segundo plano: o histórico antigo e as contas (uma vez por dia) e as sessões vencidas (a cada minuto).
 
 Quem liga é o orzy/wsgi.py, só no servidor de verdade: os testes e o migrate não ligam.
 """
@@ -6,6 +6,7 @@ Quem liga é o orzy/wsgi.py, só no servidor de verdade: os testes e o migrate n
 import logging
 import threading
 
+from contas import acesso
 from contas.sessoes import GUARDADAS
 from django.db import connections
 
@@ -34,6 +35,30 @@ def apagar_antigos_todo_dia(historico, parar, intervalo=UM_DIA):
             return
 
 
+def conferir_contas_todo_dia(contas, parar, intervalo=UM_DIA):
+    """Agora e depois a cada intervalo, até `parar`: renova o acesso guardado de cada conta (assim ele não vence e o
+    Orzy percebe quem tirou a permissão no Mercado Livre) e apaga as contas sem acesso há mais de 30 dias.
+
+    `contas` é o módulo contas/acesso.py (os testes passam outro).
+    """
+    while True:
+        try:
+            renovadas, perdidas, falhas = contas.conferir_todos()
+            if renovadas or perdidas or falhas:
+                logging.info("Contas: %d acesso(s) renovado(s), %d recusado(s) pelo Mercado Livre, %d com erro.",
+                             renovadas, perdidas, falhas)
+            apagadas = contas.apagar_sem_acesso()
+            if apagadas:
+                logging.info("Contas: %d conta(s) sem acesso há mais de %d dias foram apagadas.",
+                             apagadas, contas.DIAS_SEM_ACESSO)
+        except Exception:
+            logging.exception("Não consegui conferir as contas; tento de novo no próximo ciclo")
+        finally:
+            connections.close_all()
+        if parar.wait(intervalo):
+            return
+
+
 def apagar_sessoes_vencidas_sempre(sessoes, parar, intervalo=UM_MINUTO):
     """Apaga as sessões vencidas a cada intervalo, até `parar`, mesmo sem ninguém usando o site.
 
@@ -49,8 +74,10 @@ def apagar_sessoes_vencidas_sempre(sessoes, parar, intervalo=UM_MINUTO):
             return
 
 
-def ligar(parar, historico=HISTORICO, sessoes=GUARDADAS):
-    """Liga em segundo plano a limpeza do histórico (uma vez por dia) e a das sessões (a cada minuto)."""
+def ligar(parar, historico=HISTORICO, sessoes=GUARDADAS, contas=acesso):
+    """Liga em segundo plano a limpeza do histórico e a conferência das contas (uma vez por dia) e a das sessões (a
+    cada minuto)."""
     for alvo, guardados, nome in ((apagar_antigos_todo_dia, historico, "limpeza-do-historico"),
+                                  (conferir_contas_todo_dia, contas, "conferir-as-contas"),
                                   (apagar_sessoes_vencidas_sempre, sessoes, "limpeza-das-sessoes")):
         threading.Thread(target=alvo, args=(guardados, parar), name=nome, daemon=True).start()

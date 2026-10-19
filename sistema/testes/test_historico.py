@@ -4,15 +4,20 @@ import threading
 from datetime import date, datetime, timedelta, timezone
 
 import analise
+from contas.models import Conta
 from django.db import connections
 from django.test import SimpleTestCase, TestCase, TransactionTestCase
 from relatorios import limpezas
 from relatorios.historico import Historico
 from relatorios.models import AnuncioGuardado, Contagem, RelatorioGuardado
 
+from .base import criar_conta
+
 
 class HistoricoTests(TestCase):
     def setUp(self):
+        for numero in (111, 222):
+            criar_conta(numero)
         self.relogio = datetime(2026, 10, 15, 12, 0, tzinfo=timezone.utc)
         self.historico = Historico(agora=lambda: self.relogio)
         self.linhas = [
@@ -30,7 +35,9 @@ class HistoricoTests(TestCase):
         # Seção 6 da Política: um campo novo aqui precisa entrar no texto antes.
         def campos(modelo):
             return {campo.name for campo in modelo._meta.get_fields()}
-        self.assertEqual(campos(RelatorioGuardado), {"id", "ml_user_id", "criado_em", "dias", "total", "resumo",
+        self.assertEqual(campos(Conta), {"id", "ml_user_id", "apelido", "criada_em", "conectada_em", "acesso",
+                                         "acesso_salvo_em", "sem_acesso_desde", "relatorios"})
+        self.assertEqual(campos(RelatorioGuardado), {"id", "conta", "criado_em", "dias", "total", "resumo",
                                                      "anuncios"})
         self.assertEqual(campos(AnuncioGuardado), {"id", "relatorio", "item_id", "titulo", "visitas", "vendas",
                                                    "situacao", "pontos"})
@@ -51,8 +58,26 @@ class HistoricoTests(TestCase):
         self.assertIsNone(self.historico.ver(111, id_ + 999_999), "relatório que não existe")
         self.assertEqual(self.historico.apagar(111), 1)
         self.assertEqual(self.historico.listar(111), [])
-        self.assertFalse(AnuncioGuardado.objects.filter(relatorio__ml_user_id=111).exists(), "os anúncios saem junto")
+        self.assertFalse(AnuncioGuardado.objects.filter(relatorio__conta__ml_user_id=111).exists(),
+                         "os anúncios saem junto")
         self.assertEqual(len(self.historico.listar(222)), 1)
+        self.assertTrue(Conta.objects.filter(ml_user_id=111).exists(), "apagar o histórico não apaga a conta")
+
+    def test_sem_a_conta_nao_guarda(self):
+        # A conta foi apagada enquanto o relatório rodava: ele não traz a conta nem o histórico de volta.
+        self.assertIsNone(self.salvar(333, 30))
+        self.assertFalse(Conta.objects.filter(ml_user_id=333).exists())
+        self.assertFalse(RelatorioGuardado.objects.exists())
+
+    def test_o_historico_sai_com_a_conta_pelo_banco(self):
+        id_ = self.salvar(111, 30)
+        self.salvar(222, 30)
+        # Direto no banco, sem o Django: quem apaga é o próprio PostgreSQL (ON DELETE CASCADE).
+        with connections["default"].cursor() as cursor:
+            cursor.execute("DELETE FROM contas_conta WHERE ml_user_id = 111")
+        self.assertFalse(RelatorioGuardado.objects.filter(id=id_).exists())
+        self.assertFalse(AnuncioGuardado.objects.filter(relatorio_id=id_).exists())
+        self.assertEqual(len(self.historico.listar(222)), 1, "a outra conta fica")
 
     def test_lista_do_mais_novo_para_o_mais_velho(self):
         ids = [self.salvar(111, 30) for _ in range(3)]
@@ -155,20 +180,55 @@ class LimpezasTests(SimpleTestCase):
             limpezas.apagar_sessoes_vencidas_sempre(SessoesFalsas(), parar, intervalo=0.01)
         self.assertEqual(chamadas, [0.01, 0.01, 0.01], "apaga um intervalo antes do prazo, e um erro não para")
 
-    def test_liga_as_duas_limpezas(self):
+    def test_confere_as_contas_todo_dia_e_segue_depois_de_um_erro(self):
+        parar = threading.Event()
+        chamadas = []
+
+        class ContasFalsas:
+            DIAS_SEM_ACESSO = 30
+
+            def conferir_todos(self):
+                chamadas.append("conferir")
+                if len(chamadas) == 1:
+                    raise RuntimeError("banco fora do ar")
+                return 1, 0, 0
+
+            def apagar_sem_acesso(self):
+                chamadas.append("apagar")
+                if chamadas.count("apagar") == 2:
+                    parar.set()
+                return 0
+
+        with self.assertLogs(level="ERROR"):
+            limpezas.conferir_contas_todo_dia(ContasFalsas(), parar, intervalo=0.01)
+        self.assertEqual(chamadas, ["conferir", "conferir", "apagar", "conferir", "apagar"],
+                         "um erro não pode parar a conferência dos dias seguintes")
+
+    def test_liga_as_tres_limpezas(self):
         parar = threading.Event()
         self.addCleanup(parar.set)
-        historico_limpo, sessoes_limpas = threading.Event(), threading.Event()
+        historico_limpo, contas_conferidas, sessoes_limpas = threading.Event(), threading.Event(), threading.Event()
 
         class HistoricoFalso:
             def apagar_antigos(self, dias):
                 historico_limpo.set()
                 return 0
 
+        class ContasFalsas:
+            DIAS_SEM_ACESSO = 30
+
+            def conferir_todos(self):
+                return 0, 0, 0
+
+            def apagar_sem_acesso(self):
+                contas_conferidas.set()
+                return 0
+
         class SessoesFalsas:
             def limpar(self, antecedencia):
                 sessoes_limpas.set()
 
-        limpezas.ligar(parar, historico=HistoricoFalso(), sessoes=SessoesFalsas())
+        limpezas.ligar(parar, historico=HistoricoFalso(), sessoes=SessoesFalsas(), contas=ContasFalsas())
         self.assertTrue(historico_limpo.wait(5), "a limpeza do histórico não ligou")
+        self.assertTrue(contas_conferidas.wait(5), "a conferência das contas não ligou")
         self.assertTrue(sessoes_limpas.wait(5), "a limpeza das sessões não ligou")

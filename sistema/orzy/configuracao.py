@@ -1,14 +1,16 @@
 """Configuração do sistema, lida das variáveis de ambiente.
 
-O Client Secret do app do Mercado Livre e a senha do banco ficam só no ambiente do servidor: nunca no código, nunca no
-GitHub.
+O Client Secret do app do Mercado Livre, a senha do banco e a chave do acesso guardado ficam só no ambiente do
+servidor: nunca no código, nunca no GitHub. A chave também nunca vai para o banco (ver contas/cofre.py).
 """
 
+import base64
+import binascii
 import os
 from dataclasses import dataclass, field
 from urllib.parse import parse_qsl, unquote, urlsplit
 
-OBRIGATORIAS = ("ORZY_ML_CLIENT_ID", "ORZY_ML_CLIENT_SECRET", "ORZY_URL_BASE", "ORZY_BANCO_URL")
+OBRIGATORIAS = ("ORZY_ML_CLIENT_ID", "ORZY_ML_CLIENT_SECRET", "ORZY_URL_BASE", "ORZY_BANCO_URL", "ORZY_CHAVE_ACESSO")
 MAX_HORAS_SESSAO = 8  # a Política de Privacidade promete: o login sai da memória no máximo 8 horas depois da entrada
 
 
@@ -22,6 +24,7 @@ class Configuracao:
     client_secret: str
     url_base: str  # endereço público do site, sem barra no final
     banco: dict = field(repr=False)  # a conexão com o PostgreSQL, no formato do Django (tem a senha: fora do repr)
+    chave_acesso: bytes = field(repr=False)  # os 32 bytes que cifram o acesso guardado (contas/cofre.py)
     max_anuncios: int = 300  # quantos anúncios um relatório lê, no máximo
     horas_sessao: int = 8  # a sessão com login acaba tanto tempo depois do login, mesmo em uso (o prazo do cookie)
     contas_admin: frozenset = frozenset()  # números das contas do Mercado Livre que abrem a página /contagens
@@ -70,6 +73,19 @@ def ler_banco(url):
     }
 
 
+def ler_chave(texto):
+    """ORZY_CHAVE_ACESSO: 32 bytes em base64, como sai de secrets.token_urlsafe(32)."""
+    texto = texto.strip()
+    try:
+        chave = base64.b64decode(texto + "=" * (-len(texto) % 4), altchars=b"-_", validate=True)
+    except (binascii.Error, ValueError):
+        chave = b""
+    if len(chave) != 32:
+        raise ErroConfiguracao("ORZY_CHAVE_ACESSO precisa ser uma chave de 32 bytes em base64. Para gerar uma: "
+                               'python -c "import secrets; print(secrets.token_urlsafe(32))"')
+    return chave
+
+
 def _inteiro(env, nome, padrao, minimo, maximo):
     texto = (env.get(nome) or "").strip()
     if not texto:
@@ -103,6 +119,7 @@ def carregar(ambiente=None):
         client_secret=env["ORZY_ML_CLIENT_SECRET"],
         url_base=url_base,
         banco=ler_banco(env["ORZY_BANCO_URL"]),
+        chave_acesso=ler_chave(env["ORZY_CHAVE_ACESSO"]),
         max_anuncios=_inteiro(env, "ORZY_MAX_ANUNCIOS", 300, 1, 10_000),
         horas_sessao=_inteiro(env, "ORZY_HORAS_SESSAO", 8, 1, MAX_HORAS_SESSAO),
         contas_admin=frozenset(int(pedaco) for pedaco in admin),

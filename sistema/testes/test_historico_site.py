@@ -5,7 +5,7 @@ import re
 from relatorios.geracao import PRONTO
 from relatorios.historico import HISTORICO
 
-from .base import CONTA, LINHA, TITULO_BOM, SistemaBase
+from .base import CONTA, LINHA, TITULO_BOM, SistemaBase, criar_conta
 
 
 class HistoricoSiteTests(SistemaBase):
@@ -39,6 +39,7 @@ class HistoricoSiteTests(SistemaBase):
         self.assertIn("últimos 30 dias", texto)
 
     def test_outra_conta_nao_ve_o_relatorio_guardado(self):
+        criar_conta(999)
         de_outra_conta = HISTORICO.salvar(999, 30, [LINHA])
         self.entrar()
         self.assertEqual(self.abrir(f"/historico/{de_outra_conta}").status_code, 404)

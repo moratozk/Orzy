@@ -29,7 +29,15 @@ Legenda: **[doc]** está na documentação oficial · **[código]** é como o pa
 - Depois de criado, o app aparece em Minhas aplicações só com o Client ID. O Secret fica em ⋮ > Editar, como
   "Chave secreta". A lista mostra "Aplicativo não certificado" e uma nota de "Configuração de segurança" (70 num app
   novo), que é recomendação. (visto em 14/10/2026)
-- Trocar a senha ou tirar a permissão do app invalida tudo: tem que fazer login de novo. **[doc]**
+- Trocar a senha ou tirar a permissão do app invalida tudo: tem que fazer login de novo. **[doc]** O erro é o mesmo
+  `invalid_grant` de um refresh token vencido ou já usado, e o Mercado Livre também invalida sozinho (troca de senha,
+  aparelho desvinculado, suspeita de fraude). Não há tópico de notificação para "tirou a permissão": o sistema do
+  site percebe na renovação de todo dia. **[doc]**
+- A documentação de login pede apagar os tokens guardados quando o vendedor desconecta o app. **[doc]**
+- Tirar a permissão pelo app: `DELETE /users/{user_id}/applications/{app_id}` com o access token do vendedor
+  (`app_id` é o Client ID). Resposta: `{"user_id", "app_id", "msg": "Autorización eliminada."}`. **[doc]** A página
+  não diz o que acontece com os tokens; o sistema do site conta que o refresh token deixa de valer. **[a validar]**
+- `GET /applications/{app_id}/grants` lista quem autorizou o app (o sistema do site não usa). **[doc]**
 - A Redirect URI tem que ser idêntica à cadastrada no app. **[doc]**
 - Erros: `invalid_client` (Client ID ou Secret errado), `invalid_grant` (código ou refresh token vencido, já usado ou com Redirect URI diferente), `local_rate_limited` (429). **[doc]**
 
@@ -49,7 +57,8 @@ Legenda: **[doc]** está na documentação oficial · **[código]** é como o pa
 ## Limites e erros
 
 - **429:** passou do limite de chamadas. Esperar alguns segundos e tentar de novo (o painel espera 2, 4 e 8 s). **[doc]**
-- **401:** token recusado. O painel renova uma vez e, se não der, pede `python conectar.py`. **[código]**
+- **401:** token recusado. O painel renova uma vez e, se não der, pede `python conectar.py`. O sistema do site renova
+  com o acesso guardado da conta e, se o Mercado Livre recusar, pede para clicar em Conectar de novo. **[código]**
 - **403:** sem permissão. O painel sugere conferir se o login foi com a conta dona (não um operador) e se o app tem permissão de leitura para anúncios, vendas e métricas. **[código]**
 
 ## Ainda falta validar na conta real
@@ -66,10 +75,14 @@ Legenda: **[doc]** está na documentação oficial · **[código]** é como o pa
 - [ ] Fase 2: as fotos trazem `max_size` e a categoria traz `settings.max_title_length`.
 - [ ] Fase 3: o login do site (`/entrar` e `/retorno`) com a Redirect URI do site cadastrada no app. Hoje só foi
   testado com o Mercado Livre simulado.
+- [ ] Fase 4, passo 2: a renovação pelo acesso guardado na conta real (cada renovação devolve um refresh token novo)
+  e, depois do "Desconectar e apagar tudo", o refresh token recusado com `invalid_grant`. Hoje só com o
+  Mercado Livre simulado.
 
 ## Fontes
 
 - [Autenticação e autorização](https://developers.mercadolivre.com.br/en_us/authentication-and-authorization)
+- [Gerenciar aplicações (tirar a permissão)](https://developers.mercadolivre.com.br/en_us/manage-your-applications)
 - [Gerenciar vendas (orders)](https://developers.mercadolivre.com.br/en_us/manage-sales)
 - [Visitas](https://developers.mercadolibre.com.mx/en_us/visits-resource)
 - [Itens e buscas](https://developers.mercadolivre.com.br/pt-br/itens-e-buscas)

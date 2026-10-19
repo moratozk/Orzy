@@ -1,0 +1,41 @@
+{% extends "sistema.html" %}
+{% load static %}
+{% block titulo %}Sua conta{% endblock %}
+{% block estilos_da_tela %}<link rel="stylesheet" href="{% static 'orzy-historico.css' %}">
+{% endblock %}
+{% block conteudo %}
+{% comment %}O que o Orzy guarda da conta e o "Desconectar e apagar tudo" (fase 4, passo 2). Usa a cabeça e o bloco de
+apagar do histórico (orzy-historico.css); o resto tem o prefixo si- (orzy-sistema.css).{% endcomment %}
+      <div class="hi-cabeca">
+        <div>
+          <h1>Sua conta</h1>
+          <p>A sua conta no Orzy é a sua conta do Mercado Livre. Não tem senha: você entra pelo Conectar.</p>
+        </div>
+        {% if com_acesso %}<p class="hi-guarda"><svg class="ico" aria-hidden="true"><use href="#i-cadeado"/></svg>Acesso guardado com criptografia</p>{% endif %}
+      </div>
+
+      <section class="si-conta" aria-labelledby="si-conta-titulo">
+        <h2 id="si-conta-titulo">O que o Orzy guarda</h2>
+        <dl class="si-conta-dados">
+          <div><dt>Conta do Mercado Livre</dt><dd><b>{{ apelido|default:"Sem apelido" }}</b><small>número {{ numero }}</small></dd></div>
+          {% if criada_em %}<div><dt>No Orzy desde</dt><dd>{{ criada_em }}<small>último Conectar em {{ conectada_em }}</small></dd></div>{% endif %}
+          <div><dt>Acesso ao Mercado Livre</dt><dd>{% if com_acesso %}Guardado com criptografia<small>atualizado em {{ acesso_salvo_em }}</small>{% else %}Sem acesso guardado<small>o Orzy usa só o acesso desta sessão, que vence em algumas horas</small>{% endif %}</dd></div>
+          <div><dt>Relatórios no histórico</dt><dd>{{ relatorios }}<small>guardados por {{ meses_de_historico }} meses</small></dd></div>
+        </dl>
+        <p class="si-ajuda">O acesso é só de leitura. Ele fica cifrado, e a chave que abre fica fora do banco de dados. O Orzy renova esse acesso uma vez por dia, para ele não vencer.</p>
+        <p class="si-ajuda">Se você tirar a permissão do Orzy no Mercado Livre, ou trocar a senha de lá, o Orzy apaga o acesso guardado assim que perceber. Se você não conectar de novo em {{ dias_sem_acesso }} dias, ele apaga também a conta e o histórico.</p>
+        <p class="si-ajuda"><b>Sair</b> encerra só a sessão neste navegador: a conta e o acesso guardado continuam.</p>
+      </section>
+
+      <section class="hi-apagar" aria-labelledby="si-desconectar-titulo">
+        <div class="hi-apagar-texto">
+          <h2 id="si-desconectar-titulo">Desconectar e apagar tudo</h2>
+          <p>Apaga a sua conta no Orzy, o acesso guardado e todo o histórico, e tira a permissão do Orzy no Mercado Livre. Os seus anúncios no Mercado Livre não mudam.</p>
+        </div>
+        <form class="hi-apagar-form" method="post" action="/conta/apagar">
+          {% csrf_token %}
+          <label class="hi-confirmo"><input type="checkbox" name="confirmo" value="on" required><span>Entendo que tudo será apagado</span></label>
+          <button class="hi-apagar-botao" type="submit"><svg class="ico" aria-hidden="true"><use href="#i-fechar"/></svg>Desconectar e apagar tudo</button>
+        </form>
+      </section>
+{% endblock %}

@@ -6,26 +6,43 @@ from pathlib import Path
 from unittest import mock
 
 import ml_api
+from contas import cofre
+from contas.models import Conta
 from contas.sessoes import GUARDADAS
 from django.conf import settings
 from django.test import Client, TransactionTestCase, override_settings
 from ml_simulado import MLSimulado, performance
 from orzy.configuracao import Configuracao
+from relatorios import datas
 
 URL = "https://orzy.test"
 CLIENT_ID = "1234567890"
 SECRET = "segredo-de-teste"
 CONTA = 111222333
+CHAVE = bytes(range(32))  # a chave do acesso guardado nos testes (no servidor, vem de ORZY_CHAVE_ACESSO)
 TITULO_BOM = "Fone de Ouvido Bluetooth Sem Fio Marca Teste Modelo X1 Preto"
 LINHA = {"id": "MLB9", "titulo": "Anúncio de outra conta", "visitas": 1, "vendas": 0, "situacao": "POUCA VISITA",
          "pontos": 0}
+
+
+def criar_conta(ml_user_id, apelido="", **campos):
+    """Uma conta guardada sem passar pelo Conectar e sem acesso guardado (para o histórico de outra conta, por
+    exemplo)."""
+    agora = datas.agora()
+    return Conta.objects.create(**{"ml_user_id": ml_user_id, "apelido": apelido, "criada_em": agora,
+                                   "conectada_em": agora, **campos})
+
+
+def codigo_guardado(ml_user_id=CONTA):
+    """O código de renovação guardado da conta, aberto com a chave dos testes."""
+    return cofre.abrir(CHAVE, ml_user_id, Conta.objects.get(ml_user_id=ml_user_id).acesso)
 
 
 def com_configuracao(**extra):
     """override_settings com a configuração dos testes e o que o settings.py tira dela. Os testes não dependem das
     variáveis de ambiente, só do banco (ORZY_BANCO_URL)."""
     config = Configuracao(**{"client_id": CLIENT_ID, "client_secret": SECRET, "url_base": URL,
-                             "banco": settings.ORZY.banco, **extra})
+                             "banco": settings.ORZY.banco, "chave_acesso": CHAVE, **extra})
     return override_settings(ORZY=config, ALLOWED_HOSTS=[config.host], CSRF_TRUSTED_ORIGINS=[config.origem],
                              SESSION_COOKIE_SECURE=config.seguro, SESSION_COOKIE_AGE=config.horas_sessao * 3600)
 

@@ -1,7 +1,8 @@
 """Entrada do servidor (gunicorn orzy.wsgi, ou o runserver do Django para testar no computador).
 
-Liga também, em segundo plano, as limpezas que a Política de Privacidade promete: as sessões vencidas a cada minuto e
-o histórico com mais de 12 meses uma vez por dia, mesmo sem ninguém usando o site.
+Liga também, em segundo plano, as limpezas que a Política de Privacidade promete, mesmo sem ninguém usando o site: as
+sessões vencidas a cada minuto e, uma vez por dia, o histórico com mais de 12 meses e a conferência das contas
+(relatorios/limpezas.py).
 """
 
 import os

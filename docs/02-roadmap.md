@@ -109,10 +109,17 @@ tudo para o sistema. Plano em 5 passos aprovado por ele em 18/10/2026
    testes passaram para o sistema novo, e o site antigo (`web/`) saiu. O banco guarda o mesmo que o site base
    guardava (o histórico e as contagens): os dados das contas começam a ser guardados no passo 2. O que falta para
    o endereço de teste está em `sistema/LEIA-ME.md` ("Antes de publicar").
-2. **Conta e acesso guardado:** a conta é criada no clique em "Conectar com Mercado Livre", sem senha. O refresh token
-   fica guardado com criptografia e a chave fora do banco. Ele é de uso único: só um processo por vendedor renova de
-   cada vez, e o novo é salvo antes de qualquer outra coisa. Desconectar apaga tudo, e o Orzy também apaga quando o
-   vendedor tira a permissão no Mercado Livre.
+2. **Conta e acesso guardado (pronto em 19/10/2026):** a conta é criada no clique em "Conectar com Mercado Livre",
+   sem senha. O refresh token fica no banco cifrado (AES-256-GCM), com a chave fora do banco, numa variável de
+   ambiente (`ORZY_CHAVE_ACESSO`); o token de acesso continua só na memória. Ele é de uso único: a linha da conta
+   fica travada no banco durante a renovação, e o novo é salvo antes de o token de acesso ser usado. O Orzy renova
+   cada conta uma vez por dia, para o refresh token não vencer e para perceber quem tirou a permissão. A página "Sua
+   conta" (o círculo com as iniciais, no topo) mostra o que fica guardado e tem o "Desconectar e apagar tudo": apaga
+   a conta, o acesso e o histórico, encerra as sessões em todos os navegadores e tira a permissão do Orzy no Mercado
+   Livre. Quando o Mercado Livre recusa o acesso guardado (permissão tirada e senha trocada dão o mesmo erro), o
+   Orzy apaga o acesso na hora e encerra as sessões; a conta e o histórico saem 30 dias depois, se a pessoa não
+   conectar de novo. A Política de Privacidade e a página inicial ainda não falam disso: as mudanças vão para a
+   thread "Privacidade e termos", prontas antes de outra pessoa usar.
 3. **Importação completa:** primeira carga em segundo plano, com progresso: anúncios de todos os status, variações,
    descrição, ficha técnica, fotos (só os links do Mercado Livre), estoque, preço, frete, vendas dos últimos 12 meses
    (sem dados pessoais do comprador), visitas dos últimos 150 dias, nota de qualidade e reputação. Conferida na conta

@@ -75,7 +75,7 @@ class PaginasTests(SistemaBase):
         self.assertEqual(resposta.status_code, 200)
         self.assertEqual(resposta["Content-Type"], "text/plain; charset=utf-8")
         self.assertEqual(resposta["Cache-Control"], "public, max-age=86400")
-        for caminho in ("/entrar", "/retorno", "/relatorio", "/historico"):
+        for caminho in ("/entrar", "/retorno", "/relatorio", "/historico", "/conta"):
             self.assertIn(f"Disallow: {caminho}\n".encode(), resposta.content)
         self.assertNotIn(b"Disallow: /\n", resposta.content, "a página inicial e os textos legais continuam abertos")
         resposta = self.abrir("/saude")

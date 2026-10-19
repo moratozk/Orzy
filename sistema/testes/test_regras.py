@@ -10,16 +10,29 @@ from django.test import RequestFactory, SimpleTestCase
 from orzy import configuracao, contexto
 from relatorios import busca, comparacao, contagens, datas, formatos
 
+CHAVE_EM_TEXTO = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8"  # bytes(range(32)) em base64, como o token_urlsafe
 ENV = {"ORZY_ML_CLIENT_ID": "1", "ORZY_ML_CLIENT_SECRET": "s", "ORZY_URL_BASE": "https://orzy.test",
-       "ORZY_BANCO_URL": "postgresql://orzy:senha@127.0.0.1:5432/orzy"}
+       "ORZY_BANCO_URL": "postgresql://orzy:senha@127.0.0.1:5432/orzy", "ORZY_CHAVE_ACESSO": CHAVE_EM_TEXTO}
 
 
 class ConfiguracaoTests(SimpleTestCase):
     def test_avisa_quais_variaveis_faltam(self):
         with self.assertRaises(configuracao.ErroConfiguracao) as contexto_:
             configuracao.carregar({"ORZY_ML_CLIENT_ID": "1"})
-        for nome in ("ORZY_ML_CLIENT_SECRET", "ORZY_URL_BASE", "ORZY_BANCO_URL"):
+        for nome in ("ORZY_ML_CLIENT_SECRET", "ORZY_URL_BASE", "ORZY_BANCO_URL", "ORZY_CHAVE_ACESSO"):
             self.assertIn(nome, str(contexto_.exception))
+
+    def test_chave_do_acesso_guardado(self):
+        config = configuracao.carregar(ENV)
+        self.assertEqual(config.chave_acesso, bytes(range(32)))
+        self.assertNotIn(CHAVE_EM_TEXTO, repr(config), "a chave não aparece no registro")
+        self.assertNotIn(repr(bytes(range(32))), repr(config))
+        com_espaco = configuracao.carregar(dict(ENV, ORZY_CHAVE_ACESSO=f"  {CHAVE_EM_TEXTO}=\n"))
+        self.assertEqual(com_espaco.chave_acesso, bytes(range(32)), "aceita o = do final e espaço em volta")
+        for errada in (CHAVE_EM_TEXTO[:-2], CHAVE_EM_TEXTO + "AAAA", "senha-fraca", CHAVE_EM_TEXTO[:-1] + "!"):
+            with self.assertRaises(configuracao.ErroConfiguracao, msg=errada) as contexto_:
+                configuracao.carregar(dict(ENV, ORZY_CHAVE_ACESSO=errada))
+            self.assertIn("secrets.token_urlsafe(32)", str(contexto_.exception), "a mensagem diz como gerar")
 
     def test_exige_https_fora_do_computador(self):
         with self.assertRaises(configuracao.ErroConfiguracao):
@@ -127,6 +140,14 @@ class SessoesTests(SimpleTestCase):
         guardadas.guardar("a", self.logada())  # o fim do pedido que estava no meio
         self.assertNotIn("a", guardadas._dados)
 
+    def test_encerra_as_sessoes_de_uma_conta_em_todos_os_navegadores(self):
+        guardadas = self.novas()
+        for chave, numero in (("a", 111), ("b", 111), ("c", 222)):
+            guardadas.criar(chave, dict(self.logada(), usuario={"id": numero, "apelido": ""}))
+        guardadas.criar("pendente", {})
+        guardadas.encerrar_da_conta(111)
+        self.assertEqual(sorted(guardadas._dados), ["c", "pendente"])
+
 
 class ComparacaoTests(SimpleTestCase):
     def test_diz_o_que_mudou_em_cada_anuncio(self):
@@ -212,10 +233,11 @@ class ContagensTests(SimpleTestCase):
                          (3, {"menor": 1, "media": 3, "maior": 6, "no_limite": 1}))
 
 
-class ClienteDaSessaoTests(SimpleTestCase):
-    def test_nao_renova_o_login_sozinho(self):
-        cliente = login.ClienteDaSessao({"client_id": "1", "client_secret": "s", "redirect_uri": "x"},
-                                        {"access_token": "APP_USR-x", "expira_em": 0})
+class ClienteDaContaTests(SimpleTestCase):
+    def test_sem_a_conta_salva_nao_renova(self):
+        # No meio do login, antes de a conta ser salva, não há acesso guardado para renovar.
+        cliente = login.ClienteDaConta({"client_id": "1", "client_secret": "s", "redirect_uri": "x"},
+                                       {"access_token": "APP_USR-x", "expira_em": 0})
         with self.assertRaises(ml_api.ErroLogin) as contexto_:
             cliente._access_token()
         self.assertIn("Clique em Conectar de novo", str(contexto_.exception))

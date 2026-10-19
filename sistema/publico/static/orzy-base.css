@@ -1,0 +1,121 @@
+/* Orzy, visual novo. Gerado de orzy/marca/visual-novo/fonte/src/base.css em 2026-10-18 (prévia versão 7). */
+/* Layout: cada tela ocupa a janela inteira. O painel e o começo da conta seguem a referência do Nicolas
+   (faixa escura com números, cartão de ações com brilho lima, painéis brancos); os três caminhos do site mudam a
+   página inicial. Cada tela tem um visual só (claro ou escuro) de propósito, com todas as cores definidas aqui. */
+:root {
+  /* marca Anel */
+  --tinta: #0d1321;
+  --tinta-funda: #080c15;
+  --noite: #131b2b;
+  --noite-2: #1a2437;
+  --noite-3: #222d43;
+  --linha-escura: rgba(255, 255, 255, 0.08);
+  --linha-escura-forte: rgba(255, 255, 255, 0.14);
+  --lima: #c4f135;
+  --lima-palida: #edf9c8;
+  --lima-forte: #6fb700;
+  --musgo: #3f6212;
+  --nevoa: #f3f5f8;
+  --branco: #ffffff;
+  --grafite: #5a6475;
+  --texto-claro: #e6eaf0;
+  --apoio-escuro: #aeb6c4;
+  --sutil-escuro: #8a94a6;
+  --borda-clara: #e6eaf0;
+  --borda-clara-forte: #d5dbe4;
+  --fundo-linha: #f6f8fb;
+  /* números que sobem e descem */
+  --sobe-escuro: #c4f135;
+  --desce-escuro: #ff9d8f;
+  --sobe-claro: #3f6212;
+  --desce-claro: #b42318;
+  /* gráfico: período atual e período anterior */
+  --serie-atual: #0d1321;
+  --serie-anterior: #e8590c;
+  /* situações dos anúncios (informação, não marca); texto sobre o fundo claro de cada uma passa de 4,5:1 */
+  --sit-vsv: #b42318; --sit-vsv-f: #fdecea;
+  --sit-cp: #b54708;  --sit-cp-f: #fdf0e3;
+  --sit-pv: #8a5a00;  --sit-pv-f: #fbf3dc;
+  --sit-vpv: #0b6e86; --sit-vpv-f: #e1f3f7;
+  --sit-vb: #177334;  --sit-vb-f: #e4f4e8;
+  /* tipos */
+  --ui: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --serifa: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --larga: "Archivo", "Geist", ui-sans-serif, system-ui, sans-serif;
+  --redonda: "Unbounded", "Geist", ui-sans-serif, system-ui, sans-serif;
+  --gutter: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-d: max(16px, env(safe-area-inset-right, 0px));
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--tinta);
+  color: var(--texto-claro);
+  font: 400 15px/1.5 var(--ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss01" 0;
+}
+
+/* a faixa de cima do celular, atrás da barra do sistema, fica da cor da tela */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 60;
+  background: var(--tinta);
+}
+
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: inherit; }
+img, svg { max-width: 100%; }
+h1, h2, h3 { text-wrap: balance; }
+p, li { text-wrap: pretty; }
+
+.tela { min-height: 100vh; }
+
+/* o atributo hidden sempre esconde, mesmo em quem tem display no CSS (o esqueleto da prévia já fazia isso; o site
+   não tem esqueleto, então a regra precisa estar aqui) */
+[hidden] { display: none !important; }
+
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.ico {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ico-cheio { fill: currentColor; stroke: none; }
+
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+:focus-visible { outline: 2px solid var(--lima); outline-offset: 3px; border-radius: 8px; }
+
+.num { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

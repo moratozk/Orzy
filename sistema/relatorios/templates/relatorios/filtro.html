@@ -1,0 +1,22 @@
+{% comment %}
+  Busca pelo título e filtro por situação de "Todos os anúncios" (relatório) e "Anúncios neste relatório"
+  (histórico). Um formulário GET, sem JavaScript: o endereço com a busca pode ir para os favoritos.
+{% endcomment %}
+          <form class="si-filtro" method="get" action="{{ lista.endereco }}#todos" role="search">
+            <label class="pn-busca">
+              <svg class="ico" aria-hidden="true"><use href="#i-busca"/></svg>
+              <span class="so-leitor">Buscar pelo título</span>
+              <input type="search" name="busca" value="{{ lista.busca }}" maxlength="{{ lista.max_busca }}" placeholder="Buscar pelo título" autocomplete="off">
+            </label>
+            <label class="pn-filtro">
+              <svg class="ico" aria-hidden="true"><use href="#i-filtro"/></svg>
+              <span class="so-leitor">Situação</span>
+              <select name="situacao">
+                <option value="">Todas as situações</option>
+                {% for o in lista.opcoes %}<option value="{{ o.valor }}"{% if o.escolhida %} selected{% endif %}>{{ o.nome }} ({{ o.quantos }})</option>
+                {% endfor %}
+              </select>
+            </label>
+            <button class="si-filtrar" type="submit">Filtrar</button>
+          </form>
+          {% if lista.quantos %}<p class="si-quantos">{{ lista.quantos }} <a href="{{ lista.endereco }}#todos">Ver todos</a></p>{% endif %}

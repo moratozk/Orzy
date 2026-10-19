@@ -2,7 +2,7 @@
 Análise dos anúncios: em que situação cada um está e o que mudar nele.
 
 Aqui só tem regras, nada fala com o Mercado Livre: o meus_anuncios.py busca os dados e
-chama estas funções, e o site da fase 3 vai usar as mesmas.
+chama estas funções, e o sistema do site (pasta sistema/) usa as mesmas.
 
 Os números abaixo são pontos de partida e podem ser ajustados. Os que vêm da
 documentação do Mercado Livre estão marcados assim.

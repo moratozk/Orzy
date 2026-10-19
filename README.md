@@ -15,19 +15,20 @@ site em orzy.com.br só vai ao ar com tudo funcionando (fase 10).
 | Pasta | O que tem |
 |---|---|
 | `painel-ml/` | O programa do Mercado Livre |
-| `web/` | O site do orzy.com.br (fase 3, ainda sem publicar; ver [web/LEIA-ME.md](web/LEIA-ME.md)) |
-| `testes/` | Mercado Livre simulado e testes automáticos |
+| `sistema/` | O sistema do Orzy em Django, com o site do orzy.com.br (fase 4, ainda sem publicar; ver [sistema/LEIA-ME.md](sistema/LEIA-ME.md)) |
+| `testes/` | Mercado Livre simulado e os testes do programa do PC (os do sistema ficam em `sistema/testes/`) |
 | `docs/` | Visão geral, roadmap, decisões técnicas, API, custos e status |
 
 ## Testes
 
-Não precisam de conta nem de internet. Na pasta do Orzy, no Prompt de Comando:
+Não precisam de conta nem de internet. Os do programa do PC, na pasta do Orzy, no Prompt de Comando:
 
 ```
 python -m unittest discover -s testes -v
 ```
 
-O GitHub também roda esses testes sozinho a cada PR, no Windows e no Linux.
+Os do sistema pedem o PostgreSQL: o passo a passo está no [sistema/LEIA-ME.md](sistema/LEIA-ME.md). O GitHub roda
+os dois sozinho a cada PR (os do PC no Windows e no Linux).
 
 ## Segurança
 

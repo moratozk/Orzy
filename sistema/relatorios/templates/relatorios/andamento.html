@@ -1,0 +1,40 @@
+{% extends "sistema.html" %}
+{% load static %}
+{% block titulo %}Gerando relatório{% endblock %}
+{% block estilos_da_tela %}<link rel="stylesheet" href="{% static 'orzy-conta.css' %}">
+{% endblock %}
+{% block scripts %}<script src="{% static 'orzy-andamento.js' %}" defer></script>{% endblock %}
+{% block cabeca %}<noscript><meta http-equiv="refresh" content="10"></noscript>{% endblock %}
+{% block conteudo %}
+{% comment %}
+  O anel e as etapas do "Importando a loja" do visual novo (modelo-importar.html). Sem JavaScript, a página se
+  recarrega a cada 10 segundos; com ele, orzy-andamento.js pergunta o andamento e abre o relatório quando termina.
+{% endcomment %}
+      <div class="si-andamento" id="si-andamento" data-andamento="/relatorio/{{ relatorio.id }}/andamento.json" data-destino="/relatorio/{{ relatorio.id }}">
+        <div class="ob-progresso">
+          <div class="ob-anel">
+            <svg viewBox="-8 -10 119 119" aria-hidden="true" focusable="false">
+              <path class="ob-anel-trilho" d="M92.86,42.69A42,42 0 1,1 58.81,8.64"/>
+              <path class="ob-anel-cheio" id="si-anel-cheio" d="M92.86,42.69A42,42 0 1,1 58.81,8.64" pathLength="100" data-pct="{{ pct }}"/>
+              <circle class="ob-anel-ponto" cx="81.2" cy="20.3" r="6.4"/>
+            </svg>
+            <p class="ob-anel-numero"><span class="num" id="si-pct">{{ pct }}</span><small>%</small></p>
+          </div>
+          <div class="ob-progresso-texto">
+            <p class="ob-rotulo">Últimos {{ relatorio.dias }} dias</p>
+            <h1>Gerando seu relatório</h1>
+            <p class="ob-lead" id="si-etapa" aria-live="polite">{{ relatorio.etapa }}</p>
+          </div>
+          <ol class="ob-etapas" id="si-etapas" aria-label="Etapas do relatório">
+            {% for etapa in etapas %}<li class="ob-etapa{% if etapa.estado %} {{ etapa.estado }}{% endif %}">
+              <span class="ob-etapa-estado"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></span>
+              <span class="ob-etapa-nome">{{ etapa.nome }}</span>
+              <span class="ob-etapa-conta">{{ etapa.conta }}</span>
+              <span class="ob-etapa-barra"><i data-barra="{{ etapa.barra|default:0 }}"></i></span>
+            </li>
+            {% endfor %}
+          </ol>
+          <p class="si-ajuda">Pode fechar esta página: o relatório continua sendo gerado e aparece em <a href="/relatorio">Relatório</a> quando ficar pronto.</p>
+        </div>
+      </div>
+{% endblock %}

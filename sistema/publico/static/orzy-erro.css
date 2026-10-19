@@ -1,0 +1,170 @@
+/* Orzy, visual novo. Gerado de orzy/marca/visual-novo/fonte/src/erro.css em 2026-10-18 (prévia versão 7). */
+/* ================================================================== página de erro
+   Logo, a mensagem do servidor e um botão para o início. O desenho é o anel da marca sem o ponto: o ponto pula para
+   fora, cai, quica e fica no chão, aceso; o anel apaga. Sem movimento (prefers-reduced-motion), tudo já aparece no
+   lugar final. As posições do ponto estão em unidades do desenho (viewBox), não em pixels da tela. */
+
+body[data-tela="erro"], body[data-tela="erro"]::before { background: #080d17; }
+
+.t-erro .er-pagina {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  min-height: 100svh;
+  background:
+    radial-gradient(40% 46% at 74% 58%, rgba(196, 241, 53, 0.08), rgba(196, 241, 53, 0) 70%),
+    radial-gradient(42% 50% at 0% 0%, rgba(80, 120, 220, 0.1), rgba(80, 120, 220, 0) 70%),
+    var(--sc-f0);
+}
+.t-erro .er-pagina::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image: var(--sc-grao-claro);
+  opacity: 0.045;
+  pointer-events: none;
+}
+
+.t-erro .er-topo { display: flex; align-items: center; height: var(--sc-topo-h); padding-top: 12px; }
+
+.t-erro .er-centro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+  grid-template-areas: "texto cena";
+  align-items: center;
+  gap: clamp(32px, 6vw, 96px);
+  padding-block: clamp(16px, 3vw, 40px) clamp(48px, 6vw, 88px);
+}
+.t-erro .er-cena { grid-area: cena; justify-self: center; width: min(100%, 470px); }
+.t-erro .er-desenho { display: block; width: 100%; height: auto; overflow: visible; }
+
+.t-erro .er-texto { grid-area: texto; display: grid; justify-items: start; gap: 18px; min-width: 0; }
+.t-erro .er-titulo {
+  max-width: 9.5em;
+  margin: 4px 0 0;
+  color: var(--branco);
+  font: 700 clamp(40px, 5.6vw, 84px)/0.98 var(--redonda);
+  letter-spacing: -0.045em;
+}
+.t-erro .er-mensagem {
+  max-width: 26em;
+  margin: 0;
+  color: var(--texto-claro);
+  font-size: clamp(18px, 1.6vw, 22px);
+  line-height: 1.45;
+}
+.t-erro .er-acoes { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.t-erro .er-ajuda { max-width: 30em; margin: 6px 0 0; color: var(--sutil-escuro); font-size: 14.5px; line-height: 1.55; }
+.t-erro .er-email { color: var(--apoio-escuro); font-family: var(--mono); -webkit-user-select: all; user-select: all; overflow-wrap: anywhere; }
+
+.t-erro .er-rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 24px;
+  padding-block: 22px calc(96px + env(safe-area-inset-bottom, 0px));
+  color: var(--sutil-escuro);
+  font-size: 13.5px;
+}
+.t-erro .er-rodape p { margin: 0; }
+.t-erro .er-rodape nav { display: flex; gap: 18px; }
+.t-erro .er-rodape a { color: var(--apoio-escuro); text-decoration: none; border-radius: 6px; }
+.t-erro .er-rodape a:hover { color: var(--lima); }
+
+/* ---------------------------------------------------------------- o desenho, no estado final */
+.t-erro .er-chao { fill: url(#er-chao); }
+.t-erro .er-arco { fill: none; stroke: #263147; stroke-width: 19; stroke-linecap: round; }
+.t-erro .er-vaga {
+  fill: none;
+  stroke: rgba(196, 241, 53, 0.5);
+  stroke-width: 1.4;
+  stroke-dasharray: 3 3.3;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.t-erro .er-ponto-x { transform: translateX(46px); }
+.t-erro .er-ponto-y { transform: translateY(68.85px); }
+.t-erro .er-bola { fill: var(--lima); transform-box: fill-box; transform-origin: 50% 100%; }
+.t-erro .er-brilho { fill: url(#er-luz); }
+.t-erro .er-sombra { fill: rgba(196, 241, 53, 0.4); opacity: 0.6; filter: blur(1.5px); transform-box: fill-box; transform-origin: center; }
+
+/* ---------------------------------------------------------------- a queda (cada vez que a tela aparece) */
+@media (prefers-reduced-motion: no-preference) {
+  .t-erro.er-tocar .er-ponto-x { animation: er-anda 1.8s 0.45s linear both; }
+  .t-erro.er-tocar .er-ponto-y { animation: er-cai 1.8s 0.45s both; }
+  .t-erro.er-tocar .er-bola { animation: er-amassa 1.8s 0.45s both; }
+  .t-erro.er-tocar .er-sombra { animation: er-sombra 1.8s 0.45s both; }
+  .t-erro.er-tocar .er-arco { animation: er-apaga 0.9s 0.55s ease-out both; }
+  .t-erro.er-tocar .er-vaga { animation: er-vaga 0.7s 0.95s var(--sc-mola) both; }
+  .t-erro .er-brilho { animation: er-pulsa 3.4s 2.4s ease-in-out infinite; }
+  .t-erro.er-tocar .er-texto > * { animation: er-entra 0.9s var(--sc-mola) both; }
+  .t-erro.er-tocar .er-texto > :nth-child(2) { animation-delay: 0.08s; }
+  .t-erro.er-tocar .er-texto > :nth-child(3) { animation-delay: 0.16s; }
+  .t-erro.er-tocar .er-texto > :nth-child(4) { animation-delay: 0.24s; }
+  .t-erro.er-tocar .er-texto > :nth-child(5) { animation-delay: 0.32s; }
+  .t-erro.er-fora .er-brilho { animation-play-state: paused; }
+}
+/* de lado: empurrão para fora da vaga, depois quase parado até rolar e parar */
+@keyframes er-anda {
+  0% { transform: translateX(0); }
+  9% { transform: translateX(-1.5px); }
+  24% { transform: translateX(30px); }
+  50% { transform: translateX(38px); }
+  74% { transform: translateX(42.5px); }
+  89% { transform: translateX(45px); }
+  100% { transform: translateX(46px); }
+}
+/* para cima e para baixo: pulo, queda e dois quiques menores */
+@keyframes er-cai {
+  0% { transform: translateY(0); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  9% { transform: translateY(2.5px); animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
+  24% { transform: translateY(-16px); animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); }
+  50% { transform: translateY(68.85px); animation-timing-function: cubic-bezier(0, 0.55, 0.45, 1); }
+  62% { transform: translateY(50px); animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); }
+  74% { transform: translateY(68.85px); animation-timing-function: cubic-bezier(0, 0.55, 0.45, 1); }
+  82% { transform: translateY(62px); animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); }
+  89%, 100% { transform: translateY(68.85px); }
+}
+@keyframes er-amassa {
+  0%, 48% { transform: none; }
+  50% { transform: scale(1.14, 0.84); }
+  54%, 72% { transform: none; }
+  74% { transform: scale(1.08, 0.9); }
+  77%, 100% { transform: none; }
+}
+@keyframes er-sombra {
+  0%, 24% { opacity: 0; transform: scale(0.4); }
+  50% { opacity: 0.65; transform: scale(1.08); }
+  62% { opacity: 0.35; transform: scale(0.78); }
+  74% { opacity: 0.62; transform: scale(1.04); }
+  82% { opacity: 0.45; transform: scale(0.9); }
+  89%, 100% { opacity: 0.6; transform: scale(1); }
+}
+@keyframes er-apaga { from { stroke: #e6eaf0; } to { stroke: #263147; } }
+@keyframes er-vaga { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: none; } }
+@keyframes er-pulsa { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@keyframes er-entra { from { opacity: 0; transform: translateY(16px); } }
+
+/* ---------------------------------------------------------------- tablet e celular: desenho em cima, texto embaixo */
+@media (max-width: 899px) {
+  .t-erro .er-centro {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "cena" "texto";
+    align-content: center;
+    gap: 28px;
+    text-align: center;
+  }
+  .t-erro .er-cena { width: min(100%, 330px); }
+  .t-erro .er-texto { justify-items: center; }
+  .t-erro .er-rodape { justify-content: center; text-align: center; }
+}
+@media (max-width: 699px) {
+  .t-erro .er-topo { padding-top: 10px; }
+  .t-erro .er-cena { width: min(78%, 260px); }
+  .t-erro .er-texto { gap: 14px; }
+}

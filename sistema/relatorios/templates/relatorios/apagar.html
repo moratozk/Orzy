@@ -1,0 +1,12 @@
+{% comment %}Apagar todo o histórico da conta. A confirmação fica na própria página (sem JavaScript).{% endcomment %}
+      <section class="hi-apagar" aria-labelledby="hi-apagar-titulo">
+        <div class="hi-apagar-texto">
+          <h2 id="hi-apagar-titulo">Apagar meu histórico</h2>
+          <p>Apaga todos os relatórios guardados desta conta. Os seus anúncios no Mercado Livre não mudam.</p>
+        </div>
+        <form class="hi-apagar-form" method="post" action="/historico/apagar">
+          {% csrf_token %}
+          <label class="hi-confirmo"><input type="checkbox" name="confirmo" value="on" required><span>Entendo que todo o histórico será apagado</span></label>
+          <button class="hi-apagar-botao" type="submit"><svg class="ico" aria-hidden="true"><use href="#i-fechar"/></svg>Apagar meu histórico</button>
+        </form>
+      </section>

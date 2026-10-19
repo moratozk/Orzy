@@ -1,0 +1,24 @@
+{% load static %}<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block titulo %}{% endblock %} · Orzy</title>
+<meta name="description" content="Conecte sua conta do Mercado Livre e veja quais anúncios vendem, quais não vendem e o que mudar em cada um. Sem instalar nada.">
+<meta name="theme-color" content="{% block cor %}#080d17{% endblock %}">
+<link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+<link rel="icon" href="{% static 'favicon-32.png' %}" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="{% static 'apple-touch-icon.png' %}">
+<link rel="preload" href="{% static 'geist.woff2' %}" as="font" type="font/woff2" crossorigin>
+{% block fonte_titulos %}<link rel="preload" href="{% static 'unbounded.woff2' %}" as="font" type="font/woff2" crossorigin>{% endblock %}
+<link rel="stylesheet" href="{% static 'orzy-fontes.css' %}">
+<link rel="stylesheet" href="{% static 'orzy-base.css' %}">
+{% block estilos %}{% endblock %}
+{% block scripts %}{% endblock %}
+{% block cabeca %}{% endblock %}
+</head>
+<body data-tela="{% block tela %}{% endblock %}">
+{% include "sprite.html" %}
+{% block corpo %}{% endblock %}
+</body>
+</html>

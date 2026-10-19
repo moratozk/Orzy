@@ -1,0 +1,424 @@
+/* Orzy: o que as telas do sistema do beta precisam além do pacote do visual novo (orzy/marca/visual-final/).
+   Vem depois do CSS do pacote e só acrescenta ou ajusta: o pacote fica como foi gerado. O prefixo si- é deste
+   arquivo. Diferenças do modelo: sem foto de anúncio (o relatório não guarda e a CSP só deixa imagens do próprio
+   site), formulários que funcionam sem JavaScript e a situação "Sem dados", que o pacote não tem. */
+
+/* ================================================================== topo e abas */
+.si-avatar { display: grid; place-items: center; cursor: default; }
+.si-sair-form { display: flex; margin: 0; }
+.si-sair {
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--linha-escura);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--apoio-escuro);
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: background-color 0.2s, color 0.2s;
+}
+.si-sair:hover { background: var(--noite); color: var(--branco); }
+.app-abas.si-abas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* ================================================================== avisos */
+.si-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 173, 102, 0.28);
+  border-radius: 16px;
+  background: rgba(255, 173, 102, 0.07);
+  color: var(--texto-claro);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.si-aviso > .ico { width: 18px; height: 18px; margin-top: 1px; color: #ffad66; }
+.si-aviso a { color: var(--lima); font-weight: 600; }
+.si-aviso-andando { align-items: center; border-color: rgba(196, 241, 53, 0.28); background: rgba(196, 241, 53, 0.06); }
+.si-aviso-andando .pulso { flex: none; margin: 0 4px; }
+
+.si-faixa {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 0;
+  padding: 13px 16px;
+  border: 1px solid rgba(196, 241, 53, 0.3);
+  border-radius: 16px;
+  background: radial-gradient(120% 160% at 100% 0%, rgba(196, 241, 53, 0.12), transparent 60%), var(--noite);
+  color: var(--branco);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: border-color 0.2s;
+}
+.si-faixa .ico { width: 18px; height: 18px; color: var(--lima); }
+.si-faixa span { flex: 1; min-width: 0; }
+.si-faixa-seta { transition: transform 0.2s; }
+.si-faixa:hover { border-color: rgba(196, 241, 53, 0.6); }
+.si-faixa:hover .si-faixa-seta { transform: translateX(3px); }
+
+.si-ajuda { margin: 0; color: var(--sutil-escuro); font-size: 13.5px; line-height: 1.5; }
+.si-ajuda a { color: var(--lima); }
+
+/* ================================================================== gerar um relatório (/relatorio) */
+.si-comecar {
+  display: grid;
+  grid-template-columns: minmax(0, 560px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  margin-top: 24px;
+}
+.si-gerar {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  border: 1px solid var(--linha-escura);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.008)), var(--noite);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.si-gerar fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.si-gerar legend { margin: 0 0 12px; padding: 0; color: var(--apoio-escuro); font-size: 13.5px; font-weight: 500; }
+.si-opcoes { flex-wrap: wrap; }
+.si-opcoes label { position: relative; }
+.si-opcoes input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.si-opcoes span {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 999px;
+  color: var(--apoio-escuro);
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color 0.2s, color 0.2s;
+}
+.si-opcoes label:hover span { color: var(--branco); }
+.si-opcoes input:checked + span { background: var(--noite-3); color: var(--branco); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); }
+.si-opcoes input:focus-visible + span { outline: 2px solid var(--lima); outline-offset: 2px; }
+.si-botao { justify-self: start; height: 46px; padding: 0 20px 0 22px; border: 0; font-size: 14.5px; }
+
+.si-prontos {
+  padding: 20px 22px;
+  border: 1px solid var(--linha-escura);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.si-prontos h2 { margin: 0; color: var(--branco); font-size: 15.5px; font-weight: 600; }
+.si-prontos ul { display: grid; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.si-prontos li a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--linha-escura);
+  border-radius: 14px;
+  background: var(--noite);
+  color: var(--texto-claro);
+  text-decoration: none;
+  transition: border-color 0.2s;
+}
+.si-prontos li a:hover { border-color: rgba(196, 241, 53, 0.5); }
+.si-prontos b { color: var(--branco); font-weight: 600; white-space: nowrap; }
+.si-prontos li span { color: var(--apoio-escuro); font-size: 13px; }
+.si-prontos li .ico { width: 18px; height: 18px; color: var(--lima); }
+.si-prontos p { margin: 12px 0 0; color: var(--sutil-escuro); font-size: 13px; }
+.si-prontos p a { color: var(--lima); }
+
+/* ================================================================== relatório pronto (painel) */
+/* os botões de período geram um relatório novo: o atual fica marcado como o "apertado" do modelo */
+.pn-periodo button[aria-current="true"] {
+  background: var(--noite-3);
+  color: var(--branco);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+.si-kpi-contexto {
+  margin: auto 0 0;
+  color: var(--sutil-escuro);
+  font: 500 10.5px/1.4 var(--mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.kpi-medidor.si-ruim { background: rgba(255, 157, 143, 0.12); color: var(--desce-escuro); }
+.kpi-medidor.si-ruim i { background: rgba(255, 157, 143, 0.25); }
+.kpi-medidor.si-ruim i.cheio { background: var(--desce-escuro); }
+.kpi-acoes-botao { border: 0; }
+/* apelidos longos e sem espaço (LOJA_DO_JOAO_OFICIAL) quebram em vez de empurrar a página para o lado no celular */
+.pn-saudacao { min-width: 0; }
+.pn-saudacao h1 { overflow-wrap: anywhere; }
+
+/* Os dois painéis um embaixo do outro: "Comece por estes" na largura toda, depois "Todos os anúncios" */
+.pn-paineis.si-empilhados { grid-template-columns: minmax(0, 1fr); }
+
+/* "O que olhar primeiro": um bloco por situação, todos na mesma linha, cada um abre o filtro de "Todos os anúncios" */
+.si-pendencias {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 8px;
+  margin-top: 12px;
+  border-top: 0;
+}
+.pn-pendencias.si-pendencias li + li { border-top: 0; }
+.si-pendencias a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--borda-clara);
+  border-radius: 14px;
+  color: var(--tinta);
+  font-size: 13.5px;
+  text-decoration: none;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+.si-pendencias a:hover { border-color: var(--nevoa); background: var(--fundo-linha); }
+.si-pendencias a:hover .pn-pend-seta { transform: translateX(2px); color: var(--tinta); }
+.si-pend-texto { display: grid; flex: 1; gap: 1px; min-width: 0; line-height: 1.3; }
+.si-pend-texto b { font-size: 12.5px; }
+.pn-pend-icone.cp { background: var(--sit-cp-f); color: var(--sit-cp); }
+.pn-pend-icone.pv { background: var(--sit-pv-f); color: var(--sit-pv); }
+.pn-pend-icone.vpv { background: var(--sit-vpv-f); color: var(--sit-vpv); }
+
+/* "Comece por estes": um cartão por anúncio, com as primeiras sugestões */
+.si-cartoes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 14px 0 0; padding: 0; list-style: none; }
+.si-cartao { padding: 14px; border: 1px solid var(--borda-clara); border-radius: 16px; }
+.si-cartao-topo { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: start; gap: 4px 10px; }
+.si-cartao-n {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: var(--tinta);
+  color: var(--lima);
+  font: 600 12.5px/1 var(--ui);
+}
+.si-cartao-titulo { min-width: 0; }
+.si-cartao-titulo .an-titulo {
+  display: -webkit-box;
+  max-width: none;
+  line-height: 1.35;
+  white-space: normal;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.si-cartao-topo .sit { margin-top: 2px; }
+/* a nota do ML vem em texto ("Satisfatória (69/100)"): a última caixa é mais larga */
+.si-numeros { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(0, 1.6fr); gap: 6px; margin: 12px 0 0; }
+.si-numeros div { min-width: 0; padding: 7px 9px; border-radius: 10px; background: var(--fundo-linha); }
+.si-numeros dt { overflow: hidden; color: var(--grafite); font-size: 10.5px; text-overflow: ellipsis; white-space: nowrap; }
+.si-numeros dd { margin: 1px 0 0; font-size: 13px; font-weight: 600; overflow-wrap: break-word; }
+.si-sugestoes { display: grid; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.si-sugestoes li {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--fundo-linha);
+  color: var(--tinta);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.si-sugestao-topo { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-bottom: 3px; }
+.si-sugestao-topo b { font-size: 12px; font-weight: 600; }
+.si-peso { padding: 1px 7px; border-radius: 999px; font-size: 10.5px; font-weight: 600; }
+.si-peso-3 { background: var(--sit-vsv-f); color: var(--sit-vsv); }
+.si-peso-2 { background: var(--sit-pv-f); color: var(--sit-pv); }
+.si-peso-1 { background: var(--nevoa); color: var(--grafite); }
+.si-olhar {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--fundo-linha);
+  color: var(--grafite);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.si-mais { margin: 8px 0 0; color: var(--grafite); font-size: 12px; }
+
+/* "Todos os anúncios": sem foto, sem ordenar clicando no título da coluna e sem abrir a linha inteira */
+.si-anuncios .pn-tabela th { padding: 10px; }
+/* com o painel na largura toda, a lista acompanha a página em vez de rolar dentro de uma caixa */
+.si-empilhados .pn-tabela { max-height: none; }
+.si-anuncios .pn-tabela tbody tr, .si-anuncios .pn-cartoes li { cursor: auto; }
+.si-csv {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  margin-left: auto;
+  padding: 0 13px 0 11px;
+  border: 1px solid var(--borda-clara);
+  border-radius: 999px;
+  color: var(--tinta);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+.si-csv .ico { width: 16px; height: 16px; }
+.si-csv:hover { background: var(--nevoa); border-color: var(--borda-clara-forte); }
+.si-filtro { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.si-filtro .pn-busca { flex: 1 1 220px; max-width: none; margin-left: 0; }
+.si-filtro .pn-filtro select { max-width: 230px; text-overflow: ellipsis; }
+.si-filtrar {
+  height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--tinta);
+  color: var(--branco);
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+.si-filtrar:hover { background: var(--noite-3); }
+.si-quantos { margin: 10px 2px 0; color: var(--grafite); font-size: 13px; }
+.si-quantos a { color: var(--musgo); font-weight: 600; }
+
+/* a situação "Sem dados" (não deu para ler as visitas ou as vendas): cinza, sem prioridade */
+.s-sd { --c: #5a6475; --f: #eef1f5; }
+
+/* ================================================================== andamento */
+.si-andamento { max-width: 860px; margin: 0 auto; padding-top: 36px; }
+.si-andamento .ob-progresso { grid-template-columns: auto minmax(0, 1fr); column-gap: 28px; align-items: center; }
+.si-andamento .ob-etapas, .si-andamento .si-ajuda { grid-column: 1 / -1; }
+.si-andamento h1 { margin: 0; color: var(--branco); font: 650 clamp(28px, 2.6vw, 38px)/1.06 var(--ui); letter-spacing: -0.035em; }
+.si-andamento .ob-anel-cheio { transition: stroke-dashoffset 0.8s cubic-bezier(0.3, 0.6, 0.2, 1), stroke 0.6s, filter 0.6s; }
+.si-andamento .ob-etapa-barra i { transition: transform 0.6s ease; }
+
+/* ================================================================== relatório que deu erro */
+.si-falhou {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  max-width: 620px;
+  margin: 48px auto 0;
+  padding: 44px 24px;
+  border: 1px solid rgba(255, 157, 143, 0.22);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 157, 143, 0.07), rgba(255, 157, 143, 0.015));
+  text-align: center;
+}
+.si-falhou-icone {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: rgba(255, 157, 143, 0.12);
+  color: var(--desce-escuro);
+}
+.si-falhou-icone .ico { width: 26px; height: 26px; }
+.si-falhou h1 { margin: 6px 0 0; color: var(--branco); font-size: 26px; font-weight: 600; letter-spacing: -0.02em; }
+.si-falhou p { max-width: 46ch; margin: 0; color: var(--apoio-escuro); }
+.si-falhou .kpi-acoes-botao { margin-top: 10px; }
+
+/* ================================================================== histórico */
+/* a linha do tempo rola para o lado com quantos relatórios houver (o modelo tinha 6 colunas fixas) */
+.hi-relatorios { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(172px, calc((100% - 60px) / 6)); }
+.hi-relatorio { text-decoration: none; }
+/* o relatório aberto (em /historico, o mais recente) */
+.hi-relatorio[aria-current="true"] {
+  border-color: rgba(196, 241, 53, 0.6);
+  background: radial-gradient(120% 140% at 100% 0%, rgba(196, 241, 53, 0.15), transparent 60%), var(--noite);
+  box-shadow: 0 0 0 1px rgba(196, 241, 53, 0.3), 0 18px 40px -26px rgba(196, 241, 53, 0.8);
+}
+.b-sd { fill: #8a94a6; }
+.hi-dist-legenda .s-sd { --v: #8a94a6; }
+a.hi-ir { display: inline; }
+/* sem a coluna da foto */
+.hi-mudancas li, .hi-simples li { grid-template-columns: minmax(0, 1fr) auto; }
+.hi-an { grid-template-columns: minmax(0, 1fr) auto 96px 76px; }
+.t-historico .si-filtro { margin-top: 10px; }
+.hi-vazio .si-vazio-botao { margin-top: 10px; }
+
+/* ================================================================== contagens do beta */
+.si-contagens { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: 16px; align-items: start; margin-top: 24px; }
+.si-totais { display: grid; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.si-totais li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  background: var(--fundo-linha);
+  color: var(--grafite);
+  font-size: 13px;
+}
+.si-totais b { color: var(--tinta); font-size: 17px; font-weight: 600; white-space: nowrap; }
+.si-nota { margin: 12px 0 0; color: var(--grafite); font-size: 12.5px; line-height: 1.5; }
+.si-tabela { margin-top: 12px; overflow-x: auto; }
+.si-tabela table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.si-tabela th, .si-tabela td { padding: 8px 10px; border-bottom: 1px solid var(--borda-clara); white-space: nowrap; }
+.si-tabela th { color: var(--grafite); font-size: 12px; font-weight: 500; text-align: left; }
+.si-tabela .n { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ================================================================== rodapé */
+/* Não está no modelo do painel: leva aos textos legais e ao e-mail em todas as telas, como no site de antes. */
+.si-rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 24px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--sutil-escuro);
+  font-size: 13px;
+}
+.si-rodape p { margin: 0; }
+.si-rodape nav { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.si-rodape a { color: var(--apoio-escuro); text-decoration: none; border-radius: 6px; }
+.si-rodape a:hover { color: var(--lima); }
+
+/* ================================================================== telas menores */
+@media (max-width: 1100px) {
+  .si-contagens { grid-template-columns: minmax(0, 1fr); }
+  .si-cartoes { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 1000px) {
+  .si-comecar { grid-template-columns: minmax(0, 1fr); max-width: 640px; }
+}
+@media (max-width: 900px) {
+  .si-pendencias { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .si-sair { height: 38px; padding: 0 14px; }
+  .si-rodape { justify-content: center; text-align: center; }
+  .si-gerar { padding: 18px 16px; }
+  .si-opcoes { display: flex; flex-wrap: nowrap; }
+  .si-opcoes label { flex: 1; }
+  .si-opcoes span { justify-content: center; width: 100%; padding: 0 6px; }
+  .si-botao { justify-self: stretch; justify-content: center; }
+  .si-prontos { padding: 18px 16px; }
+  .si-pendencias { grid-template-columns: minmax(0, 1fr); }
+  /* três caixas na primeira linha; ficha técnica e nota do ML, que são textos, dividem a segunda */
+  .si-numeros { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .si-numeros div { grid-column: span 2; }
+  .si-numeros div:nth-child(n + 4) { grid-column: span 3; }
+  .si-cartao { padding: 12px; }
+  .si-cartao-topo { grid-template-columns: 28px minmax(0, 1fr); }
+  .si-cartao-topo .sit { grid-column: 2; }
+  .si-filtro .pn-busca { order: 0; flex-basis: 100%; }
+  .si-filtro .pn-filtro { flex: 1 1 auto; min-width: 0; }
+  .si-filtro .pn-filtro select { width: 100%; max-width: none; }
+  .si-anuncios .pn-cartoes li { grid-template-columns: minmax(0, 1fr); }
+  .si-andamento { padding-top: 24px; }
+  .si-andamento .ob-progresso { grid-template-columns: minmax(0, 1fr); }
+  .si-falhou { margin-top: 28px; padding: 32px 18px; }
+  .hi-relatorios { grid-auto-columns: 156px; }
+  .hi-mudancas li { grid-template-columns: minmax(0, 1fr); }
+  .hi-mud-num { grid-column: 1; }
+  .hi-an { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "texto texto" "sit sit" "vis ven"; }
+  .hi-lista .hi-an .si-vis { grid-area: vis; justify-self: start; }
+  .hi-lista .hi-an .si-ven { grid-area: ven; justify-self: end; }
+}

@@ -1,0 +1,472 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}O que mudar nos seus anúncios do Mercado Livre{% endblock %}
+{% block estilos %}<link rel="stylesheet" href="{% static 'orzy-site.css' %}">
+<link rel="stylesheet" href="{% static 'orzy-inicio.css' %}">{% endblock %}
+{% block scripts %}<script src="{% static 'orzy-base.js' %}" defer></script>
+<script src="{% static 'orzy-inicio.js' %}" defer></script>
+<script src="{% static 'orzy-iniciar.js' %}" defer></script>{% endblock %}
+{% block tela %}inicio{% endblock %}
+{% block corpo %}
+<section class="tela t-inicio site sc-intro" id="t-inicio" data-tela="inicio" aria-label="Página inicial">
+  <svg class="sc-defs" aria-hidden="true" focusable="false">
+    <symbol id="sc-anel" viewBox="-4 -5.5 111 111"><path d="M92.86,42.69A42,42 0 1,1 58.81,8.64" fill="none" stroke="currentColor" stroke-width="19" stroke-linecap="round"/><circle class="sc-anel-ponto" cx="81.2" cy="20.3" r="12.35" fill="currentColor"/></symbol>
+    <symbol id="sc-marca" viewBox="-6 -8 347.5 158"><path d="M92.86,42.69A42,42 0 1,1 58.81,8.64" fill="none" stroke="currentColor" stroke-width="19" stroke-linecap="round"/><circle class="sc-anel-ponto" cx="81.2" cy="20.3" r="12.35" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"><path d="M126.5,90.5V40A30.5,30.5 0 0,1 157,9.5"/><path d="M185,9.5H236L185,90.5H236"/><path d="M263,9.5L294.5,90.5M326,9.5L278.17,132.5"/></g></symbol>
+    <linearGradient id="sc-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c4f135" stop-opacity="0.5"/><stop offset="1" stop-color="#c4f135" stop-opacity="0"/></linearGradient>
+    <!-- o anel aceso: a luz sai do ponto e escurece ao longo do arco -->
+    <linearGradient id="sc-luz" gradientUnits="userSpaceOnUse" x1="8" y1="96" x2="96" y2="8"><stop offset="0" stop-color="#0f1726"/><stop offset="0.45" stop-color="#18233a"/><stop offset="0.8" stop-color="#c4f135"/></linearGradient>
+    <radialGradient id="sc-brilho"><stop offset="0" stop-color="#c4f135" stop-opacity="0.6"/><stop offset="1" stop-color="#c4f135" stop-opacity="0"/></radialGradient>
+    <symbol id="sc-anel-luz" viewBox="-4 -5.5 111 111"><circle cx="81.2" cy="20.3" r="24" fill="url(#sc-brilho)"/><path d="M92.86,42.69A42,42 0 1,1 58.81,8.64" fill="none" stroke="url(#sc-luz)" stroke-width="19" stroke-linecap="round"/><circle cx="81.2" cy="20.3" r="12.35" fill="#c4f135"/></symbol>
+  </svg>
+  <span class="sc-sentinela" aria-hidden="true"></span>
+
+  <!-- ============================================================ topo -->
+  <header class="sc-topo">
+    <div class="sc-topo-barra">
+      <a class="sc-logo" href="/" data-alvo="sc-inicio" aria-label="Orzy, voltar ao início">
+        <svg viewBox="-6 -8 347.5 158" width="74" height="34" aria-hidden="true" focusable="false"><use href="#sc-marca"/></svg>
+      </a>
+      <nav class="sc-nav" aria-label="Seções da página">
+        <a href="#sc-como" data-alvo="sc-como">Como funciona</a>
+        <a href="#sc-situacoes" data-alvo="sc-situacoes">Situações</a>
+        <a href="#sc-seguranca" data-alvo="sc-seguranca">Segurança</a>
+      </nav>
+      <div class="sc-topo-acoes">
+        {% if logado %}<a class="sc-botao sc-botao-lima sc-topo-cta" href="/relatorio"><span>Meu relatório</span></a>{% else %}<a class="sc-botao sc-botao-lima sc-topo-cta" href="#sc-final" data-alvo="sc-final"><span>Começar<span class="sc-cta-agora"> agora</span></span></a>{% endif %}
+        <button class="sc-menu-botao" type="button" aria-expanded="false" aria-controls="sc-menu">
+          <span class="so-leitor">Menu</span>
+          <svg class="ico sc-menu-abre" aria-hidden="true"><use href="#i-menu"/></svg>
+          <svg class="ico sc-menu-fecha" aria-hidden="true"><use href="#i-fechar"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="sc-menu" id="sc-menu" hidden>
+      <nav class="sc-menu-nav" aria-label="Seções da página">
+        <a href="#sc-como" data-alvo="sc-como"><span>01</span>Como funciona</a>
+        <a href="#sc-situacoes" data-alvo="sc-situacoes"><span>02</span>Situações</a>
+        <a href="#sc-seguranca" data-alvo="sc-seguranca"><span>03</span>Segurança</a>
+      </nav>
+      <div class="sc-menu-acoes">
+        {% if logado %}<a class="sc-botao sc-botao-lima" href="/relatorio">Meu relatório</a>{% else %}<a class="sc-botao sc-botao-lima" href="#sc-final" data-alvo="sc-final">Começar agora</a>{% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================ abertura -->
+  <main id="conteudo">
+<div class="sc-heroi sc-anima" id="sc-inicio">
+    <div class="sc-dentro sc-heroi-grade">
+      <div class="sc-heroi-texto">
+        <p class="sc-selo sc-entra sc-entra-0"><span class="sc-selo-ponto" aria-hidden="true"></span><span>Fase de testes</span><span class="sc-selo-sep" aria-hidden="true"></span><span>Para quem vende no Mercado Livre</span></p>
+        <h1 class="sc-h1">
+          <span class="sc-mascara"><span class="sc-sobe sc-sobe-1">Cada</span></span>
+          <span class="sc-mascara"><span class="sc-sobe sc-sobe-2">anúncio</span></span>
+          <span class="sc-mascara"><span class="sc-sobe sc-sobe-3">no ponto.</span></span>
+        </h1>
+        <p class="sc-heroi-sub sc-entra sc-entra-1">Conecte sua conta do Mercado Livre e veja, num painel só, o que cada anúncio precisa: título, fotos, ficha técnica, visitas e vendas.</p>
+        <div class="sc-acoes sc-entra sc-entra-2">
+          {% if logado %}<a class="sc-botao sc-botao-lima sc-botao-g" href="/relatorio">Ver meu relatório<span class="sc-botao-seta" aria-hidden="true"><svg class="ico"><use href="#i-seta"/></svg></span></a>{% else %}<a class="sc-botao sc-botao-lima sc-botao-g" href="/entrar">Conectar com Mercado Livre<span class="sc-botao-seta" aria-hidden="true"><svg class="ico"><use href="#i-seta"/></svg></span></a>{% endif %}
+          <a class="sc-botao sc-botao-contorno sc-botao-g" href="#sc-como" data-alvo="sc-como">Ver como funciona</a>
+        </div>
+        {% if not logado %}
+        <p class="sc-aceite sc-entra sc-entra-2">Ao conectar, você aceita os <a href="/termos">Termos de Uso</a> e confirma que leu a <a href="/privacidade">Política de Privacidade</a>.</p>
+        {% endif %}
+        <ul class="sc-fatos sc-entra sc-entra-3">
+          <li><b>Só leitura</b><span>não altera seus anúncios</span></li>
+          <li><b>Até {{ max_anuncios }} anúncios</b><span>em cada relatório</span></li>
+          <li><b>{{ dias }} dias</b><span>o período é você quem escolhe</span></li>
+        </ul>
+      </div>
+
+      <div class="sc-heroi-visual">
+        <div class="sc-anel-gigante" aria-hidden="true">
+          <svg class="sc-anel-gira" viewBox="-4 -5.5 111 111" focusable="false"><use href="#sc-anel-luz"/></svg>
+        </div>
+        <figure class="sc-heroi-figura">
+          <div class="sc-cel sc-cel-heroi" role="img" aria-label="Exemplo de anúncio no Orzy: Fone de Ouvido Bluetooth TWS, na situação visita sem venda, com 412 visitas, nenhuma venda e 3 mudanças sugeridas.">
+            <div class="sc-cel-tela">
+              <div class="sc-app">
+                <div class="sc-app-status"><span>20:21</span><i class="sc-app-ilha"></i><span class="sc-app-sinais"><i></i><i></i><i></i><b></b></span></div>
+                <div class="sc-app-topo">
+                  <svg class="sc-app-logo" viewBox="-6 -8 347.5 158" aria-hidden="true" focusable="false"><use href="#sc-marca"/></svg>
+                  <span class="sc-app-icone"><svg class="ico"><use href="#i-sino"/></svg></span>
+                  <span class="sc-app-avatar">MS</span>
+                </div>
+                <div class="sc-app-trilha"><span><svg class="ico"><use href="#i-esquerda"/></svg>Anúncios</span><span class="sc-app-mono">3 de 7</span></div>
+                <div class="sc-app-cartao">
+                  <div class="sc-an">
+                    <span class="sc-an-foto sc-tom-fone"><svg class="ico"><use href="#p-fone"/></svg></span>
+                    <span class="sc-an-texto"><b class="sc-an-titulo">Fone de Ouvido Bluetooth TWS com Microfone e Case</b><span class="sc-an-id">MLB3000000001</span></span>
+                  </div>
+                  <div class="sc-sit-linha sc-c-vsv"><span class="sc-chip">Visita sem venda</span><span class="sc-medidor"><i class="sc-cheio"></i><i class="sc-cheio"></i><i class="sc-cheio"></i></span></div>
+                  <div class="sc-an-numeros">
+                    <span><small>Visitas</small><b>412</b></span>
+                    <span><small>Vendas</small><b>0</b></span>
+                    <span><small>Nota do ML</small><b>64</b></span>
+                  </div>
+                </div>
+                <div class="sc-app-secao"><b>3 mudanças sugeridas</b><span class="sc-app-mono">urgente primeiro</span></div>
+                <ul class="sc-sugestoes">
+                  <li><span class="sc-prio sc-prio-alta">Alta</span><b>Fotos</b><span>Coloque pelo menos {{ min_fotos }} fotos, de ângulos diferentes (tem 2).</span></li>
+                  <li><span class="sc-prio sc-prio-media">Média</span><b>Ficha técnica</b><span>5 de 11 campos. Faltam Cor, Alcance sem fio, Duração da bateria e mais 3.</span></li>
+                  <li><span class="sc-prio sc-prio-baixa">Baixa</span><b>Zoom nas fotos</b><span>Use fotos com mais de {{ largura_zoom }} px de largura.</span></li>
+                </ul>
+                <div class="sc-app-abas">
+                  <span><svg class="ico"><use href="#i-painel"/></svg>Painel</span>
+                  <span class="sc-aba-ativa"><svg class="ico"><use href="#i-tag"/></svg>Anúncios</span>
+                  <span><svg class="ico"><use href="#i-relogio"/></svg>Histórico</span>
+                  <span><svg class="ico"><use href="#i-doc"/></svg>Relatórios</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <figcaption class="sc-legenda"><span aria-hidden="true"></span>Loja de exemplo</figcaption>
+        </figure>
+        <div class="sc-adesivo sc-adesivo-1" aria-hidden="true"><div class="sc-adesivo-corpo"><span class="sc-adesivo-icone sc-tom-carregador"><svg class="ico"><use href="#p-carregador"/></svg></span><span><b>590</b> visitas · <b>0</b> vendas</span></div></div>
+        <div class="sc-adesivo sc-adesivo-2" aria-hidden="true"><div class="sc-adesivo-corpo"><span class="sc-adesivo-icone"><svg class="ico"><use href="#i-lista"/></svg></span><span>Ficha técnica <b>5/11</b></span></div></div>
+        <div class="sc-adesivo sc-adesivo-3" aria-hidden="true"><div class="sc-adesivo-corpo"><span class="sc-adesivo-icone"><svg class="ico"><use href="#i-foto"/></svg></span><span><b>+1</b> foto</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ faixas que se cruzam -->
+  <div class="sc-cruz sc-anima" aria-hidden="true">
+    <div class="sc-fita sc-fita-lima">
+      <div class="sc-fita-trilho">
+        <span class="sc-fita-grupo">TÍTULO<svg><use href="#sc-anel"/></svg>FOTOS<svg><use href="#sc-anel"/></svg>FICHA TÉCNICA<svg><use href="#sc-anel"/></svg>VISITAS<svg><use href="#sc-anel"/></svg>VENDAS<svg><use href="#sc-anel"/></svg>NOTA DO MERCADO LIVRE<svg><use href="#sc-anel"/></svg></span>
+      </div>
+    </div>
+    <div class="sc-fita sc-fita-clara">
+      <div class="sc-fita-trilho">
+        <span class="sc-fita-grupo">VISITA SEM VENDA<i></i>CONVERTE POUCO<i></i>POUCA VISITA<i></i>VENDE, MAS POUCO VISTO<i></i>VENDENDO BEM<i></i></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ como funciona -->
+  <section class="sc-como" id="sc-como" aria-labelledby="sc-como-titulo">
+    <div class="sc-dentro">
+      <div class="sc-como-grade">
+        <div class="sc-como-texto">
+          <header class="sc-cabeca">
+            <p class="sc-rotulo">Como funciona</p>
+            <h2 class="sc-h2" id="sc-como-titulo">Do login à lista do que mudar.</h2>
+          </header>
+          <ol class="sc-passos">
+            <li class="sc-passo sc-ativo">
+              <div class="sc-passo-texto">
+                <span class="sc-passo-num" aria-hidden="true">01</span>
+                <h3>Conecte</h3>
+                <p>Entre pelo site do Mercado Livre e autorize a leitura da sua conta. Sua senha não passa pelo Orzy.</p>
+                <ul class="sc-etiquetas"><li>Login no Mercado Livre</li><li>Só leitura</li></ul>
+              </div>
+              <div class="sc-passo-mini" aria-hidden="true"></div>
+            </li>
+            <li class="sc-passo">
+              <div class="sc-passo-texto">
+                <span class="sc-passo-num" aria-hidden="true">02</span>
+                <h3>Importe</h3>
+                <p>Anúncios, fotos, preço, estoque, visitas e vendas entram sozinhos, sem você digitar nada.</p>
+                <ul class="sc-etiquetas"><li>Até {{ max_anuncios }} anúncios por relatório</li></ul>
+              </div>
+              <div class="sc-passo-mini" aria-hidden="true"></div>
+            </li>
+            <li class="sc-passo">
+              <div class="sc-passo-texto">
+                <span class="sc-passo-num" aria-hidden="true">03</span>
+                <h3>Veja</h3>
+                <p>Cada anúncio ganha uma situação e mostra a nota que o Mercado Livre dá a ele, de 0 a 100. O período é você quem escolhe: {{ dias }} dias.</p>
+                <ul class="sc-etiquetas"><li>5 situações</li><li>Nota de 0 a 100</li></ul>
+              </div>
+              <div class="sc-passo-mini" aria-hidden="true"></div>
+            </li>
+            <li class="sc-passo">
+              <div class="sc-passo-texto">
+                <span class="sc-passo-num" aria-hidden="true">04</span>
+                <h3>Corrija</h3>
+                <p>Uma lista do que mudar em cada anúncio, do mais urgente ao menos: título, fotos e ficha técnica. As mudanças, você faz no Mercado Livre.</p>
+                <ul class="sc-etiquetas"><li>Prioridade alta, média e baixa</li></ul>
+              </div>
+              <div class="sc-passo-mini" aria-hidden="true"></div>
+            </li>
+          </ol>
+          <p class="sc-depois"><span class="sc-depois-rotulo">Depois</span>Gere um novo relatório e compare com o anterior: o Orzy mostra o que mudou nas visitas, nas vendas e na situação de cada anúncio.</p>
+        </div>
+
+        <div class="sc-palco" aria-hidden="true">
+          <div class="sc-palco-luz"></div>
+          <div class="sc-cel sc-cel-como">
+            <div class="sc-cel-tela">
+              <div class="sc-app">
+                <div class="sc-app-status"><span>20:21</span><i class="sc-app-ilha"></i><span class="sc-app-sinais"><i></i><i></i><i></i><b></b></span></div>
+                <div class="sc-app-topo">
+                  <svg class="sc-app-logo" viewBox="-6 -8 347.5 158" focusable="false"><use href="#sc-marca"/></svg>
+                  <span class="sc-app-icone"><svg class="ico"><use href="#i-sino"/></svg></span>
+                  <span class="sc-app-avatar">MS</span>
+                </div>
+                <div class="sc-telas">
+
+                  <!-- 1. conectar -->
+                  <div class="sc-tela sc-tela-conectar sc-ativa">
+                    <p class="sc-tela-passo">Passo 1 de 4</p>
+                    <b class="sc-tela-titulo">Conecte sua conta</b>
+                    <p class="sc-tela-sub">Você entra pelo site do Mercado Livre.</p>
+                    <div class="sc-elo">
+                      <span class="sc-elo-orzy"><svg viewBox="-4 -5.5 111 111" focusable="false"><use href="#sc-anel"/></svg></span>
+                      <span class="sc-elo-fio"><i></i><span class="sc-elo-cadeado"><svg class="ico"><use href="#i-cadeado"/></svg></span></span>
+                      <span class="sc-elo-ml">Mercado Livre</span>
+                    </div>
+                    <p class="sc-elo-legenda">Permissão só de leitura</p>
+                    <ul class="sc-permissoes">
+                      <li><svg class="ico"><use href="#i-check"/></svg>Ler anúncios, fotos, preço e estoque</li>
+                      <li><svg class="ico"><use href="#i-check"/></svg>Ler visitas e vendas</li>
+                      <li class="sc-nao"><svg class="ico"><use href="#i-fechar"/></svg>Alterar anúncios, preços ou estoque</li>
+                    </ul>
+                    <span class="sc-tela-botao">Entrar no Mercado Livre<svg class="ico"><use href="#i-seta"/></svg></span>
+                    <p class="sc-tela-nota"><svg class="ico"><use href="#i-cadeado"/></svg>Sua senha fica no Mercado Livre.</p>
+                  </div>
+
+                  <!-- 2. importar -->
+                  <div class="sc-tela sc-tela-importar">
+                    <p class="sc-tela-passo">Passo 2 de 4</p>
+                    <b class="sc-tela-titulo">Importando sua loja</b>
+                    <p class="sc-tela-sub">Loja Exemplo · últimos 30 dias</p>
+                    <div class="sc-imp-anel">
+                      <svg viewBox="0 0 120 120" focusable="false"><circle class="sc-imp-trilho" cx="60" cy="60" r="50"/><circle class="sc-imp-barra" cx="60" cy="60" r="50" pathLength="100"/></svg>
+                      <span class="sc-imp-pct"><b data-ate="100">100</b><small>%</small></span>
+                    </div>
+                    <ul class="sc-imp-lista">
+                      <li><svg class="ico"><use href="#i-tag"/></svg><span>Anúncios</span><b data-ate="10">10</b><svg class="ico sc-imp-ok"><use href="#i-check"/></svg></li>
+                      <li><svg class="ico"><use href="#i-foto"/></svg><span>Fotos</span><b data-ate="41">41</b><svg class="ico sc-imp-ok"><use href="#i-check"/></svg></li>
+                      <li><svg class="ico"><use href="#i-olho"/></svg><span>Visitas</span><b data-ate="2417">2.417</b><svg class="ico sc-imp-ok"><use href="#i-check"/></svg></li>
+                      <li><svg class="ico"><use href="#i-sacola"/></svg><span>Vendas</span><b data-ate="39">39</b><svg class="ico sc-imp-ok"><use href="#i-check"/></svg></li>
+                    </ul>
+                    <p class="sc-tela-nota"><svg class="ico"><use href="#i-caixa"/></svg>Preço e estoque também entram.</p>
+                  </div>
+
+                  <!-- 3. painel -->
+                  <div class="sc-tela sc-tela-painel">
+                    <b class="sc-tela-ola">Olá, Marina!</b>
+                    <p class="sc-tela-sub">16/09 a 15/10/2026 · 30 dias</p>
+                    <div class="sc-mini-acoes">
+                      <span class="sc-mini-acoes-num"><b>14</b> mudanças</span>
+                      <span class="sc-mini-acoes-txt">Sugeridas para 7 anúncios</span>
+                      <span class="sc-mini-acoes-botao">Ver o que mudar<svg class="ico"><use href="#i-seta"/></svg></span>
+                    </div>
+                    <div class="sc-mini-kpis">
+                      <span><small><svg class="ico"><use href="#i-olho"/></svg>Visitas</small><b>2.417</b><em><svg class="ico"><use href="#i-sobe"/></svg>7,7%</em></span>
+                      <span><small><svg class="ico"><use href="#i-sacola"/></svg>Vendas</small><b>39</b><em><svg class="ico"><use href="#i-sobe"/></svg>18,2%</em></span>
+                      <span><small><svg class="ico"><use href="#i-alvo"/></svg>Conversão</small><b>1,61%</b><em>acima de 1%</em></span>
+                      <span><small><svg class="ico"><use href="#i-estrela"/></svg>Nota média</small><b>73</b><em class="sc-neutro">de 100</em></span>
+                    </div>
+                    <div class="sc-mini-grafico">
+                      <span class="sc-mini-grafico-topo"><b>Visitas por dia</b><span><i class="sc-leg-atual"></i>atual<i class="sc-leg-ant"></i>anterior</span></span>
+                      <svg viewBox="0 0 240 92" preserveAspectRatio="none" focusable="false">
+                        <path class="sc-graf-grade" d="M2,6H238M2,33.3H238M2,60.7H238M2,88H238"/>
+                        <path class="sc-graf-area" d="M2.0,47.5C3.3,46.7 7.5,40.8 10.1,42.1C12.7,43.4 15.7,54.5 18.3,55.7C20.9,57.0 23.8,49.6 26.4,49.7C29.0,49.9 31.9,58.4 34.6,56.8C37.2,55.3 40.1,41.9 42.7,39.9C45.3,37.9 48.2,45.8 50.8,44.3C53.4,42.7 56.4,31.1 59.0,30.1C61.6,29.0 64.5,35.9 67.1,37.7C69.7,39.5 72.6,40.3 75.2,41.5C77.8,42.8 80.8,44.8 83.4,45.4C86.0,45.9 88.9,45.3 91.5,44.8C94.1,44.4 97.1,44.7 99.7,42.6C102.3,40.5 105.2,33.7 107.8,31.7C110.4,29.7 113.3,29.5 115.9,30.1C118.5,30.6 121.5,33.9 124.1,35.0C126.7,36.0 129.6,33.6 132.2,36.6C134.8,39.7 137.7,51.7 140.3,54.1C142.9,56.5 145.9,53.7 148.5,51.4C151.1,49.0 154.0,39.7 156.6,39.3C159.2,39.0 162.2,48.4 164.8,49.2C167.4,50.0 170.3,43.8 172.9,44.3C175.5,44.7 178.4,51.7 181.0,51.9C183.6,52.2 186.6,45.3 189.2,45.9C191.8,46.5 194.7,55.0 197.3,55.7C199.9,56.5 202.8,52.3 205.4,50.8C208.1,49.3 211.0,48.6 213.6,46.5C216.2,44.4 219.1,38.7 221.7,37.7C224.3,36.7 227.3,40.1 229.9,40.4C232.5,40.8 236.7,40.0 238.0,39.9L238.0,88.0L2.0,88.0Z"/>
+                        <path class="sc-graf-ant" pathLength="1" d="M2.0,39.9C3.3,39.9 7.5,39.3 10.1,39.9C12.7,40.5 15.7,40.8 18.3,43.7C20.9,46.6 23.8,56.3 26.4,57.9C29.0,59.6 31.9,57.1 34.6,54.1C37.2,51.1 40.1,40.4 42.7,39.3C45.3,38.3 48.2,46.8 50.8,47.5C53.4,48.3 56.4,44.6 59.0,44.3C61.6,43.9 64.5,45.1 67.1,45.4C69.7,45.6 72.6,43.7 75.2,45.9C77.8,48.1 80.8,57.5 83.4,59.0C86.0,60.6 88.9,56.5 91.5,55.7C94.1,55.0 97.1,55.8 99.7,54.1C102.3,52.4 105.2,46.8 107.8,45.4C110.4,44.0 113.3,44.6 115.9,45.4C118.5,46.1 121.5,49.2 124.1,50.3C126.7,51.3 129.6,50.3 132.2,51.9C134.8,53.6 137.7,59.1 140.3,60.7C142.9,62.2 145.9,63.4 148.5,61.8C151.1,60.1 154.0,54.0 156.6,50.3C159.2,46.6 162.2,39.1 164.8,38.8C167.4,38.5 170.3,47.7 172.9,48.1C175.5,48.5 178.4,42.1 181.0,41.5C183.6,41.0 186.6,43.6 189.2,44.8C191.8,46.0 194.7,48.4 197.3,49.2C199.9,50.0 202.8,52.1 205.4,49.7C208.1,47.4 211.0,36.8 213.6,34.4C216.2,32.1 219.1,34.0 221.7,35.0C224.3,35.9 227.3,39.8 229.9,40.4C232.5,41.1 236.7,39.1 238.0,38.8"/>
+                        <path class="sc-graf-linha" pathLength="1" d="M2.0,47.5C3.3,46.7 7.5,40.8 10.1,42.1C12.7,43.4 15.7,54.5 18.3,55.7C20.9,57.0 23.8,49.6 26.4,49.7C29.0,49.9 31.9,58.4 34.6,56.8C37.2,55.3 40.1,41.9 42.7,39.9C45.3,37.9 48.2,45.8 50.8,44.3C53.4,42.7 56.4,31.1 59.0,30.1C61.6,29.0 64.5,35.9 67.1,37.7C69.7,39.5 72.6,40.3 75.2,41.5C77.8,42.8 80.8,44.8 83.4,45.4C86.0,45.9 88.9,45.3 91.5,44.8C94.1,44.4 97.1,44.7 99.7,42.6C102.3,40.5 105.2,33.7 107.8,31.7C110.4,29.7 113.3,29.5 115.9,30.1C118.5,30.6 121.5,33.9 124.1,35.0C126.7,36.0 129.6,33.6 132.2,36.6C134.8,39.7 137.7,51.7 140.3,54.1C142.9,56.5 145.9,53.7 148.5,51.4C151.1,49.0 154.0,39.7 156.6,39.3C159.2,39.0 162.2,48.4 164.8,49.2C167.4,50.0 170.3,43.8 172.9,44.3C175.5,44.7 178.4,51.7 181.0,51.9C183.6,52.2 186.6,45.3 189.2,45.9C191.8,46.5 194.7,55.0 197.3,55.7C199.9,56.5 202.8,52.3 205.4,50.8C208.1,49.3 211.0,48.6 213.6,46.5C216.2,44.4 219.1,38.7 221.7,37.7C224.3,36.7 227.3,40.1 229.9,40.4C232.5,40.8 236.7,40.0 238.0,39.9"/>
+                      </svg>
+                      <span class="sc-mini-grafico-eixo"><span>16 set</span><span>1 out</span><b>15 out</b></span>
+                    </div>
+                  </div>
+
+                  <!-- 4. anúncio -->
+                  <div class="sc-tela sc-tela-anuncio">
+                    <div class="sc-app-trilha"><span><svg class="ico"><use href="#i-esquerda"/></svg>Anúncios</span><span class="sc-app-mono">1 de 7</span></div>
+                    <div class="sc-app-cartao">
+                      <div class="sc-an">
+                        <span class="sc-an-foto sc-tom-carregador"><svg class="ico"><use href="#p-carregador"/></svg></span>
+                        <span class="sc-an-texto"><b class="sc-an-titulo">Carregador Turbo USB-C 25W com Cabo 1m</b><span class="sc-an-id">MLB3000000002</span></span>
+                      </div>
+                      <div class="sc-sit-linha sc-c-vsv"><span class="sc-chip">Visita sem venda</span><span class="sc-medidor"><i class="sc-cheio"></i><i class="sc-cheio"></i><i class="sc-cheio"></i></span></div>
+                      <div class="sc-an-numeros">
+                        <span><small>Visitas</small><b>590</b></span>
+                        <span><small>Vendas</small><b>0</b></span>
+                        <span><small>Nota do ML</small><b>64</b></span>
+                      </div>
+                    </div>
+                    <div class="sc-app-secao"><b>2 mudanças sugeridas</b><span class="sc-app-mono">urgente primeiro</span></div>
+                    <ul class="sc-sugestoes">
+                      <li><span class="sc-prio sc-prio-alta">Alta</span><b>Ficha técnica</b><span>Preencha a ficha técnica: 4 de 9 campos preenchidos.</span></li>
+                      <li><span class="sc-prio sc-prio-media">Média</span><b>Frete</b><span>Ofereça frete grátis, se a margem permitir: o anúncio fica mais competitivo.</span></li>
+                    </ul>
+                    <span class="sc-proximo"><span><small>Próximo</small>Caixa de Som Bluetooth 20W</span><svg class="ico"><use href="#i-direita"/></svg></span>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+          <ol class="sc-progresso">
+            <li class="sc-feito"><i></i>Conecte</li>
+            <li><i></i>Importe</li>
+            <li><i></i>Veja</li>
+            <li><i></i>Corrija</li>
+          </ol>
+          <p class="sc-legenda sc-legenda-clara"><span></span>Dados de exemplo</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ números -->
+  <section class="sc-numeros sc-folha" aria-labelledby="sc-numeros-titulo">
+    <div class="sc-dentro">
+      <div class="sc-numeros-topo">
+        <h2 class="sc-h2 sc-h2-media" id="sc-numeros-titulo">Tudo conferido, anúncio por anúncio.</h2>
+        <p class="sc-numeros-legenda"><span class="sc-rotulo">Na loja de exemplo</span><span class="sc-numeros-datas">16/09 a 15/10/2026</span></p>
+      </div>
+      <ul class="sc-numeros-grade">
+        <li class="sc-revela"><span class="sc-numero sc-conta" data-ate="10">10</span><b>anúncios lidos</b><span>2.417 visitas e 39 vendas no período</span></li>
+        <li class="sc-revela"><span class="sc-numero sc-conta" data-ate="41">41</span><b>fotos conferidas</b><span>1 anúncio com menos de {{ min_fotos }} fotos</span></li>
+        <li class="sc-revela"><span class="sc-numero sc-conta" data-ate="84">84</span><b>campos de ficha técnica</b><span>66 preenchidos, 18 em branco</span></li>
+        <li class="sc-revela"><span class="sc-numero sc-conta" data-ate="14">14</span><b>mudanças sugeridas</b><span>para 7 dos 10 anúncios</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================================================ situações -->
+  <section class="sc-situacoes sc-folha" id="sc-situacoes" aria-labelledby="sc-sit-titulo">
+    <div class="sc-dentro">
+      <header class="sc-sit-cabeca">
+        <div>
+          <p class="sc-rotulo">Situações</p>
+          <h2 class="sc-h2" id="sc-sit-titulo">Cinco situações. Regras claras.</h2>
+        </div>
+        <p class="sc-sit-intro">O Orzy olha as visitas e as vendas do período e coloca cada anúncio numa situação. Duas medidas decidem: <b class="sc-regra">{{ poucas_visitas }} visitas</b> no período e <b class="sc-regra">1 venda a cada {{ a_cada }} visitas</b>.</p>
+      </header>
+    </div>
+    <div class="sc-sit-rolo" role="region" aria-label="As cinco situações" tabindex="0">
+      <ol class="sc-sit-lista">
+        <li class="sc-sit sc-c-vsv sc-n2 sc-revela">
+          <span class="sc-sit-num" aria-hidden="true">01</span>
+          <h3>Visita sem venda</h3>
+          <p class="sc-sit-regra">{{ poucas_visitas }} visitas ou mais e nenhuma venda</p>
+          <p class="sc-sit-frase">As pessoas veem e não compram.</p>
+          <p class="sc-sit-ex">Carregador Turbo, Fone TWS</p>
+          <div class="sc-sit-zona"><div class="sc-sit-barra"><b>2</b><span>anúncios</span></div></div>
+        </li>
+        <li class="sc-sit sc-c-cp sc-n2 sc-revela">
+          <span class="sc-sit-num" aria-hidden="true">02</span>
+          <h3>Converte pouco</h3>
+          <p class="sc-sit-regra">{{ poucas_visitas }} visitas ou mais e menos de 1 venda a cada {{ a_cada }}</p>
+          <p class="sc-sit-frase">Vende, mas pouco para tanta visita.</p>
+          <p class="sc-sit-ex">Caixa de Som, Mouse Sem Fio</p>
+          <div class="sc-sit-zona"><div class="sc-sit-barra"><b>2</b><span>anúncios</span></div></div>
+        </li>
+        <li class="sc-sit sc-c-pv sc-n2 sc-revela">
+          <span class="sc-sit-num" aria-hidden="true">03</span>
+          <h3>Pouca visita</h3>
+          <p class="sc-sit-regra">Menos de {{ poucas_visitas }} visitas e nenhuma venda</p>
+          <p class="sc-sit-frase">Quase ninguém encontra.</p>
+          <p class="sc-sit-ex">Capa de Silicone, Suporte Veicular</p>
+          <div class="sc-sit-zona"><div class="sc-sit-barra"><b>2</b><span>anúncios</span></div></div>
+        </li>
+        <li class="sc-sit sc-c-vpv sc-n1 sc-revela">
+          <span class="sc-sit-num" aria-hidden="true">04</span>
+          <h3>Vende, mas pouco visto</h3>
+          <p class="sc-sit-regra">Menos de {{ poucas_visitas }} visitas, com vendas</p>
+          <p class="sc-sit-frase">Quem vê, compra.</p>
+          <p class="sc-sit-ex">Hub USB-C 7 em 1</p>
+          <div class="sc-sit-zona"><div class="sc-sit-barra"><b>1</b><span>anúncio</span></div></div>
+        </li>
+        <li class="sc-sit sc-c-vb sc-n3 sc-revela">
+          <span class="sc-sit-num" aria-hidden="true">05</span>
+          <h3>Vendendo bem</h3>
+          <p class="sc-sit-regra">{{ poucas_visitas }} visitas ou mais e 1 venda ou mais a cada {{ a_cada }}</p>
+          <p class="sc-sit-frase">Use como modelo.</p>
+          <p class="sc-sit-ex">Garrafa Térmica, Suporte de Mesa, Cabo USB-C</p>
+          <div class="sc-sit-zona"><div class="sc-sit-barra"><b>3</b><span>anúncios</span></div></div>
+        </li>
+      </ol>
+    </div>
+    <div class="sc-dentro">
+      <p class="sc-sit-legenda"><span class="sc-rotulo">Na loja de exemplo</span>10 anúncios. A altura de cada bloco mostra quantos estão em cada situação.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ segurança -->
+  <section class="sc-seguranca sc-folha" id="sc-seguranca" aria-labelledby="sc-seg-titulo">
+    <div class="sc-dentro">
+      <h2 class="sc-rotulo" id="sc-seg-titulo">Segurança</h2>
+      <ol class="sc-frases">
+        <li class="sc-frase sc-revela">
+          <span class="sc-frase-num" aria-hidden="true">01</span>
+          <p class="sc-frase-texto">Sua senha fica <span class="sc-marca">no Mercado Livre.</span></p>
+          <p class="sc-frase-detalhe"><svg class="ico" aria-hidden="true"><use href="#i-cadeado"/></svg>Você entra pelo site do Mercado Livre. O Orzy nunca vê a sua senha.</p>
+        </li>
+        <li class="sc-frase sc-revela">
+          <span class="sc-frase-num" aria-hidden="true">02</span>
+          <p class="sc-frase-texto">O Orzy <span class="sc-marca">só lê.</span> Não altera anúncios, preços nem estoque.</p>
+          <p class="sc-frase-detalhe"><svg class="ico" aria-hidden="true"><use href="#i-olho"/></svg>Permissão só de leitura. As mudanças, quem faz é você.</p>
+        </li>
+        <li class="sc-frase sc-revela">
+          <span class="sc-frase-num" aria-hidden="true">03</span>
+          <p class="sc-frase-texto"><span class="sc-marca">Apague seus dados</span> quando quiser.</p>
+          <p class="sc-frase-detalhe"><svg class="ico" aria-hidden="true"><use href="#i-relogio"/></svg>Histórico guardado por até {{ meses_de_historico }} meses. O botão “Apagar meu histórico” apaga tudo.</p>
+        </li>
+      </ol>
+      <p class="sc-independente sc-revela"><b>O Orzy não é do Mercado Livre.</b> É um serviço independente, feito para quem vende lá.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ chamada final -->
+  <section class="sc-final sc-folha sc-anima" id="sc-final" aria-labelledby="sc-final-titulo">
+    <div class="sc-final-anel" aria-hidden="true">
+      <svg class="sc-anel-gira sc-anel-volta" viewBox="-4 -5.5 111 111" focusable="false"><use href="#sc-anel-luz"/></svg>
+    </div>
+    <div class="sc-dentro sc-final-dentro">
+      <h2 class="sc-final-titulo sc-revela" id="sc-final-titulo">
+        <span class="sc-mascara"><span class="sc-sobe">Seu painel</span></span>
+        <span class="sc-mascara"><span class="sc-sobe">está a um</span></span>
+        <span class="sc-mascara"><span class="sc-sobe">login de</span></span>
+        <span class="sc-mascara"><span class="sc-sobe">distância<span class="sc-ponto-final">.</span></span></span>
+      </h2>
+      <div class="sc-final-acao">
+        <div class="sc-conectar">
+          {% if logado %}
+          <a class="sc-botao sc-botao-lima sc-botao-xg" href="/relatorio">Ver meu relatório<span class="sc-botao-seta" aria-hidden="true"><svg class="ico"><use href="#i-seta"/></svg></span></a>
+          {% else %}
+          <a class="sc-botao sc-botao-lima sc-botao-xg" href="/entrar">Conectar com Mercado Livre<span class="sc-botao-seta" aria-hidden="true"><svg class="ico"><use href="#i-seta"/></svg></span></a>
+          <p class="sc-aceite">Ao conectar, você aceita os <a href="/termos">Termos de Uso</a> e confirma que leu a <a href="/privacidade">Política de Privacidade</a>.</p>
+          {% endif %}
+        </div>
+        <ul class="sc-final-fatos">
+          <li>Login no site do Mercado Livre</li>
+          <li>Só leitura</li>
+          <li>Fase de testes</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+  <!-- ============================================================ rodapé -->
+  <footer class="sc-rodape sc-folha">
+    <div class="sc-dentro">
+      <div class="sc-rodape-grade">
+        <div class="sc-rodape-marca">
+          <svg class="sc-rodape-logo" viewBox="-6 -8 347.5 158" width="92" height="42" role="img" aria-label="Orzy"><use href="#sc-marca"/></svg>
+          <p>Painel para quem vende no Mercado Livre. Mostra o que cada anúncio precisa, do mais urgente ao menos.</p>
+        </div>
+        <nav class="sc-rodape-links" aria-label="Rodapé">
+          <p class="sc-rodape-rotulo">Legal</p>
+          <a href="/privacidade">Privacidade</a>
+          <a href="/termos">Termos</a>
+        </nav>
+        <div class="sc-rodape-suporte">
+          <p class="sc-rodape-rotulo">Suporte</p>
+          <p class="sc-email">{{ contato }}</p>
+        </div>
+      </div>
+      <div class="sc-rodape-base">
+        <p>O Orzy é um serviço independente e não tem vínculo com o Mercado Livre.</p>
+        <p>© 2026 Orzy</p>
+      </div>
+      <svg class="sc-rodape-gigante" viewBox="-6 -8 347.5 158" aria-hidden="true" focusable="false"><use href="#sc-marca"/></svg>
+    </div>
+  </footer>
+</section>
+{% endblock %}

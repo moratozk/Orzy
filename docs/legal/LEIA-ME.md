@@ -1,6 +1,6 @@
 # Privacidade e termos do Orzy
 
-**Situação (16/10/2026):** rascunhos, escritos pelo Claude a partir do código. Nada está publicado.
+**Situação (19/10/2026):** rascunhos, escritos pelo Claude a partir do código. Nada está publicado.
 Não é parecer jurídico: antes de abrir o site ao público, o ideal é um advogado revisar.
 
 | Arquivo | O que é |
@@ -8,16 +8,26 @@ Não é parecer jurídico: antes de abrir o site ao público, o ideal é um advo
 | [politica-de-privacidade.md](politica-de-privacidade.md) | Quais dados o site usa, para que, por quanto tempo e os direitos do vendedor (LGPD) |
 | [termos-de-uso.md](termos-de-uso.md) | As regras de uso do site: o que ele faz, o que não faz, responsabilidades e lei aplicável |
 
-Os textos descrevem o site como ele está no PR #5 (rascunho, commit `9c3bfdc`, conferido em 16/10/2026). Se o código
-mudar nos pontos da tabela "De onde vem cada frase", os textos mudam junto.
+Os textos foram escritos para o site base do PR #5 (commit `9c3bfdc`). Na fase 4, o site passou para `sistema/`, em
+Django com PostgreSQL (PR #12), sem mudar o que os textos prometem. O passo 2 da fase 4 (PR #13, main em `909617d`,
+conferido em 19/10/2026) guarda a conta e o acesso ao Mercado Livre, cifrado, e algumas frases ficaram velhas: a lista
+está em "Frases que o passo 2 deixou velhas", abaixo. O texto novo é escrito num rascunho desta thread e vai ao Nicolas
+numa revisão só, junto com o do passo 3 (a importação completa). Até a Política mudar, ninguém além do Nicolas usa o
+sistema. Se o código mudar nos pontos da tabela "De onde vem cada frase", os textos mudam junto.
 
 Para achar o que falta, procure por `[PREENCHER` (só o Nicolas sabe) e `[CONFIRMAR` (depende de outra frente).
 
 **Como o site mostra os textos:** as páginas `/privacidade` e `/termos` leem os dois arquivos desta pasta a cada
-visita (`web/legal.py`). O site entende só parte do Markdown: títulos, parágrafos, listas de um nível (a continuação
-de um item vai recuada), citações (`>`), tabelas, negrito, código e links. Não use itálico, lista dentro de lista,
-linha horizontal nem imagem. Os links para `politica-de-privacidade.md` e `termos-de-uso.md` viram `/privacidade` e
-`/termos`; outros links relativos, como o deste LEIA-ME, aparecem como texto.
+visita (`sistema/publico/legal.py`). O site entende só parte do Markdown: títulos, parágrafos, listas de um nível (a
+continuação de um item vai recuada), citações (`>`), tabelas, negrito, código e links. Não use itálico, lista dentro de
+lista, linha horizontal nem imagem, e não comece uma linha de parágrafo com `- `, `* `, `|`, `>`, `# ` ou um número
+seguido de ponto e espaço, porque ela vira outra coisa. O que vem antes do primeiro `##` é a cabeça da página: o
+título, o aviso (a primeira citação), a linha `**Versão:**` e a abertura. Cada `##` entra no índice da página. Nos `##`
+e `###`, o número do começo vira um selo e o título ganha um endereço próprio (por exemplo,
+`/privacidade#8-os-seus-direitos`): mudar o número ou o nome de um item muda o endereço. `[PREENCHER: ...]` e
+`[CONFIRMAR: ...]` aparecem marcados na página. Os links para `politica-de-privacidade.md` e `termos-de-uso.md` viram
+`/privacidade` e `/termos`; outros links relativos, como o deste LEIA-ME, aparecem como texto. Os testes do sistema
+abrem as duas páginas com os textos desta pasta (`sistema/testes/test_paginas.py`).
 
 ## O que só o Nicolas preenche
 
@@ -31,8 +41,11 @@ Já perguntado no thread "Site: código e login": se haverá revisão de advogad
 
 ## O que depende das outras frentes
 
-**Hospedagem e domínio:** o nome da empresa de hospedagem (Política, item 4), o país dos servidores (item 5) e por
-quanto tempo ela guarda registros de acesso e cópias de segurança (itens 2.4 e 6). Texto do item 5 para cada caso:
+**Hospedagem e domínio:** o nome da empresa de hospedagem e, se o banco de dados for de outra empresa, o nome dela
+também (Política, item 4), o país dos servidores e do banco (item 5) e por quanto tempo elas guardam registros de
+acesso e cópias de segurança (itens 2.4 e 6). O banco é um PostgreSQL num plano grátis até o lançamento, escolhido pela
+thread de hospedagem no fim da fase 4; o contrato de dados dele (LGPD) passa por esta thread antes de entrar dado de
+outra pessoa. Texto do item 5 para cada caso:
 
 - **Brasil:** "Os dados ficam em servidores no Brasil."
 - **União Europeia (ex.: Frankfurt):** "Os dados ficam em servidores na Alemanha, na União Europeia. A ANPD reconhece
@@ -45,8 +58,10 @@ quanto tempo ela guarda registros de acesso e cópias de segurança (itens 2.4 e
   Frankfurt e Singapura). Em qualquer transferência para fora do Brasil, a Política também precisa dizer a finalidade,
   a duração e os direitos ligados a ela, e o Orzy entrega o texto das cláusulas a quem pedir (Resolução CD/ANPD
   nº 19/2024).
-- **Google (recomendação da thread de hospedagem, 15/10/2026, ainda não decidida):** servidor no Cloud Run e histórico
-  no Firestore, os dois em São Paulo, contratados com a Google Cloud Brasil Computação e Serviços de Dados Ltda.
+- **Google (recomendação da thread de hospedagem, 15/10/2026, ainda não decidida):** plano feito para o site base, com
+  o histórico no Firestore. O sistema da fase 4 usa PostgreSQL, e a thread de hospedagem refaz o plano no fim da fase 4:
+  o que vale para o servidor continua, o que vale para o banco muda. Servidor no Cloud Run e histórico no Firestore, os
+  dois em São Paulo, contratados com a Google Cloud Brasil Computação e Serviços de Dados Ltda.
   Segundo a thread de hospedagem, Cloud Run, Firestore, Secret Manager e Cloud Logging seguem o Cloud Data Processing
   Addendum do Google Cloud, que traz as cláusulas-padrão da ANPD na parte "Brazil". O que recebe as visitas muda a
   conta. O endereço do próprio Cloud Run (`...run.app`, grátis, bom para um teste fechado) e um balanceador de carga do
@@ -63,32 +78,39 @@ quanto tempo ela guarda registros de acesso e cópias de segurança (itens 2.4 e
   hospedagem passa a dizer que o Google recebe o endereço IP para entregar as páginas, mas o Orzy não guarda IP, o
   endereço com a busca nem o navegador; a frase dos registros do servidor fica como está. No item 6, os registros do
   servidor ficam 30 dias num depósito em São Paulo, e o histórico e as contagens ganham uma cópia de segurança por dia,
-  guardada 7 dias em São Paulo: um dado apagado pode ficar até 7 dias nas cópias, e depois o Google conclui a exclusão
-  em até 180 dias. Um robô abre `/saude` a cada 5 minutos, então o servidor não desliga quando ninguém usa o site, e a
-  sessão dura até **Sair** ou 8 horas depois do login, como a Política já diz (ela ainda acaba se o servidor reiniciar).
-  Na cobrança por pedido, o padrão do Cloud Run, a CPU só funciona durante algum pedido, e a limpeza das sessões anda
-  com os pedidos do robô; para as 8 horas valerem, a thread do código faz a limpeza na nuvem apagar as sessões 6 minutos
-  antes do prazo, no lançamento. Os avisos de erro por e-mail ao responsável não trazem dado de vendedor; se um dia
-  trouxerem, a Política precisa contar. Só com o Firebase Hosting, o cookie passa a se chamar `__session`.
-- **Registro de quem apagou o histórico** (proposta da thread de hospedagem, aceita por esta thread em 16/10/2026):
-  quando alguém apaga o histórico, o número da conta e a hora ficam 8 dias num registro à parte, em São Paulo, só para
-  apagar de novo os relatórios dessa conta se for preciso voltar uma cópia de segurança. Sem ele, voltar uma cópia
-  traria de volta relatórios que a pessoa apagou. Quando o código fizer isso, entram na Política uma frase no item 2.4,
-  uma linha no item 3 (cumprimento de obrigação legal: garantir a eliminação pedida, arts. 7º, II, e 18, VI) e uma linha
-  no item 6 (8 dias).
+  guardada 7 dias em São Paulo (era o Firestore; com o PostgreSQL, vale o que o banco escolhido fizer): um dado apagado
+  pode ficar até 7 dias nas cópias, e depois o Google conclui a exclusão em até 180 dias. Um robô abre `/saude` a cada
+  5 minutos, então o servidor não desliga quando ninguém usa o site, e a sessão dura até **Sair** ou 8 horas depois do
+  login, como a Política já diz (ela ainda acaba se o servidor reiniciar). Na cobrança por pedido, o padrão do Cloud
+  Run, a CPU só funciona durante algum pedido, e as tarefas em segundo plano (a limpeza das sessões e, desde o passo 2,
+  a renovação dos acessos) andam com os pedidos do robô; para as 8 horas valerem, a thread do código faz a limpeza na
+  nuvem apagar as sessões 6 minutos antes do prazo, no lançamento. Os avisos de erro por e-mail ao responsável não
+  trazem dado de vendedor; se um dia trouxerem, a Política precisa contar. Só com o Firebase Hosting, o cookie passa a
+  se chamar `__session`.
+- **Registro de quem apagou** (proposta da thread de hospedagem, aceita por esta thread em 16/10/2026 e ampliada em
+  19/10/2026): quando alguém usa **Apagar meu histórico** ou **Desconectar e apagar tudo**, o número da conta, a hora e
+  o que foi apagado ficam num registro à parte, fora do banco e fora do registro comum do servidor, só para apagar de
+  novo se for preciso voltar uma cópia de segurança do banco. Sem ele, voltar uma cópia traria de volta o que a pessoa
+  apagou, até o acesso guardado de quem desconectou. O prazo é o das cópias do banco mais 1 dia (8 dias com as cópias
+  de 7 dias do plano de 16/10/2026). Fora do banco porque voltar uma cópia apagaria um registro guardado nele. Quando o
+  código fizer isso, entram na Política uma frase no item 2.4, uma linha no item 3 (cumprimento de obrigação legal:
+  garantir a eliminação pedida, arts. 7º, II, e 18, VI) e uma linha no item 6.
 
 **Site: código e login:** os itens da seção seguinte.
 
 **Página inicial:** link para a Política e os Termos no rodapé e a frase "Não somos o Mercado Livre". Sem o logotipo
 do Mercado Livre (os termos deles só permitem as marcas conforme o manual de marcas do Mercado Livre) e sem ferramenta
-de estatística (Google Analytics e parecidos) ou outros cookies. Se entrar alguma, a Política precisa mudar antes.
+de estatística (Google Analytics e parecidos) ou outros cookies. Se entrar alguma, a Política precisa mudar antes. A
+frase "O botão “Apagar meu histórico” apaga tudo", na parte de segurança
+(`sistema/publico/templates/publico/inicio.html:407`), ficou velha no passo 2: quem apaga tudo agora é o
+**Desconectar e apagar tudo**. O texto novo foi para a thread do site, pela coordenação, em 19/10/2026.
 
 **Nicolas, na conta dele:** o caminho do menu do Mercado Livre onde o vendedor tira a permissão de um aplicativo
 (Política, item 8). A documentação para desenvolvedores não diz.
 
 ## O que o site precisa ter para os textos valerem
 
-Já feito no PR #5 (commit `9c3bfdc`, ainda em rascunho):
+Já feito no sistema (main, `909617d`):
 
 1. Páginas `/privacidade` e `/termos`, que mostram os arquivos desta pasta.
 2. Junto de cada botão **Conectar com Mercado Livre**: "Ao conectar, você aceita os Termos de Uso e confirma que leu a
@@ -99,7 +121,7 @@ Já feito no PR #5 (commit `9c3bfdc`, ainda em rascunho):
    mostra os anúncios como estavam naquele dia. Os termos do Mercado Livre (5.3) pedem que o aplicativo diga com que
    frequência os dados são atualizados, e os Termos (item 6) prometem isso.
 5. Relatórios e contagens do beta com mais de 12 meses apagados ao ligar o servidor e depois a cada 24 horas.
-6. O e-mail de contato no rodapé de todas as páginas.
+6. O e-mail de contato em todas as páginas: no rodapé, ou no texto da página de erro.
 7. Sessão sem login (de quem clicou em Conectar e não voltou do Mercado Livre) apagada depois de 15 minutos, com no
    máximo 1000 de uma vez, e código novo da sessão depois do login.
 8. Contagens do beta só em números por dia, e a página `/contagens` só para as contas de `ORZY_CONTAS_ADMIN`, sem
@@ -110,6 +132,18 @@ Já feito no PR #5 (commit `9c3bfdc`, ainda em rascunho):
 9. Sessão com login apagada do servidor no máximo 8 horas depois do login, mesmo que a pessoa continue usando o site: o
    prazo conta da hora do login, e o servidor confere a cada minuto, mesmo sem visitas, e apaga um minuto antes do prazo
    (no Cloud Run, ver "Se for Google" acima). O cookie vence no mesmo prazo.
+10. A conta e o acesso guardado (passo 2): o código de renovação vai para o banco cifrado com AES-256-GCM, com o número
+    da conta na conferência da cifra, e a chave fica numa variável de ambiente obrigatória (`ORZY_CHAVE_ACESSO`),
+    nunca no banco. O token de acesso continua só na memória, na sessão.
+11. A página **Sua conta** mostra o que fica guardado e tem o **Desconectar e apagar tudo**: apaga a conta, o acesso e o
+    histórico, encerra as sessões da conta em todos os navegadores e pede ao Mercado Livre para tirar a permissão do
+    Orzy. Se o Mercado Livre não confirmar, o Orzy apaga do lado dele mesmo assim e a página diz para tirar por lá.
+12. Quando o Mercado Livre recusa o acesso guardado (permissão tirada ou senha trocada, que dão o mesmo erro), o acesso
+    sai na hora e as sessões da conta acabam; a conta e o histórico saem 30 dias depois, sem um novo Conectar. A
+    conferência de todo dia renova quem não renovou nas últimas 20 horas, então entre duas renovações passam no máximo
+    44 horas: é o tempo máximo para o Orzy perceber, com o servidor ligado.
+13. **Sair** encerra só a sessão daquele navegador, e **Apagar meu histórico** apaga só os relatórios: nos dois, a conta
+    e o acesso guardado ficam.
 
 Regras que continuam valendo:
 
@@ -117,26 +151,80 @@ Regras que continuam valendo:
   atualizar a Política.
 - `ORZY_HORAS_SESSAO` muda o prazo da sessão e do cookie (padrão: 8 horas). Mais de 8 só depois de mudar a Política
   (itens 2.4 e 6), que promete 8.
+- O prazo de 30 dias depois de o acesso parar de valer (`DIAS_SEM_ACESSO`, `sistema/contas/acesso.py:30`) aparece na
+  página Sua conta e vai aparecer na Política e nos Termos. Se o número mudar, os textos mudam junto.
 - Se o responsável virar empresa (CNPJ): guardar data, hora e IP de cada acesso por 6 meses, em sigilo (Marco Civil
   da Internet, art. 15). Hoje o site não guarda IP.
+
+## Frases que o passo 2 deixou velhas
+
+O rascunho desta thread troca estas frases. Números de linha do main em `909617d`.
+
+Política de Privacidade (`politica-de-privacidade.md`):
+
+- linhas 16 e 17 (Resumo): "Ele não altera nada na sua conta". O **Desconectar e apagar tudo** pede ao Mercado Livre
+  para tirar a permissão do próprio Orzy;
+- linhas 18 e 19 (Resumo): o acesso "só na memória do servidor" e "o Orzy não guarda o código que renovaria esse
+  acesso";
+- linha 21 (Resumo): "Você apaga tudo quando quiser". **Apagar meu histórico** apaga só os relatórios;
+- linhas 47, 52 e 53 (item 2.1): o código de renovação "que o Orzy descarta assim que recebe, sem guardar"; faltam a
+  conta e para que ela serve;
+- linhas 121 e 122 (item 4): a hospedagem guarda também a conta e o acesso cifrado, e o banco pode ser de outra
+  empresa;
+- linhas 142, 143 e 145 (item 6): "Código de renovação: não é guardado" e "Número do usuário e apelido: na sessão";
+  faltam a conta e o código cifrado, com os prazos, e o histórico sai também com a conta;
+- linhas 158 e 159 (item 7): o acesso "só na memória do servidor, durante a sessão"; falta a cifra, com a chave fora
+  do banco;
+- linhas 184 a 190 (item 8): falta o **Desconectar e apagar tudo**; **Sair** agora encerra só a sessão; depois de
+  tirar a permissão, a conta e o histórico saem em 30 dias, não em 12 meses.
+
+Termos de Uso (`termos-de-uso.md`):
+
+- linhas 52 e 53 (item 4): "O Orzy só usa esse acesso durante a sua sessão ... é preciso conectar de novo". Agora o
+  Orzy guarda o acesso e o renova sozinho;
+- linhas 109 e 110 (item 11): falta o **Desconectar e apagar tudo**;
+- linha 118 (item 12): "pare de usar o Orzy e apague o seu histórico". Apagar tudo é o **Desconectar e apagar tudo**.
+
+## Decisões desta thread (19/10/2026)
+
+Sobre os pontos que a thread do site deixou para esta thread nos passos 1 e 2 da fase 4:
+
+- **Registro do servidor sem IP:** cada linha do gunicorn tem data e hora, método, página sem a busca, resposta,
+  tamanho e tempo, sem o IP. No rascunho, a Política (item 2.4) passa a dizer que o servidor não anota o endereço IP.
+  As linhas dos pedidos com outro endereço (robôs) mostram só o endereço recusado, nada do vendedor, e não pedem frase.
+- **Banco de dados de outra empresa:** no rascunho, o item 4 da Política tem a hospedagem do site e o banco de dados
+  em linhas separadas, cada uma com o seu `[PREENCHER]` (podem ser a mesma empresa), e o item 5 pede o país dos dois.
+- **Registro de quem apagou:** continua, agora também para o **Desconectar e apagar tudo** (ver "Registro de quem
+  apagou", acima). As limpezas automáticas (12 meses, e 30 dias sem acesso) não precisam dele: depois de voltar uma
+  cópia, elas apagam de novo sozinhas, porque a regra está nos próprios dados (no máximo, os 30 dias recomeçam).
+- **30 dias depois de o Mercado Livre recusar o acesso:** aceito. Os termos do Mercado Livre (2.2.4) pedem para
+  revogar o acesso aos dados de quem avisou o desenvolvedor que não vai mais usar o aplicativo, e o **Desconectar e
+  apagar tudo** faz isso na hora; o item 14 trata do Mercado Livre cortar o acesso do desenvolvedor. Quem tira a
+  permissão pelo Mercado Livre perde o acesso guardado assim que o Orzy percebe, e a espera curta, dita na Política,
+  protege quem só trocou a senha. Quem quiser antes conecta de novo e usa o **Desconectar e apagar tudo**, ou escreve
+  para o e-mail.
+- **Sugestão para o passo 3 (não decidida):** hoje a conta que continua com acesso, mas não é usada, fica guardada sem
+  prazo (o histórico sai em 12 meses). Com a importação e a sincronia do passo 3, o Orzy leria todo dia a conta de quem
+  parou de usar. Sugestão: a conta sem nenhum Conectar há 12 meses sai com tudo, como o histórico. Quem decide é o
+  Nicolas, com a thread do site.
 
 ## O que o Mercado Livre exige
 
 Lido em 15/10/2026 nos [termos para desenvolvedores](https://developers.mercadolibre.com.ar/en_us/mercado-libre-developer-terms-and-conditions)
-(a página em inglês; não tem data de versão):
+(a página em inglês; não tem data de versão), e os itens 2.2.4 e 14 relidos em 19/10/2026:
 
 | Item dos termos | O que pede | Como o Orzy cumpre |
 |---|---|---|
 | 6 | Cumprir a LGPD; usar os dados só para a finalidade; o usuário do Mercado Livre que autoriza é o controlador e o desenvolvedor segue as instruções dele; subcontratados com a mesma segurança; avisar o Mercado Livre se uma autoridade pedir dados | Política itens 2.3, 3 e 4. Avisar o Mercado Livre fica com o responsável, se acontecer |
-| 10 | Medidas de segurança para dados pessoais (nomes, e-mails), credenciais e apelidos | Política item 7 |
-| 2.2.1.3 | Cópias intermediárias só as necessárias, apagadas de vez quando não servem mais | Token só na memória; cadastro e compradores descartados na hora |
-| 2.2.4 | Revogar o acesso aos dados de quem sair; não usar "mercado", "libre", "livre", "payment", "shipments" nem "credit" no nome ou no visual do aplicativo | "Sair" e "Apagar meu histórico"; o nome Orzy está fora da lista |
+| 10 | Medidas de segurança para dados pessoais (nomes, e-mails), credenciais e apelidos | Política item 7; o acesso guardado vai cifrado, com a chave fora do banco |
+| 2.2.1.3 | Cópias intermediárias só as necessárias, apagadas de vez quando não servem mais | Token de acesso só na memória; código de renovação só enquanto a conta está conectada, cifrado; cadastro e compradores descartados na hora |
+| 2.2.4 | Revogar o acesso do aplicativo aos dados de quem avisou o desenvolvedor que não vai mais usar; não usar "mercado", "libre", "livre", "payment", "shipments" nem "credit" no nome ou no visual do aplicativo | **Desconectar e apagar tudo** apaga a conta, o acesso e o histórico e tira a permissão no Mercado Livre; por e-mail, o responsável faz o mesmo (ver "Antes de abrir ao público"); o nome Orzy está fora da lista |
 | 4.1 | Deixar sempre claro que o aplicativo não pertence ao Mercado Livre; marcas do Mercado Livre só conforme o manual de marcas deles | Termos item 2 e rodapé do site |
 | 5.2 e 5.3 | Informação não pública do usuário só com autorização dele; conteúdo atualizado pelo menos a cada 24 horas; o aplicativo informa a frequência de atualização | Termos item 6 e site item 4 acima |
 | 2.2.2 | Client Secret em sigilo; avisar o Mercado Livre se houver uso indevido | Secret só no ambiente do servidor |
 | 7.9 | Não guardar dados de cartão nem números de documento sem autorização | O Orzy não guarda |
 | 9 | O Mercado Livre pode auditar e suspender o acesso por suspeita de falha de segurança | Termos item 2 |
-| 14 | Se o Mercado Livre cortar o acesso: parar de usar a API e destruir as cópias e os dados pessoais obtidos | Apagar o histórico nesse caso |
+| 14 | Se o Mercado Livre cortar o acesso do desenvolvedor: parar de usar a API e destruir as cópias e os dados pessoais obtidos | Apagar todas as contas nesse caso: o acesso guardado e o histórico saem junto |
 | 17 | Os termos podem mudar; a mudança vale 10 dias depois de publicada | Reler antes de abrir ao público |
 
 **Histórico de 12 meses (pergunta do thread do site):** os termos não fixam prazo para guardar dados; pedem
@@ -176,6 +264,11 @@ comunicar incidentes (art. 14). Os textos prometem o prazo normal de 15 dias, qu
   um modelo).
 - Plano para incidente: avisar a ANPD e os vendedores em até 3 dias úteis (6 para agente de pequeno porte) quando houver
   risco ou dano relevante, e guardar o registro de todo incidente por 5 anos (Resolução CD/ANPD nº 15/2024).
+- Contrato de dados (LGPD) do banco grátis, antes de entrar dado de outra pessoa: a thread de hospedagem escolhe o
+  banco no fim da fase 4.
+- **Pedido para apagar tudo por e-mail:** `acesso.desconectar(número da conta)` faz o mesmo que o botão, sem precisar
+  de sessão, e também tira a permissão no Mercado Livre (`sistema/contas/acesso.py:108`). A thread do site pode
+  deixar isso num comando pronto antes do lançamento.
 - **E-mail de contato:** orzy.suporte@gmail.com, criado pelo Nicolas em 15/10/2026. É um Gmail comum: segue os termos de
   consumidor do Google, sem contrato de tratamento de dados nem as cláusulas-padrão da ANPD, e as mensagens podem ficar
   em servidores fora do Brasil (a Política diz isso nos itens 4 e 5). O Google diz que pode pôr essas cláusulas nos
@@ -187,38 +280,57 @@ comunicar incidentes (art. 14). Os textos prometem o prazo normal de 15 dias, qu
 
 ## De onde vem cada frase
 
-Código do PR #5 (commit `9c3bfdc`, branch `claude/project-thread-y5cpt9`):
+Código do main em `909617d` (fase 4, passo 2), conferido em 19/10/2026. As frases da tabela valem hoje; as que o passo
+2 deixou velhas estão na seção acima.
 
 | O que os textos dizem | Onde está no código |
 |---|---|
-| O código de acesso fica só na memória do servidor | `web/sessoes.py:24` e `web/login.py` |
-| O código de renovação é descartado | `web/login.py:52` |
-| De `/users/me` ficam só o número e o apelido | `web/login.py:60` |
-| O que o histórico guarda (SQLite no PC e no Render; Firestore no Cloud Run, com os mesmos campos) | `web/historico.py:19` a `36`; `web/historico_firestore.py:189` a `200` |
-| Histórico e contagens do beta apagados com mais de 12 meses, ao ligar e depois a cada 24 horas | `web/historico.py:17` e `127` a `137`; `web/historico_firestore.py:246` a `255`; `web/servidor.py:56` a `70`, `88` a `92` e `104`; no Firestore, os relatórios também têm o campo `expira_em` (`web/historico_firestore.py:194`) |
-| O que mudou desde o relatório anterior do mesmo período, sem dizer por quê | `web/comparacao.py`; `web/historico.py:107` a `118`; `web/paginas.py:593` a `594` |
-| Cookie `orzy_sessao`: HttpOnly, SameSite=Lax, Secure em HTTPS, dura 8 horas | `web/app.py:115`, `131` e `283` a `287`; `web/configuracao.py:81` |
-| Sessão sem login apagada depois de 15 minutos; código novo depois do login | `web/sessoes.py:15` a `16`, `51` a `60` e `80` a `93`; `web/app.py:128` |
-| Sessão com login apagada do servidor no máximo 8 horas depois do login, mesmo em uso, conferida a cada minuto | `web/sessoes.py:27`, `58` e `74` a `93`; `web/servidor.py:73` a `92` e `104`; `web/app.py:123` a `131` |
-| Até 300 anúncios por relatório | `web/configuracao.py:80` |
-| Um relatório por vez em cada conexão | `web/relatorios.py:79` a `80` |
-| O registro do servidor anota só o caminho, sem o código do Mercado Livre nem a busca | `web/servidor.py:49` a `53`; `web/app.py:66` |
-| Contagens do beta: só números por dia, sem conta, apelido nem anúncio | `web/contagens.py:14` a `20`; `web/relatorios.py:91` a `119`; `web/app.py:126`; `web/historico.py:38` a `43` e `141` a `147` |
-| Página `/contagens` só para as contas de `ORZY_CONTAS_ADMIN`, sem mostrar de quem são os números | `web/app.py:237` a `242`; `web/configuracao.py:68` a `72`; `web/historico.py:157` a `162` |
-| O que o relatório lê de cada anúncio | `painel-ml/meus_anuncios.py:28` |
-| Dos pedidos, só o anúncio e a quantidade | `painel-ml/meus_anuncios.py:137` a `159` |
-| "Não somos o Mercado Livre", os links para os dois textos e o e-mail de contato no rodapé | `web/paginas.py:14` e `85` a `86` |
-| Aviso de aceite junto de cada botão Conectar | `web/paginas.py:104` a `105` |
-| Data e hora em que os dados foram buscados | `web/relatorios.py:56` e `web/paginas.py:471` a `475` |
-| O histórico mostra como os anúncios estavam no dia | `web/paginas.py:517` e `615` |
-| Fonte, ícones e imagens saem do próprio site, sem serviço de fora na página | `web/app.py:19` a `27` e `37` a `38` |
-| O site mostra os textos desta pasta | `web/legal.py:12` a `13` e `web/app.py:83` a `84` |
+| O código de acesso fica só na memória do servidor | `sistema/contas/sessoes.py:1` a `13` e `126` a `181` (o motor de sessão do Django, só na memória); `sistema/orzy/settings.py:71`; `sistema/contas/login.py:63` e `64`; `sistema/contas/views.py:40` |
+| De `/users/me` ficam só o número e o apelido | `sistema/contas/login.py:65` a `69` |
+| O que o histórico guarda | `sistema/relatorios/models.py:12` a `33`; `sistema/relatorios/historico.py:38` a `53` |
+| Histórico e contagens do beta apagados com mais de 12 meses, ao ligar e depois a cada 24 horas | `sistema/relatorios/historico.py:18` e `85` a `92`; `sistema/relatorios/limpezas.py:19` a `35` e `77` a `83`; `sistema/orzy/wsgi.py:17` a `19` |
+| O que mudou desde o relatório anterior do mesmo período, sem dizer por quê | `sistema/relatorios/comparacao.py`; `sistema/relatorios/historico.py:69` a `78`; `sistema/relatorios/templates/relatorios/historico_relatorio.html:44` |
+| Cookie `orzy_sessao`: HttpOnly, SameSite=Lax, Secure em HTTPS, dura 8 horas | `sistema/orzy/settings.py:72` a `76`; `sistema/orzy/configuracao.py:14`, `29` e `124` |
+| Sessão sem login apagada depois de 15 minutos, no máximo 1000 de uma vez; código novo depois do login | `sistema/contas/sessoes.py:22` e `23`, `58` a `69` e `109` a `123`; `sistema/contas/views.py:37` a `39` |
+| Sessão com login apagada do servidor no máximo 8 horas depois do login, mesmo em uso, conferida a cada minuto | `sistema/contas/sessoes.py:103` a `123` e `129` a `131`; `sistema/relatorios/limpezas.py:62` a `74`; `sistema/orzy/wsgi.py:19` |
+| Até 300 anúncios por relatório | `sistema/orzy/configuracao.py:28` e `123` |
+| Um relatório por vez em cada conexão | `sistema/relatorios/geracao.py:120` e `121` |
+| O registro do servidor anota só o caminho, sem o código do Mercado Livre, a busca nem o IP | `sistema/gunicorn.conf.py:21` a `24` (o servidor da hospedagem); `sistema/orzy/settings.py:105` a `120` e `sistema/orzy/seguranca.py:21` a `37` (o servidor de teste do computador e os pedidos com outro endereço) |
+| Contagens do beta: só números por dia, sem conta, apelido nem anúncio | `sistema/relatorios/contagens.py:13` a `19`; `sistema/relatorios/models.py:36` a `42`; `sistema/relatorios/historico.py:96` a `104`; `sistema/relatorios/geracao.py:162`; `sistema/contas/views.py:36` |
+| Página `/contagens` só para as contas de `ORZY_CONTAS_ADMIN`, sem mostrar de quem são os números | `sistema/relatorios/views.py:136` a `143`; `sistema/orzy/configuracao.py:112` a `115` e `125`; `sistema/relatorios/historico.py:113` a `116` |
+| O que o relatório lê de cada anúncio | `painel-ml/meus_anuncios.py:28` e `29` |
+| Dos pedidos, só o anúncio e a quantidade | `painel-ml/meus_anuncios.py:137` a `165` |
+| "Não somos o Mercado Livre", os links para os dois textos e o e-mail de contato | Página inicial: `sistema/publico/templates/publico/inicio.html:454` a `466`. Textos legais: `sistema/publico/templates/publico/legal.html:134` a `146`. Telas do sistema: `sistema/publico/templates/sistema.html:34` a `37`. Na página de erro, o rodapé tem a frase e os dois links, e o e-mail fica no texto da página (`sistema/publico/templates/publico/erro.html:48`, `53` e `54`) |
+| Aviso de aceite junto de cada botão Conectar | `sistema/publico/templates/publico/inicio.html:72` e `432` |
+| Data e hora em que os dados foram buscados | `sistema/relatorios/geracao.py:67`; `sistema/relatorios/templates/relatorios/resultado.html:12` |
+| O histórico mostra como os anúncios estavam no dia | `sistema/relatorios/templates/relatorios/historico_relatorio.html:29` |
+| Fonte, ícones e imagens saem do próprio site, sem serviço de fora na página | `sistema/orzy/settings.py:89` a `98` (a regra de segurança da página só aceita o próprio site); os arquivos em `sistema/publico/static/` |
+| O site mostra os textos desta pasta | `sistema/orzy/settings.py:102` e `103`; `sistema/orzy/urls.py:11` e `12`; `sistema/publico/legal.py:22` e `37` a `44` |
+
+O que o passo 2 faz, e de onde vão sair as frases novas do rascunho:
+
+| O que o código faz | Onde está no código |
+|---|---|
+| A conta: número e apelido no Mercado Livre, o primeiro e o último Conectar, quando o acesso foi salvo e desde quando está sem acesso | `sistema/contas/models.py:13` a `20` |
+| A conta é criada ou atualizada no Conectar, com o código de renovação cifrado; o token de acesso fica só na sessão | `sistema/contas/login.py:60` a `69`; `sistema/contas/acesso.py:41` a `62` |
+| A cifra: AES-256-GCM, com o número da conta na conferência (o valor de uma conta não abre na linha de outra) | `sistema/contas/cofre.py:39` a `58` |
+| A chave fica fora do banco, numa variável de ambiente obrigatória | `sistema/orzy/configuracao.py:13`, `27`, `76` a `86` e `122` |
+| Renovar um de cada vez, com o código novo salvo antes de usar | `sistema/contas/acesso.py:65` a `105` |
+| O Mercado Livre recusou: o acesso sai na hora e as sessões da conta acabam | `sistema/contas/acesso.py:89` a `104`; `sistema/contas/sessoes.py:97` a `101` |
+| A conferência de todo dia renova quem não renovou nas últimas 20 horas | `sistema/contas/acesso.py:31` e `150` a `172`; `sistema/relatorios/limpezas.py:38` a `59` e `77` a `83` |
+| A conta sem acesso há 30 dias, e sem Conectar nesse tempo, sai com o histórico | `sistema/contas/acesso.py:30` e `175` a `190` |
+| "Desconectar e apagar tudo" | `sistema/contas/views.py:69` a `85`; `sistema/contas/acesso.py:108` a `147`; `painel-ml/ml_api.py:264` a `270` |
+| O histórico sai com a conta, pelo próprio banco, e um relatório que termina depois não traz a conta de volta | `sistema/relatorios/models.py:13` e `24`; `sistema/relatorios/historico.py:38` a `53` |
+| "Apagar meu histórico" apaga só os relatórios | `sistema/relatorios/historico.py:80` a `83`; `sistema/relatorios/views.py:123` a `131` |
+| "Sair" encerra só a sessão daquele navegador | `sistema/contas/views.py:45` a `48` |
+| A página "Sua conta" | `sistema/contas/views.py:51` a `66`; `sistema/contas/templates/contas/conta.html` |
 
 ## Fontes
 
 Consultadas em 15/10/2026.
 
 - [Termos para desenvolvedores do Mercado Livre](https://developers.mercadolibre.com.ar/en_us/mercado-libre-developer-terms-and-conditions)
+  (itens 2.2.4 e 14 relidos em 19/10/2026)
 - [Formulário do aplicativo (Global Selling)](https://global-selling.mercadolibre.com/devsite/create-application)
   e [registro do aplicativo](https://developers.mercadolivre.com.br/en_us/register-your-application)
 - [Programa de certificação (Developer Partner Program)](https://developers.mercadolibre.com.ar/en_us/developer-partner-program)

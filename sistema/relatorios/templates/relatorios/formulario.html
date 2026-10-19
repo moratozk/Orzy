@@ -1,0 +1,39 @@
+{% extends "sistema.html" %}
+{% block titulo %}Relatório{% endblock %}
+{% block conteudo %}
+      <div class="pn-cabeca">
+        <div class="pn-saudacao">
+          <h1>{% if apelido %}Olá, {{ apelido }}!{% else %}Olá!{% endif %}</h1>
+          <p>Gere um relatório dos seus anúncios ativos no Mercado Livre.</p>
+        </div>
+      </div>
+
+      {% if aviso %}<p class="si-aviso" role="alert"><svg class="ico" aria-hidden="true"><use href="#i-alerta"/></svg><span>{{ aviso }}</span></p>{% endif %}
+      {% if em_andamento %}<p class="si-aviso si-aviso-andando"><span class="pulso" aria-hidden="true"></span><span>Você tem um relatório sendo gerado. <a href="/relatorio/{{ em_andamento.id }}">Ver andamento</a></span></p>{% endif %}
+
+      <div class="si-comecar">
+        <form class="si-gerar" method="post" action="/relatorio/gerar">
+          {% csrf_token %}
+          <fieldset>
+            <legend>Período das visitas e vendas</legend>
+            <div class="pn-periodo si-opcoes">
+              {% for d in opcoes_dias %}<label><input type="radio" name="dias" value="{{ d }}"{% if forloop.first %} checked{% endif %}><span>{{ d }} dias</span></label>
+              {% endfor %}
+            </div>
+          </fieldset>
+          <p class="si-ajuda">O Orzy lê as visitas de cada anúncio, então um relatório com muitos anúncios leva alguns minutos. Se você sair da página, o relatório continua sendo gerado.</p>
+          <button class="kpi-acoes-botao si-botao" type="submit">Gerar relatório <svg class="ico" aria-hidden="true"><use href="#i-seta"/></svg></button>
+        </form>
+
+        {% if prontos %}
+        <section class="si-prontos" aria-labelledby="si-prontos-titulo">
+          <h2 id="si-prontos-titulo">Gerados desde que você entrou</h2>
+          <ul>
+            {% for r in prontos %}<li><a href="/relatorio/{{ r.id }}"><b>{{ r.dias }} dias</b><span>{{ r.quando }} · {{ r.anuncios }}</span><svg class="ico" aria-hidden="true"><use href="#i-direita"/></svg></a></li>
+            {% endfor %}
+          </ul>
+          <p>Ficam aqui até você sair. O <a href="/historico">Histórico</a> guarda todos por {{ meses_de_historico }} meses.</p>
+        </section>
+        {% endif %}
+      </div>
+{% endblock %}

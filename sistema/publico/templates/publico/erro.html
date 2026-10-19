@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Erro{% endblock %}
+{% block estilos %}<link rel="stylesheet" href="{% static 'orzy-site.css' %}">
+<link rel="stylesheet" href="{% static 'orzy-erro.css' %}">{% endblock %}
+{% block scripts %}<script src="{% static 'orzy-base.js' %}" defer></script>
+<script src="{% static 'orzy-erro.js' %}" defer></script>
+<script src="{% static 'orzy-iniciar.js' %}" defer></script>{% endblock %}
+{% block tela %}erro{% endblock %}
+{% block corpo %}
+{% comment %}A página de erro do visual novo: o título fica, a mensagem muda (publico/paginas.erro). O ponto do anel
+cai e fica no chão; o anel apaga.{% endcomment %}
+<section class="tela t-erro site" id="t-erro" data-tela="erro" aria-label="Página de erro">
+  <div class="er-pagina">
+    <div class="er-topo sc-dentro">
+      <a class="sc-logo" href="/" aria-label="Orzy, página inicial">
+        <svg viewBox="-6 -8 347.5 158" width="74" height="34" aria-hidden="true" focusable="false"><path d="M92.86,42.69A42,42 0 1,1 58.81,8.64" fill="none" stroke="currentColor" stroke-width="19" stroke-linecap="round"/><circle class="sc-anel-ponto" cx="81.2" cy="20.3" r="12.35" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"><path d="M126.5,90.5V40A30.5,30.5 0 0,1 157,9.5"/><path d="M185,9.5H236L185,90.5H236"/><path d="M263,9.5L294.5,90.5M326,9.5L278.17,132.5"/></g></svg>
+      </a>
+    </div>
+
+    <main class="er-centro sc-dentro">
+      <div class="er-cena" aria-hidden="true">
+        <svg class="er-desenho" viewBox="-14 -26 170 132" focusable="false">
+          <defs>
+            <radialGradient id="er-luz"><stop offset="0" stop-color="#c4f135" stop-opacity="0.55"/><stop offset="1" stop-color="#c4f135" stop-opacity="0"/></radialGradient>
+            <linearGradient id="er-chao" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffffff" stop-opacity="0"/><stop offset="0.25" stop-color="#ffffff" stop-opacity="0.16"/><stop offset="0.8" stop-color="#ffffff" stop-opacity="0.16"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
+          </defs>
+          <rect class="er-chao" x="-14" y="101" width="170" height="1"/>
+          <path class="er-arco" d="M92.86,42.69A42,42 0 1,1 58.81,8.64"/>
+          <circle class="er-vaga" cx="81.2" cy="20.3" r="12.35"/>
+          <g class="er-ponto-x">
+            <ellipse class="er-sombra" cx="81.2" cy="102.4" rx="13" ry="2.4"/>
+            <g class="er-ponto-y">
+              <circle class="er-brilho" cx="81.2" cy="20.3" r="27"/>
+              <circle class="er-bola" cx="81.2" cy="20.3" r="12.35"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <div class="er-texto">
+        {% if codigo %}<p class="sc-rotulo er-codigo">Erro {{ codigo }}</p>{% endif %}
+        <h1 class="er-titulo">Algo não deu certo</h1>
+        <p class="er-mensagem">{{ mensagem }}</p>
+        <div class="er-acoes">
+          <a class="sc-botao sc-botao-lima sc-botao-g" href="/">Voltar ao início<span class="sc-botao-seta" aria-hidden="true"><svg class="ico"><use href="#i-seta"/></svg></span></a>
+        </div>
+        <p class="er-ajuda">Se continuar acontecendo, escreva para <span class="er-email">{{ contato }}</span></p>
+      </div>
+    </main>
+
+    <footer class="er-rodape sc-dentro">
+      <p>O Orzy é um serviço independente e não tem vínculo com o Mercado Livre.</p>
+      <nav aria-label="Rodapé"><a href="/privacidade">Privacidade</a><a href="/termos">Termos</a></nav>
+    </footer>
+  </div>
+</section>
+{% endblock %}

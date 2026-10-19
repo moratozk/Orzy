@@ -10,4 +10,7 @@ relatorio_anuncios*.csv
 *.db
 *.db-journal
 
+# Arquivos de /static/ que o collectstatic do sistema junta (python manage.py collectstatic)
+sistema/static-pronto/
+
 __pycache__/

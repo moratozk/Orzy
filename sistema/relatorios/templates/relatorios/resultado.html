@@ -1,0 +1,160 @@
+{% extends "sistema.html" %}
+{% block titulo %}Relatório{% endblock %}
+{% block conteudo %}
+{% comment %}
+  O painel do visual novo (modelo-painel.html) com o que o relatório do beta tem. Sem o gráfico por dia (o relatório
+  não guarda visitas por dia) e sem fotos (o histórico não guarda e a CSP só deixa imagens do próprio site).
+  Os botões de período geram um relatório novo com aquele período; "Atualizar dados" gera de novo com o mesmo.
+{% endcomment %}
+      <div class="pn-cabeca">
+        <div class="pn-saudacao">
+          <h1>{% if apelido %}Olá, {{ apelido }}!{% else %}Seu relatório{% endif %}</h1>
+          <p>Relatório dos últimos <strong>{{ relatorio.dias }} dias</strong>{% if gerado_em %} · Dados buscados no Mercado Livre em {{ gerado_em }} (horário de Brasília){% endif %}</p>
+        </div>
+        <form class="pn-cabeca-acoes" method="post" action="/relatorio/gerar">
+          {% csrf_token %}
+          <div class="pn-periodo" role="group" aria-label="Gerar um relatório novo com o período">
+            {% for d in opcoes_dias %}<button type="submit" name="dias" value="{{ d }}"{% if d == relatorio.dias %} aria-current="true"{% endif %}>{{ d }} dias</button>
+            {% endfor %}
+          </div>
+          <button class="pn-novo" type="submit" name="dias" value="{{ relatorio.dias }}"><span class="pn-novo-texto">Atualizar dados</span><svg class="ico" aria-hidden="true"><use href="#i-atualizar"/></svg></button>
+        </form>
+      </div>
+
+      {% if relatorio.aviso %}<p class="si-aviso"><svg class="ico" aria-hidden="true"><use href="#i-alerta"/></svg><span>{{ relatorio.aviso }}</span></p>{% endif %}
+      {% if relatorio.mensagem %}<p class="si-aviso"><svg class="ico" aria-hidden="true"><use href="#i-alerta"/></svg><span>{{ relatorio.mensagem }}</span></p>{% endif %}
+      {% if ver_mudancas %}<a class="si-faixa" href="{{ ver_mudancas }}"><svg class="ico" aria-hidden="true"><use href="#i-relogio"/></svg><span>Ver o que mudou desde o relatório anterior de {{ relatorio.dias }} dias</span><svg class="ico si-faixa-seta" aria-hidden="true"><use href="#i-seta"/></svg></a>{% endif %}
+
+      {% if total %}
+      <div class="pn-kpis">
+        <article class="kpi">
+          <div class="kpi-topo">
+            <span class="kpi-icone"><svg class="ico" aria-hidden="true"><use href="#i-olho"/></svg></span>
+            <h2>Visitas</h2>
+          </div>
+          <p class="kpi-valor"><span class="num">{{ kpis.visitas }}</span> <small>em {{ relatorio.dias }} dias</small></p>
+          <p class="si-kpi-contexto">{{ kpis.por_dia }} por dia</p>
+        </article>
+        <article class="kpi">
+          <div class="kpi-topo">
+            <span class="kpi-icone"><svg class="ico" aria-hidden="true"><use href="#i-sacola"/></svg></span>
+            <h2>Vendas</h2>
+          </div>
+          <p class="kpi-valor"><span class="num">{{ kpis.vendas }}</span> <small>unidades</small></p>
+          <p class="si-kpi-contexto">Em pedidos pagos</p>
+        </article>
+        <article class="kpi">
+          <div class="kpi-topo">
+            <span class="kpi-icone"><svg class="ico" aria-hidden="true"><use href="#i-alvo"/></svg></span>
+            <h2>Conversão</h2>
+          </div>
+          <p class="kpi-valor"><span class="num">{{ kpis.conversao }}</span>
+            {% if kpis.conversao != "?" %}<span class="kpi-medidor{% if kpis.conversao_baixa %} si-ruim{% endif %}" title="O Orzy considera baixa a conversão abaixo de 1 venda a cada 100 visitas">{% if kpis.conversao_baixa %}abaixo{% else %}acima{% endif %} de {{ kpis.limite }} <i class="cheio"></i><i{% if not kpis.conversao_baixa %} class="cheio"{% endif %}></i><i></i></span>{% endif %}</p>
+          <p class="si-kpi-contexto">Vendas a cada 100 visitas</p>
+        </article>
+        <article class="kpi kpi-acoes">
+          <div class="kpi-acoes-texto">
+            <p class="kpi-acoes-numero"><span class="num">{{ kpis.mudancas }}</span> <small>{% if kpis.uma_mudanca %}mudança{% else %}mudanças{% endif %}</small></p>
+            <h2>{% if kpis.n_mudancas %}Sugeridas para {{ kpis.com_mudanca }}{% else %}Nenhuma mudança sugerida{% endif %}</h2>
+            {% if quando %}<p class="kpi-acoes-quando"><span class="pulso" aria-hidden="true"></span>Dados de {{ quando }}</p>{% endif %}
+          </div>
+          {% if prioridade %}<a class="kpi-acoes-botao" href="#prioridade">Ver o que mudar <svg class="ico" aria-hidden="true"><use href="#i-seta"/></svg></a>{% endif %}
+        </article>
+      </div>
+
+      <div class="pn-paineis si-empilhados">
+        <section class="pn-branco si-prioridade" id="prioridade" aria-labelledby="si-prioridade-titulo">
+          <div class="pn-branco-topo">
+            <h2 id="si-prioridade-titulo">Comece por estes</h2>
+          </div>
+          {% if pendencias %}
+          <ul class="pn-pendencias si-pendencias" aria-label="O que olhar primeiro">
+            {% for p in pendencias %}<li><a href="?situacao={{ p.valor|urlencode }}#todos"><span class="pn-pend-icone {{ p.classe }}"><svg class="ico" aria-hidden="true"><use href="#{{ p.icone }}"/></svg></span><span class="si-pend-texto"><span>{{ p.nome }}</span><b>{{ p.texto }}</b></span><svg class="ico pn-pend-seta" aria-hidden="true"><use href="#i-direita"/></svg></a></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          {% if prioridade %}
+          <ol class="si-cartoes">
+            {% for a in prioridade %}<li class="si-cartao">
+              <div class="si-cartao-topo">
+                <span class="si-cartao-n num" aria-hidden="true">{{ forloop.counter }}</span>
+                <div class="si-cartao-titulo">
+                  {% include "relatorios/titulo.html" %}
+                  <span class="an-id">{{ a.id }}</span>
+                </div>
+                {% include "relatorios/situacao.html" with s=a.situacao %}
+              </div>
+              <dl class="si-numeros">
+                <div><dt>Visitas</dt><dd class="num">{{ a.visitas }}</dd></div>
+                <div><dt>Vendas</dt><dd class="num">{{ a.vendas }}</dd></div>
+                <div><dt>Fotos</dt><dd class="num">{{ a.fotos }}</dd></div>
+                <div><dt>Ficha técnica</dt><dd>{{ a.ficha }}</dd></div>
+                <div><dt>Nota do ML</dt><dd>{{ a.qualidade }}</dd></div>
+              </dl>
+              {% if a.sugestoes %}
+              <ul class="si-sugestoes">
+                {% for s in a.sugestoes %}<li><span class="si-sugestao-topo"><b>{{ s.area }}</b>{% if s.prioridade %}<span class="si-peso si-peso-{{ s.peso }}">Prioridade {{ s.prioridade }}</span>{% endif %}</span>{{ s.texto }}</li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <p class="si-olhar">{{ a.o_que_olhar }}</p>
+              {% endif %}
+              {% if a.mais %}<p class="si-mais">Mais {{ a.mais }} na planilha (CSV).</p>{% endif %}
+            </li>
+            {% endfor %}
+          </ol>
+          {% else %}
+          <p class="pn-vazio">Nenhum anúncio com sugestão de mudança neste período.</p>
+          {% endif %}
+        </section>
+
+        <section class="pn-branco pn-anuncios si-anuncios" id="todos" aria-labelledby="si-todos-titulo">
+          <div class="pn-branco-topo">
+            <h2 id="si-todos-titulo">Todos os anúncios <span class="pn-contagem num">{{ total }}</span></h2>
+            <a class="si-csv" href="/relatorio/{{ relatorio.id }}/csv"><svg class="ico" aria-hidden="true"><use href="#i-doc"/></svg>Baixar planilha (CSV)</a>
+          </div>
+          {% include "relatorios/filtro.html" %}
+          {% if anuncios %}
+          <div class="pn-tabela">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Anúncio</th>
+                  <th scope="col" class="n">Preço</th>
+                  <th scope="col" class="n">Estoque</th>
+                  <th scope="col" class="n">Visitas</th>
+                  <th scope="col" class="n">Vendas</th>
+                  <th scope="col">Situação e prioridade</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for a in anuncios %}<tr>
+                  <td><div class="an"><div class="an-texto">{% include "relatorios/titulo.html" %}<span class="an-id">{{ a.id }}{% if a.mudancas %} · <span class="an-mudancas">{{ a.mudancas }}</span>{% endif %}</span></div></div></td>
+                  <td class="n">{% if a.preco != "?" %}<span class="moeda">R$</span>{% endif %}{{ a.preco }}</td>
+                  <td class="n">{{ a.estoque }}</td>
+                  <td class="n">{{ a.visitas }}</td>
+                  <td class="n{% if a.sem_vendas %} zero{% endif %}">{{ a.vendas }}</td>
+                  <td>{% include "relatorios/situacao.html" with s=a.situacao %}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <ul class="pn-cartoes" aria-label="Anúncios">
+            {% for a in anuncios %}<li>
+              {% include "relatorios/titulo.html" %}
+              {% include "relatorios/situacao.html" with s=a.situacao %}
+              <dl class="pn-cartao-numeros">
+                <div><dt>Preço</dt><dd>{% if a.preco != "?" %}R$ {% endif %}{{ a.preco }}</dd></div>
+                <div><dt>Estoque</dt><dd>{{ a.estoque }}</dd></div>
+                <div><dt>Visitas</dt><dd>{{ a.visitas }}</dd></div>
+                <div><dt>Vendas</dt><dd>{{ a.vendas }}</dd></div>
+              </dl>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </section>
+      </div>
+      {% endif %}
+{% endblock %}

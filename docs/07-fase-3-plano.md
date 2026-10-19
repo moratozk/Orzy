@@ -1,9 +1,12 @@
 # 07 · Fase 3: site no orzy.com.br (plano)
 
-**Atualizado em:** 18/10/2026
+**Atualizado em:** 19/10/2026
 **Desde 18/10/2026:** o site base deste plano está pronto e vira a base da fase 4. O lançamento (passos 2 a 5 abaixo)
 saiu da fase 3 e foi para as fases 9 e 10, com o sistema completo, e o beta fechado com 3 a 5 vendedores saiu (escolha
 do Nicolas: "Sem convidados"). Ver o [02-roadmap.md](02-roadmap.md).
+**Desde 19/10/2026:** o código do site está em `sistema/`, em Django ([sistema/LEIA-ME.md](../sistema/LEIA-ME.md)).
+O `web/`, o `testes/test_site.py` e o `testes/firestore_simulado.py` citados abaixo saíram do repositório no
+passo 1 da fase 4.
 **Situação:** construindo o site, com o código em rascunho (PR aberto, sem merge). Nada foi contratado, publicado nem
 mexido no app do Mercado Livre. Decisão do Nicolas (15/10/2026): o site só vai ao ar quando estiver quase pronto
 ("só vai pro ar quando estiver 95% concluído"), e não num endereço temporário. As decisões dele estão no fim.

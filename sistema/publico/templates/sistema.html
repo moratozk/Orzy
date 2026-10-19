@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+{% block cor %}#0d1321{% endblock %}
+{% block fonte_titulos %}{% endblock %}
+{% block estilos %}<link rel="stylesheet" href="{% static 'orzy-painel.css' %}">
+{% block estilos_da_tela %}{% endblock %}<link rel="stylesheet" href="{% static 'orzy-sistema.css' %}">{% endblock %}
+{% block tela %}painel{% endblock %}
+{% block corpo %}
+{% comment %}
+  O topo e as abas do sistema (relatório, histórico e contagens), do pacote do visual novo
+  (orzy/marca/visual-final/paginas/modelo-painel.html). O beta tem só Relatório e Histórico; avisos, ajustes e a busca
+  do topo chegam com as fases seguintes. O rodapé não está no modelo: leva aos textos legais de todas as telas, como no
+  site de antes.
+{% endcomment %}
+<section class="tela {% block classe_da_tela %}t-painel{% endblock %}">
+  <div class="app">
+    <header class="app-topo">
+      <a class="app-logo" href="/relatorio" aria-label="Orzy, relatório">
+        <svg viewBox="-6 -8 347.5 158" width="66" height="30" aria-hidden="true" focusable="false"><path d="M92.86,42.69A42,42 0 1,1 58.81,8.64" fill="none" stroke="currentColor" stroke-width="19" stroke-linecap="round"/><circle cx="81.2" cy="20.3" r="12.35" fill="#C4F135"/><g fill="none" stroke="currentColor" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"><path d="M126.5,90.5V40A30.5,30.5 0 0,1 157,9.5"/><path d="M185,9.5H236L185,90.5H236"/><path d="M263,9.5L294.5,90.5M326,9.5L278.17,132.5"/></g></svg>
+      </a>
+      <nav class="app-nav" aria-label="Seções do sistema">
+        <a{% if aba == "relatorio" %} class="ativo"{% endif %} href="/relatorio"{% if caminho == "/relatorio" %} aria-current="page"{% endif %}><svg class="ico" aria-hidden="true"><use href="#i-doc"/></svg>Relatório</a>
+        <a{% if aba == "historico" %} class="ativo"{% endif %} href="/historico"{% if caminho == "/historico" %} aria-current="page"{% endif %}><svg class="ico" aria-hidden="true"><use href="#i-relogio"/></svg>Histórico</a>
+      </nav>
+      <div class="app-ferramentas">
+        {% if conta.iniciais %}<span class="app-avatar si-avatar" aria-hidden="true" title="Conectado como {{ conta.apelido }}">{{ conta.iniciais }}</span>{% endif %}
+        <form class="si-sair-form" method="post" action="/sair">{% csrf_token %}<button class="si-sair" type="submit">Sair</button></form>
+      </div>
+    </header>
+
+    <main id="conteudo">
+{% block conteudo %}{% endblock %}
+    </main>
+
+    <footer class="si-rodape">
+      <p>O Orzy é um serviço independente e não tem vínculo com o Mercado Livre.</p>
+      <nav aria-label="Rodapé"><a href="/privacidade">Privacidade</a><a href="/termos">Termos</a><a href="mailto:{{ contato }}">{{ contato }}</a></nav>
+    </footer>
+  </div>
+
+  <nav class="app-abas si-abas" aria-label="Seções do sistema">
+    <a{% if aba == "relatorio" %} class="ativo"{% endif %} href="/relatorio"{% if caminho == "/relatorio" %} aria-current="page"{% endif %}><svg class="ico" aria-hidden="true"><use href="#i-doc"/></svg>Relatório</a>
+    <a{% if aba == "historico" %} class="ativo"{% endif %} href="/historico"{% if caminho == "/historico" %} aria-current="page"{% endif %}><svg class="ico" aria-hidden="true"><use href="#i-relogio"/></svg>Histórico</a>
+  </nav>
+</section>
+{% endblock %}

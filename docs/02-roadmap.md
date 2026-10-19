@@ -60,7 +60,8 @@ Ordem decidida pelo Nicolas em 15/10/2026: primeiro o **site base**, funcionando
 realmente bonito, com a identidade visual (logo, cores e letras) da thread "Identidade visual e logo". O visual
 de agora, inclusive o da página inicial, é só uma base, nada perto do modelo final: não vale gastar tempo polindo.
 
-- [x] Código do site em rascunho (`web/`): login, relatório, histórico e testes com o Mercado Livre simulado
+- [x] Código do site em rascunho (`web/`): login, relatório, histórico e testes com o Mercado Livre simulado. Em
+  19/10/2026 ele passou para Django em `sistema/` (fase 4, passo 1) e o `web/` saiu do repositório
 - [x] Página inicial base (primeiro protótipo, aprovado em 15/10/2026; não é o visual final)
 - [x] Política de Privacidade e Termos de Uso em rascunho (`docs/legal/`), já mostrados no site
 - [x] Recomendação de hospedagem com custos em reais
@@ -102,10 +103,12 @@ Pedido do Nicolas em 16/10/2026: ao criar a conta, um botão leva ao Mercado Liv
 tudo para o sistema. Plano em 5 passos aprovado por ele em 18/10/2026
 (`/mnt/project-files/orzy/plano/nova-ordem-sistema-completo.md`, seção 2).
 
-1. **Base nova:** o PR #5 entra no main e o site passa para Django com PostgreSQL (num plano grátis até o
-   lançamento), levando o login, os relatórios, as regras e o histórico, já com o visual novo da thread "Identidade
-   visual e logo" (`/mnt/project-files/orzy/marca/visual-final/`). Os testes de hoje passam para o sistema novo. É
-   quando o Orzy passa a guardar os dados das contas.
+1. **Base nova (pronta em 19/10/2026, PR #12):** o PR #5 entrou no main e o site passou para Django com PostgreSQL
+   (num plano grátis até o lançamento) em `sistema/`, levando o login, os relatórios, as regras e o histórico, já
+   com o visual novo da thread "Identidade visual e logo" (`/mnt/project-files/orzy/marca/visual-final/`). Os
+   testes passaram para o sistema novo, e o site antigo (`web/`) saiu. O banco guarda o mesmo que o site base
+   guardava (o histórico e as contagens): os dados das contas começam a ser guardados no passo 2. O que falta para
+   o endereço de teste está em `sistema/LEIA-ME.md` ("Antes de publicar").
 2. **Conta e acesso guardado:** a conta é criada no clique em "Conectar com Mercado Livre", sem senha. O refresh token
    fica guardado com criptografia e a chave fora do banco. Ele é de uso único: só um processo por vendedor renova de
    cada vez, e o novo é salvo antes de qualquer outra coisa. Desconectar apaga tudo, e o Orzy também apaga quando o

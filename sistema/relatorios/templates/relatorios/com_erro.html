@@ -1,0 +1,10 @@
+{% extends "sistema.html" %}
+{% block titulo %}Relatório{% endblock %}
+{% block conteudo %}
+      <div class="si-falhou">
+        <span class="si-falhou-icone"><svg class="ico" aria-hidden="true"><use href="#i-alerta"/></svg></span>
+        <h1>Não deu para gerar o relatório</h1>
+        {% if relatorio.mensagem %}<p>{{ relatorio.mensagem }}</p>{% endif %}
+        <a class="kpi-acoes-botao" href="/relatorio">Tentar de novo <svg class="ico" aria-hidden="true"><use href="#i-seta"/></svg></a>
+      </div>
+{% endblock %}

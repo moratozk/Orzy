@@ -1,0 +1,25 @@
+{% extends "sistema.html" %}
+{% load static %}
+{% block titulo %}Histórico{% endblock %}
+{% block fonte_titulos %}<link rel="preload" href="{% static 'unbounded.woff2' %}" as="font" type="font/woff2" crossorigin>{% endblock %}
+{% block estilos_da_tela %}<link rel="stylesheet" href="{% static 'orzy-historico.css' %}">
+{% endblock %}
+{% block tela %}historico{% endblock %}
+{% block classe_da_tela %}t-historico{% endblock %}
+{% block conteudo %}
+{% comment %}O histórico de quem ainda não tem relatório guardado. Com algum, /historico abre no mais recente.{% endcomment %}
+      <div class="hi-cabeca">
+        <div>
+          <h1>Histórico</h1>
+          <p>Os relatórios que você gerar ficam guardados aqui.</p>
+        </div>
+        <p class="hi-guarda"><svg class="ico" aria-hidden="true"><use href="#i-cadeado"/></svg>Guardados por {{ meses_de_historico }} meses</p>
+      </div>
+
+      <div class="hi-vazio">
+        <svg class="ico" aria-hidden="true"><use href="#i-relogio"/></svg>
+        <h2>Você ainda não tem relatórios guardados</h2>
+        <p>Cada relatório que você gerar fica aqui por {{ meses_de_historico }} meses, para comparar um com o outro.</p>
+        <a class="kpi-acoes-botao si-vazio-botao" href="/relatorio">Gerar um relatório <svg class="ico" aria-hidden="true"><use href="#i-seta"/></svg></a>
+      </div>
+{% endblock %}

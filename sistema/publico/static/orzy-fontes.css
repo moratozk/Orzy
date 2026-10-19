@@ -1,0 +1,25 @@
+/* Orzy, visual novo. Gerado de orzy/marca/visual-novo/fonte/pacote.py em 2026-10-18 (prévia versão 7). */
+/* Fontes do visual novo, servidas pelo próprio site (a CSP não deixa buscar no Google Fonts).
+   Geist e Geist Mono são os arquivos que o site já tem; Unbounded faz os títulos e os números grandes.
+   As três são livres (SIL Open Font License 1.1): OFL-Geist.txt e OFL-Unbounded.txt. */
+@font-face {
+  font-family: "Geist";
+  src: url("geist.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("geist-mono.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Unbounded";
+  src: url("unbounded.woff2") format("woff2");
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+}

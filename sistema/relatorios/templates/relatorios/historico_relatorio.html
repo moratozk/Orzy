@@ -1,0 +1,110 @@
+{% extends "sistema.html" %}
+{% load static %}
+{% block titulo %}Histórico{% endblock %}
+{% block fonte_titulos %}<link rel="preload" href="{% static 'unbounded.woff2' %}" as="font" type="font/woff2" crossorigin>{% endblock %}
+{% block estilos_da_tela %}<link rel="stylesheet" href="{% static 'orzy-historico.css' %}">
+{% endblock %}
+{% block tela %}historico{% endblock %}
+{% block classe_da_tela %}t-historico{% endblock %}
+{% block conteudo %}
+{% comment %}
+  Um relatório guardado (modelo-historico.html). Compara só com o relatório anterior do mesmo período
+  (relatorios/comparacao.py) e diz o que mudou, nunca o porquê.
+{% endcomment %}
+      <div class="hi-cabeca">
+        <div>
+          <h1>Histórico</h1>
+          <p>{{ quantos }}. Abra cada um para ver como os anúncios estavam naquele dia.</p>
+        </div>
+        <p class="hi-guarda"><svg class="ico" aria-hidden="true"><use href="#i-cadeado"/></svg>Guardados por {{ meses_de_historico }} meses</p>
+      </div>
+
+{% include "relatorios/linha_do_tempo.html" %}
+
+      <div class="hi-escolhido">
+        <div class="hi-escolhido-data">
+          <p class="hi-rotulo">Relatório de</p>
+          <p class="hi-grande"><b>{{ dia }}</b><span>{{ ano }}</span></p>
+          <p class="hi-meta">{{ meta }}</p>
+          <p class="hi-fixo"><svg class="ico" aria-hidden="true"><use href="#i-cadeado"/></svg>Mostra como os anúncios estavam nesse dia: não é atualizado depois.</p>
+        </div>
+        <div class="hi-distribuicao">
+          <p class="hi-rotulo">Situações neste relatório</p>
+          <svg class="hi-dist-barra" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true" focusable="false">{% for f in barra %}<rect class="b-{{ f.classe }}" x="{{ f.x }}" y="0" width="{{ f.largura }}" height="10" rx="1.5"/>{% endfor %}</svg>
+          <ul class="hi-dist-legenda">{% for s in legenda %}<li class="s-{{ s.classe }}{% if not s.quantos %} zero{% endif %}"><i aria-hidden="true"></i><span>{{ s.nome }}</span><b class="num">{{ s.quantos }}</b></li>{% endfor %}</ul>
+        </div>
+      </div>
+
+      <div class="hi-corpo">
+        <section class="pn-branco hi-mudou" id="mudancas" aria-labelledby="hi-mudou-titulo">
+          {% if mudou %}
+          <div class="pn-branco-topo">
+            <h2 id="hi-mudou-titulo">O que mudou desde <a class="hi-ir" href="/historico/{{ mudou.anterior_id }}">{{ mudou.anterior_em }}</a></h2>
+          </div>
+          <p class="hi-honesto">Comparado com o relatório anterior do mesmo período (últimos {{ dados.dias }} dias). Mostra o que mudou, não o porquê: visitas e vendas mudam por muitos motivos, como época do ano, preço e concorrência.</p>
+          <div class="hi-somas">
+            <div class="hi-soma"><p>Visitas, somando todos os anúncios</p><p class="hi-soma-valor">{% include "relatorios/antes_agora.html" with n=mudou.visitas completo=True %}</p></div>
+            <div class="hi-soma"><p>Vendas, somando todos os anúncios</p><p class="hi-soma-valor">{% include "relatorios/antes_agora.html" with n=mudou.vendas completo=True %}</p></div>
+          </div>
+          <ul class="hi-contas">{% for quantos, nome in mudou.contas %}<li{% if not quantos %} class="zero"{% endif %}><b class="num">{{ quantos }}</b><span>{{ nome }}</span></li>{% endfor %}</ul>
+          {% if mudou.mudaram %}
+          <h3 class="hi-sub">Mudaram de situação</h3>
+          <ul class="hi-mudancas">
+            {% for a in mudou.mudaram %}<li>
+              <div class="hi-mud-texto"><b>{{ a.titulo }}</b>
+                <span class="hi-mud-sit"><span class="sit s-{{ a.antes.classe }}"><span class="chip">{{ a.antes.nome }}</span></span><svg class="ico hi-seta" aria-hidden="true"><use href="#i-seta"/></svg><span class="so-leitor">para</span><span class="sit s-{{ a.agora.classe }}"><span class="chip">{{ a.agora.nome }}</span></span></span></div>
+              <dl class="hi-mud-num">
+                <div><dt>Visitas</dt><dd>{% include "relatorios/antes_agora.html" with n=a.visitas %}</dd></div>
+                <div><dt>Vendas</dt><dd>{% include "relatorios/antes_agora.html" with n=a.vendas %}</dd></div>
+              </dl>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          {% if mudou.novos %}
+          <h3 class="hi-sub">Novos neste relatório</h3>
+          <ul class="hi-simples">
+            {% for a in mudou.novos %}<li><b title="{{ a.titulo }}">{{ a.titulo }}</b><span class="sit s-{{ a.situacao.classe }}"><span class="chip">{{ a.situacao.nome }}</span></span></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          {% if mudou.sairam %}
+          <h3 class="hi-sub">Não estão mais no relatório</h3>
+          <p class="hi-ajuda">Estavam no relatório anterior e não estão neste. O relatório só lê anúncios ativos.</p>
+          <ul class="hi-simples">
+            {% for titulo in mudou.sairam %}<li class="saiu"><b title="{{ titulo }}">{{ titulo }}</b></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          {% else %}
+          <div class="pn-branco-topo">
+            <h2 id="hi-mudou-titulo">O que mudou</h2>
+          </div>
+          <div class="hi-sem-comparacao">
+            <svg class="ico" aria-hidden="true"><use href="#i-relogio"/></svg>
+            <p>Ainda não há um relatório anterior de {{ dados.dias }} dias para comparar. Gere outro com o mesmo período daqui a alguns dias para ver o que mudou em cada anúncio.</p>
+          </div>
+          {% endif %}
+        </section>
+
+        <section class="pn-branco hi-anuncios" id="todos" aria-labelledby="hi-anuncios-titulo">
+          <div class="pn-branco-topo">
+            <h2 id="hi-anuncios-titulo">Anúncios neste relatório <span class="pn-contagem num">{{ dados.total }}</span></h2>
+          </div>
+{% include "relatorios/filtro.html" %}
+          {% if anuncios %}
+          <ul class="hi-lista">
+            {% for a in anuncios %}<li class="hi-an">
+              <span class="hi-an-texto"><b title="{{ a.titulo }}">{{ a.titulo }}</b>{% if a.novo %}<small class="novo">Novo neste relatório</small>{% elif a.titulo_antes %}<small>Título antes: {{ a.titulo_antes }}</small>{% endif %}</span>
+              <span class="hi-an-sit"><span class="sit s-{{ a.situacao.classe }}"><span class="chip">{{ a.situacao.nome }}</span></span>{% if a.situacao_antes %}<small>antes: {{ a.situacao_antes }}</small>{% endif %}</span>
+              <span class="hi-an-num si-vis"><span class="hi-an-valor">{% if a.visitas.diferenca %}<em class="{{ a.visitas.diferenca.classe }}">{{ a.visitas.diferenca.texto }}</em>{% endif %}<b class="num">{{ a.visitas.agora }}</b></span><small>visitas</small></span>
+              <span class="hi-an-num si-ven"><span class="hi-an-valor">{% if a.vendas.diferenca %}<em class="{{ a.vendas.diferenca.classe }}">{{ a.vendas.diferenca.texto }}</em>{% endif %}<b class="num">{{ a.vendas.agora }}</b></span><small>vendas</small></span>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </section>
+      </div>
+
+{% include "relatorios/apagar.html" %}
+{% endblock %}

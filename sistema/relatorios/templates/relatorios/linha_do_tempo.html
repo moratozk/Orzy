@@ -1,0 +1,14 @@
+{% comment %}A linha do tempo do histórico: um cartão por relatório guardado, do mais novo para o mais antigo.{% endcomment %}
+      <div class="hi-linha">
+        <ol class="hi-relatorios" aria-label="Relatórios guardados">
+          {% for c in cartoes %}<li>
+            <a class="hi-relatorio" href="/historico/{{ c.id }}" aria-label="{{ c.rotulo }}"{% if c.atual %} aria-current="true"{% endif %}>
+              <span class="hi-rel-quando"><b>{{ c.dia }}</b><span>{{ c.ano_hora }}</span></span>
+              <span class="hi-rel-meta">{{ c.meta }}</span>
+              <svg class="hi-rel-barra" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true" focusable="false">{% for f in c.barra %}<rect class="b-{{ f.classe }}" x="{{ f.x }}" y="0" width="{{ f.largura }}" height="10" rx="1.5"/>{% endfor %}</svg>
+              {% if c.mais_recente %}<span class="hi-rel-tag">Mais recente</span>{% endif %}
+            </a>
+          </li>
+          {% endfor %}
+        </ol>
+      </div>

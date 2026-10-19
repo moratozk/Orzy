@@ -1,0 +1,1 @@
+<span class="sit s-{{ s.classe }}"><span class="chip">{{ s.nome }}</span>{% if s.barras %}<span class="medidor" role="img" aria-label="Prioridade {{ s.nome_prioridade }}">{% for cheio in s.barras %}<i{% if cheio %} class="cheio"{% endif %}></i>{% endfor %}</span>{% endif %}</span>

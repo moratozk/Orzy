@@ -1,5 +1,6 @@
-# Roda os testes do painel (contra o Mercado Livre simulado) a cada PR e a cada mudança na main.
-# Não usa conta do Mercado Livre nem segredo nenhum.
+# Roda os testes a cada PR e a cada mudança na main, contra o Mercado Livre simulado: os do programa do PC
+# (painel-ml/) no Windows e no Linux, e os do sistema em Django (sistema/) com um PostgreSQL só para o teste.
+# Não usa conta do Mercado Livre nem segredo nenhum: o Client Secret e a senha do banco abaixo são de mentira.
 name: Testes
 
 on:
@@ -29,3 +30,41 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Rodar os testes
         run: python -m unittest discover -s testes -v
+
+  sistema:
+    name: Sistema (Django e PostgreSQL) · Python 3.13
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: orzy
+          POSTGRES_PASSWORD: orzy-teste
+          POSTGRES_DB: orzy
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U orzy"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ORZY_ML_CLIENT_ID: "1234567890"
+      ORZY_ML_CLIENT_SECRET: segredo-de-teste
+      ORZY_URL_BASE: https://orzy.test
+      ORZY_BANCO_URL: postgresql://orzy:orzy-teste@127.0.0.1:5432/orzy
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Instalar o Django e o resto do requirements.txt
+        run: python -m pip install -r requirements.txt
+      - name: Conferir as migrações
+        working-directory: sistema
+        run: python manage.py makemigrations --check --dry-run
+      - name: Rodar os testes
+        working-directory: sistema
+        run: python manage.py test testes --noinput -v 2

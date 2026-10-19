@@ -181,7 +181,8 @@ Termos de Uso:
 
 - **4:** a conta no Orzy e o acesso guardado e renovado; a sessão de 8 horas; o que acontece quando o Mercado Livre
   recusa o acesso; o **Desconectar e apagar tudo**.
-- **11 e 12:** para parar de usar, ou se não concordar com uma versão nova, o **Desconectar e apagar tudo**.
+- **11 e 12:** para parar de usar, o **Desconectar e apagar tudo**; para quem não concordar com uma versão nova, o
+  mesmo botão antes de ela valer, ou o pedido por e-mail.
 
 ## Decisões desta thread (19/10/2026)
 
@@ -216,7 +217,7 @@ Lido em 15/10/2026 nos [termos para desenvolvedores](https://developers.mercadol
 | 6 | Cumprir a LGPD; usar os dados só para a finalidade; o usuário do Mercado Livre que autoriza é o controlador e o desenvolvedor segue as instruções dele; subcontratados com a mesma segurança; avisar o Mercado Livre se uma autoridade pedir dados | Política itens 2.3, 3 e 4. Avisar o Mercado Livre fica com o responsável, se acontecer |
 | 10 | Medidas de segurança para dados pessoais (nomes, e-mails), credenciais e apelidos | Política item 7; o acesso guardado vai cifrado, com a chave fora do banco |
 | 2.2.1.3 | Cópias intermediárias só as necessárias, apagadas de vez quando não servem mais | Token de acesso só na memória; código de renovação só enquanto a conta está conectada, cifrado; cadastro e compradores descartados na hora |
-| 2.2.4 | Revogar o acesso do aplicativo aos dados de quem avisou o desenvolvedor que não vai mais usar; não usar "mercado", "libre", "livre", "payment", "shipments" nem "credit" no nome ou no visual do aplicativo | **Desconectar e apagar tudo** apaga a conta, o acesso e o histórico e tira a permissão no Mercado Livre; por e-mail, o responsável faz o mesmo (ver "Antes de abrir ao público"); o nome Orzy está fora da lista |
+| 2.2.4 | Revogar o acesso do aplicativo aos dados de quem avisou o desenvolvedor que não vai mais usar; não usar "mercado", "libre", "livre", "payment", "shipments" nem "credit" no nome ou no visual do aplicativo | **Desconectar e apagar tudo** apaga a conta, o acesso e o histórico e pede ao Mercado Livre para tirar a permissão; por e-mail, o responsável faz o mesmo (ver "Antes de abrir ao público"); o nome Orzy está fora da lista |
 | 4.1 | Deixar sempre claro que o aplicativo não pertence ao Mercado Livre; marcas do Mercado Livre só conforme o manual de marcas deles | Termos item 2 e rodapé do site |
 | 5.2 e 5.3 | Informação não pública do usuário só com autorização dele; conteúdo atualizado pelo menos a cada 24 horas; o aplicativo informa a frequência de atualização | Termos item 6 e site item 4 acima |
 | 2.2.2 | Client Secret em sigilo; avisar o Mercado Livre se houver uso indevido | Secret só no ambiente do servidor |
@@ -266,8 +267,8 @@ comunicar incidentes (art. 14). Os textos prometem o prazo normal de 15 dias, qu
 - Contrato de dados (LGPD) do banco grátis, antes de entrar dado de outra pessoa: a thread de hospedagem escolhe o
   banco no fim da fase 4.
 - **Pedido para apagar tudo por e-mail:** `acesso.desconectar(número da conta)` faz o mesmo que o botão, sem precisar
-  de sessão, e também tira a permissão no Mercado Livre (`sistema/contas/acesso.py:108`). A thread do site pode
-  deixar isso num comando pronto antes do lançamento.
+  de sessão, e também pede ao Mercado Livre para tirar a permissão (`sistema/contas/acesso.py:108`). A thread do site
+  pode deixar isso num comando pronto antes do lançamento.
 - **E-mail de contato:** orzy.suporte@gmail.com, criado pelo Nicolas em 15/10/2026. É um Gmail comum: segue os termos de
   consumidor do Google, sem contrato de tratamento de dados nem as cláusulas-padrão da ANPD, e as mensagens podem ficar
   em servidores fora do Brasil (a Política diz isso nos itens 4 e 5). O Google diz que pode pôr essas cláusulas nos

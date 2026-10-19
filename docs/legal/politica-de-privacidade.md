@@ -20,7 +20,7 @@ de Proteção de Dados Pessoais (LGPD, Lei nº 13.709/2018).
 - O Orzy guarda um **histórico** dos seus relatórios (número e título de cada anúncio, visitas, vendas e situação) por
   até 12 meses e mostra o que mudou de um relatório para o outro. Você apaga o histórico quando quiser, com um clique.
 - Na página **Sua conta**, **Desconectar e apagar tudo** apaga a sua conta no Orzy, o acesso guardado e o histórico, e
-  tira a permissão do Orzy no Mercado Livre.
+  pede ao Mercado Livre para tirar a permissão do Orzy.
 - O Orzy **não guarda dados dos seus compradores** nem os dados do seu cadastro no Mercado Livre (nome, e-mail,
   CPF ou CNPJ, endereço, telefone).
 - Para acompanhar a fase de testes, o Orzy conta quantos logins e relatórios o site tem por dia, **só em números**, sem

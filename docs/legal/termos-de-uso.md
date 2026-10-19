@@ -58,7 +58,7 @@ terminar.
   de aceitar o acesso (porque você tirou a permissão ou trocou a senha de lá), o Orzy apaga o acesso guardado e, se
   você não conectar de novo em 30 dias, apaga também a sua conta no Orzy e o histórico.
 - Na página **Sua conta**, **Desconectar e apagar tudo** apaga na hora a sua conta no Orzy, o acesso guardado e o
-  histórico, e tira a permissão do Orzy no Mercado Livre.
+  histórico, e pede ao Mercado Livre para tirar a permissão do Orzy.
 
 ## 5. Preço
 
@@ -114,8 +114,8 @@ Os dados dos seus anúncios continuam sendo seus. O que o Orzy usa, guarda e apa
 ## 11. Como encerrar
 
 - Você pode parar de usar o Orzy quando quiser: na página **Sua conta**, **Desconectar e apagar tudo** apaga a sua
-  conta no Orzy, o acesso guardado e o histórico, e tira a permissão do Orzy no Mercado Livre. **Sair** só encerra a
-  sessão naquele navegador.
+  conta no Orzy, o acesso guardado e o histórico, e pede ao Mercado Livre para tirar a permissão do Orzy. **Sair** só
+  encerra a sessão naquele navegador.
 - O Orzy pode suspender ou bloquear o acesso de quem descumprir estes termos, os termos do Mercado Livre ou a lei, ou
   colocar em risco a segurança do site ou de outros usuários. Sempre que possível, o Orzy explica o motivo.
 
@@ -123,7 +123,8 @@ Os dados dos seus anúncios continuam sendo seus. O que o Orzy usa, guarda e apa
 
 O Orzy pode mudar estes termos. A versão nova é publicada no site pelo menos 10 dias antes de valer, com a data no alto
 desta página. Como você aceita os termos toda vez que conecta, a versão nova vale a partir da primeira conexão depois
-dessa data. Se não concordar, pare de usar o Orzy e use **Desconectar e apagar tudo**, na página **Sua conta**.
+dessa data. Se não concordar, use **Desconectar e apagar tudo**, na página **Sua conta**, antes de a versão nova valer,
+ou peça por e-mail para apagar a sua conta.
 
 ## 13. Lei aplicável
 

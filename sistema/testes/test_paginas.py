@@ -102,6 +102,9 @@ class PaginasTests(SistemaBase):
         self.assertIn('<a href="/privacidade">Política de Privacidade</a>', texto)
         self.assertIn("Até 300 anúncios", texto)
         self.assertIn("30, 60, 90 ou 150 dias", texto)
+        # Quem apaga tudo é o "Desconectar e apagar tudo"; o "Apagar meu histórico" apaga só os relatórios.
+        self.assertIn("Histórico guardado por até 12 meses. Na página Sua conta, “Desconectar e apagar tudo” apaga "
+                      "tudo na hora.", texto)
 
     def test_inicio_com_login_leva_ao_relatorio(self):
         self.entrar()

@@ -8,12 +8,11 @@ Não é parecer jurídico: antes de abrir o site ao público, o ideal é um advo
 | [politica-de-privacidade.md](politica-de-privacidade.md) | Quais dados o site usa, para que, por quanto tempo e os direitos do vendedor (LGPD) |
 | [termos-de-uso.md](termos-de-uso.md) | As regras de uso do site: o que ele faz, o que não faz, responsabilidades e lei aplicável |
 
-Os textos foram escritos para o site base do PR #5 (commit `9c3bfdc`). Na fase 4, o site passou para `sistema/`, em
-Django com PostgreSQL (PR #12), sem mudar o que os textos prometem. O passo 2 da fase 4 (PR #13, main em `909617d`,
-conferido em 19/10/2026) guarda a conta e o acesso ao Mercado Livre, cifrado, e algumas frases ficaram velhas: a lista
-está em "Frases que o passo 2 deixou velhas", abaixo. O texto novo é escrito num rascunho desta thread e vai ao Nicolas
-numa revisão só, junto com o do passo 3 (a importação completa). Até a Política mudar, ninguém além do Nicolas usa o
-sistema. Se o código mudar nos pontos da tabela "De onde vem cada frase", os textos mudam junto.
+Os textos descrevem o sistema da fase 4 até o passo 2 (`sistema/`, main em `909617d`, conferido em 19/10/2026): a
+conta e o acesso ao Mercado Livre guardado, cifrado. O que mudou nos textos está em "O que o passo 2 mudou nos
+textos", abaixo. Este rascunho espera o passo 3 (a importação completa), que muda os textos de novo, e vai ao Nicolas
+numa revisão só. Até a Política mudar no main, ninguém além do Nicolas usa o sistema. Se o código mudar nos pontos da
+tabela "De onde vem cada frase", os textos mudam junto.
 
 Para achar o que falta, procure por `[PREENCHER` (só o Nicolas sabe) e `[CONFIRMAR` (depende de outra frente).
 
@@ -152,48 +151,47 @@ Regras que continuam valendo:
 - `ORZY_HORAS_SESSAO` muda o prazo da sessão e do cookie (padrão: 8 horas). Mais de 8 só depois de mudar a Política
   (itens 2.4 e 6), que promete 8.
 - O prazo de 30 dias depois de o acesso parar de valer (`DIAS_SEM_ACESSO`, `sistema/contas/acesso.py:30`) aparece na
-  página Sua conta e vai aparecer na Política e nos Termos. Se o número mudar, os textos mudam junto.
+  página Sua conta, na Política (itens 3, 6 e 8) e nos Termos (item 4). Se o número mudar, os textos mudam junto.
 - Se o responsável virar empresa (CNPJ): guardar data, hora e IP de cada acesso por 6 meses, em sigilo (Marco Civil
   da Internet, art. 15). Hoje o site não guarda IP.
 
-## Frases que o passo 2 deixou velhas
+## O que o passo 2 mudou nos textos
 
-O rascunho desta thread troca estas frases. Números de linha do main em `909617d`.
+Para a revisão do Nicolas e do advogado. Antes, o Orzy não guardava o acesso: ele ficava só na memória, durante a
+sessão.
 
-Política de Privacidade (`politica-de-privacidade.md`):
+Política de Privacidade:
 
-- linhas 16 e 17 (Resumo): "Ele não altera nada na sua conta". O **Desconectar e apagar tudo** pede ao Mercado Livre
-  para tirar a permissão do próprio Orzy;
-- linhas 18 e 19 (Resumo): o acesso "só na memória do servidor" e "o Orzy não guarda o código que renovaria esse
-  acesso";
-- linha 21 (Resumo): "Você apaga tudo quando quiser". **Apagar meu histórico** apaga só os relatórios;
-- linhas 47, 52 e 53 (item 2.1): o código de renovação "que o Orzy descarta assim que recebe, sem guardar"; faltam a
-  conta e para que ela serve;
-- linhas 121 e 122 (item 4): a hospedagem guarda também a conta e o acesso cifrado, e o banco pode ser de outra
-  empresa;
-- linhas 142, 143 e 145 (item 6): "Código de renovação: não é guardado" e "Número do usuário e apelido: na sessão";
-  faltam a conta e o código cifrado, com os prazos, e o histórico sai também com a conta;
-- linhas 158 e 159 (item 7): o acesso "só na memória do servidor, durante a sessão"; falta a cifra, com a chave fora
-  do banco;
-- linhas 184 a 190 (item 8): falta o **Desconectar e apagar tudo**; **Sair** agora encerra só a sessão; depois de
-  tirar a permissão, a conta e o histórico saem em 30 dias, não em 12 meses.
+- **Resumo:** o acesso guardado cifrado e renovado sozinho; o **Desconectar e apagar tudo**; o Orzy não altera nada na
+  conta, a não ser tirar a própria permissão quando a pessoa pede.
+- **2.1:** a conta no Orzy, criada no primeiro **Conectar**; o código de renovação guardado cifrado; a renovação no
+  meio do uso e mais ou menos uma vez por dia, que não lê os dados.
+- **2.4:** o registro do servidor não anota o IP.
+- **3:** guardar e renovar o acesso e manter a conta por 30 dias quando o Mercado Livre recusa o acesso, como
+  execução do contrato.
+- **4 e 5:** a hospedagem do site e o banco de dados em linhas separadas, cada um com o seu país.
+- **6:** os prazos do código de renovação e da conta; o histórico sai junto com a conta; as cópias de segurança são as
+  do banco.
+- **7:** a cifra (AES-256-GCM) e a chave só no ambiente do servidor, fora do código e do banco.
+- **8:** **Desconectar e apagar tudo**, **Apagar meu histórico** (só os relatórios) e **Sair** (só a sessão); quem
+  tira a permissão no Mercado Livre perde o acesso guardado quando o Orzy percebe, em até dois dias, e a conta e o
+  histórico 30 dias depois, não mais em 12 meses.
 
-Termos de Uso (`termos-de-uso.md`):
+Termos de Uso:
 
-- linhas 52 e 53 (item 4): "O Orzy só usa esse acesso durante a sua sessão ... é preciso conectar de novo". Agora o
-  Orzy guarda o acesso e o renova sozinho;
-- linhas 109 e 110 (item 11): falta o **Desconectar e apagar tudo**;
-- linha 118 (item 12): "pare de usar o Orzy e apague o seu histórico". Apagar tudo é o **Desconectar e apagar tudo**.
+- **4:** a conta no Orzy e o acesso guardado e renovado; a sessão de 8 horas; o que acontece quando o Mercado Livre
+  recusa o acesso; o **Desconectar e apagar tudo**.
+- **11 e 12:** para parar de usar, ou se não concordar com uma versão nova, o **Desconectar e apagar tudo**.
 
 ## Decisões desta thread (19/10/2026)
 
 Sobre os pontos que a thread do site deixou para esta thread nos passos 1 e 2 da fase 4:
 
 - **Registro do servidor sem IP:** cada linha do gunicorn tem data e hora, método, página sem a busca, resposta,
-  tamanho e tempo, sem o IP. No rascunho, a Política (item 2.4) passa a dizer que o servidor não anota o endereço IP.
-  As linhas dos pedidos com outro endereço (robôs) mostram só o endereço recusado, nada do vendedor, e não pedem frase.
-- **Banco de dados de outra empresa:** no rascunho, o item 4 da Política tem a hospedagem do site e o banco de dados
-  em linhas separadas, cada uma com o seu `[PREENCHER]` (podem ser a mesma empresa), e o item 5 pede o país dos dois.
+  tamanho e tempo, sem o IP. A Política (item 2.4) diz que o servidor não anota o endereço IP. As linhas dos pedidos
+  com outro endereço (robôs) mostram só o endereço recusado, nada do vendedor, e não pedem frase.
+- **Banco de dados de outra empresa:** o item 4 da Política tem a hospedagem do site e o banco de dados em linhas
+  separadas, cada uma com o seu `[PREENCHER]` (podem ser a mesma empresa), e o item 5 pede o país dos dois.
 - **Registro de quem apagou:** continua, agora também para o **Desconectar e apagar tudo** (ver "Registro de quem
   apagou", acima). As limpezas automáticas (12 meses, e 30 dias sem acesso) não precisam dele: depois de voltar uma
   cópia, elas apagam de novo sozinhas, porque a regra está nos próprios dados (no máximo, os 30 dias recomeçam).
@@ -251,6 +249,7 @@ US$ 2,5 milhões por mês no Brasil, e uma avaliação de segurança. "Aplicativ
 | Segurança e comunicação de incidentes (arts. 46 e 48; Resolução CD/ANPD nº 15/2024) | Política item 7 |
 | Canal de comunicação no lugar do encarregado (Resolução CD/ANPD nº 2/2022, art. 11) | Política item 1 |
 | Dado anonimizado só deixa de ser pessoal se não der para voltar à pessoa com esforço razoável (art. 12) | Contagens do beta: Política itens 2.4, 3 e 6 |
+| Eliminação quando o tratamento acaba (arts. 15 e 16) | Política itens 6 e 8: a conta e o acesso saem com o **Desconectar e apagar tudo**, ou 30 dias depois de o Mercado Livre recusar o acesso |
 
 O Orzy cabe como **agente de tratamento de pequeno porte** (Resolução CD/ANPD nº 2/2022): pessoa física ou empresa
 pequena, sem tratamento de alto risco, porque não usa dados sensíveis nem de crianças, trata poucos vendedores e as
@@ -280,8 +279,7 @@ comunicar incidentes (art. 14). Os textos prometem o prazo normal de 15 dias, qu
 
 ## De onde vem cada frase
 
-Código do main em `909617d` (fase 4, passo 2), conferido em 19/10/2026. As frases da tabela valem hoje; as que o passo
-2 deixou velhas estão na seção acima.
+Código do main em `909617d` (fase 4, passo 2), conferido em 19/10/2026.
 
 | O que os textos dizem | Onde está no código |
 |---|---|
@@ -306,11 +304,6 @@ Código do main em `909617d` (fase 4, passo 2), conferido em 19/10/2026. As fras
 | O histórico mostra como os anúncios estavam no dia | `sistema/relatorios/templates/relatorios/historico_relatorio.html:29` |
 | Fonte, ícones e imagens saem do próprio site, sem serviço de fora na página | `sistema/orzy/settings.py:89` a `98` (a regra de segurança da página só aceita o próprio site); os arquivos em `sistema/publico/static/` |
 | O site mostra os textos desta pasta | `sistema/orzy/settings.py:102` e `103`; `sistema/orzy/urls.py:11` e `12`; `sistema/publico/legal.py:22` e `37` a `44` |
-
-O que o passo 2 faz, e de onde vão sair as frases novas do rascunho:
-
-| O que o código faz | Onde está no código |
-|---|---|
 | A conta: número e apelido no Mercado Livre, o primeiro e o último Conectar, quando o acesso foi salvo e desde quando está sem acesso | `sistema/contas/models.py:13` a `20` |
 | A conta é criada ou atualizada no Conectar, com o código de renovação cifrado; o token de acesso fica só na sessão | `sistema/contas/login.py:60` a `69`; `sistema/contas/acesso.py:41` a `62` |
 | A cifra: AES-256-GCM, com o número da conta na conferência (o valor de uma conta não abre na linha de outra) | `sistema/contas/cofre.py:39` a `58` |

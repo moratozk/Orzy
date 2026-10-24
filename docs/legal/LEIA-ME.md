@@ -8,7 +8,7 @@ Não é parecer jurídico: antes de abrir o site ao público, o ideal é um advo
 | [politica-de-privacidade.md](politica-de-privacidade.md) | Quais dados o site usa, para que, por quanto tempo e os direitos do vendedor (LGPD) |
 | [termos-de-uso.md](termos-de-uso.md) | As regras de uso do site: o que ele faz, o que não faz, responsabilidades e lei aplicável |
 
-Os textos descrevem o sistema da fase 4 até o passo 2 (`sistema/`, main em `909617d`, conferido em 19/10/2026): a
+Os textos descrevem o sistema da fase 4 até o passo 2 (`sistema/`, main em `b2c82e8`, conferido em 19/10/2026): a
 conta e o acesso ao Mercado Livre guardado, cifrado. O que mudou nos textos está em "O que o passo 2 mudou nos
 textos", abaixo. Este rascunho espera o passo 3 (a importação completa), que muda os textos de novo, e vai ao Nicolas
 numa revisão só. Até a Política mudar no main, ninguém além do Nicolas usa o sistema. Se o código mudar nos pontos da
@@ -87,29 +87,31 @@ outra pessoa. Texto do item 5 para cada caso:
   trazem dado de vendedor; se um dia trouxerem, a Política precisa contar. Só com o Firebase Hosting, o cookie passa a
   se chamar `__session`.
 - **Registro de quem apagou** (proposta da thread de hospedagem, aceita por esta thread em 16/10/2026 e ampliada em
-  19/10/2026): quando alguém usa **Apagar meu histórico** ou **Desconectar e apagar tudo**, o número da conta, a hora e
-  o que foi apagado ficam num registro à parte, fora do banco e fora do registro comum do servidor, só para apagar de
-  novo se for preciso voltar uma cópia de segurança do banco. Sem ele, voltar uma cópia traria de volta o que a pessoa
-  apagou, até o acesso guardado de quem desconectou. O prazo é o das cópias do banco mais 1 dia (8 dias com as cópias
-  de 7 dias do plano de 16/10/2026). Fora do banco porque voltar uma cópia apagaria um registro guardado nele. Quando o
-  código fizer isso, entram na Política uma frase no item 2.4, uma linha no item 3 (cumprimento de obrigação legal:
-  garantir a eliminação pedida, arts. 7º, II, e 18, VI) e uma linha no item 6.
+  19/10/2026): quando alguém usa **Apagar meu histórico** ou **Desconectar e apagar tudo**, ou quando o responsável
+  apaga uma conta a pedido, por e-mail (o comando `apagar_conta`), o número da conta, a hora e o que foi apagado ficam
+  num registro à parte, fora do banco e fora do registro comum do servidor, só para apagar de novo se for preciso
+  voltar uma cópia de segurança do banco. Sem ele, voltar uma cópia traria de volta o que a pessoa apagou, até o acesso
+  guardado de quem desconectou. O prazo é o das cópias do banco mais 1 dia (8 dias com as cópias de 7 dias do plano de
+  16/10/2026). Fora do banco porque voltar uma cópia apagaria um registro guardado nele. Quando o código fizer isso,
+  entram na Política uma frase no item 2.4, uma linha no item 3 (cumprimento de obrigação legal: garantir a eliminação
+  pedida, arts. 7º, II, e 18, VI) e uma linha no item 6. A thread do site anotou isso para antes do endereço de teste
+  (`sistema/LEIA-ME.md`, "Antes de publicar").
 
 **Site: código e login:** os itens da seção seguinte.
 
 **Página inicial:** link para a Política e os Termos no rodapé e a frase "Não somos o Mercado Livre". Sem o logotipo
 do Mercado Livre (os termos deles só permitem as marcas conforme o manual de marcas do Mercado Livre) e sem ferramenta
-de estatística (Google Analytics e parecidos) ou outros cookies. Se entrar alguma, a Política precisa mudar antes. A
-frase "O botão “Apagar meu histórico” apaga tudo", na parte de segurança
-(`sistema/publico/templates/publico/inicio.html:407`), ficou velha no passo 2: quem apaga tudo agora é o
-**Desconectar e apagar tudo**. O texto novo foi para a thread do site, pela coordenação, em 19/10/2026.
+de estatística (Google Analytics e parecidos) ou outros cookies. Se entrar alguma, a Política precisa mudar antes. Na
+parte de segurança, desde 19/10/2026 (PR #16), a frase diz "Na página Sua conta, “Desconectar e apagar tudo” apaga
+tudo na hora" (`sistema/publico/templates/publico/inicio.html:407`, conferida em `sistema/testes/test_paginas.py:106`
+e `107`). Antes, ela dizia que o **Apagar meu histórico** apagava tudo.
 
 **Nicolas, na conta dele:** o caminho do menu do Mercado Livre onde o vendedor tira a permissão de um aplicativo
 (Política, item 8). A documentação para desenvolvedores não diz.
 
 ## O que o site precisa ter para os textos valerem
 
-Já feito no sistema (main, `909617d`):
+Já feito no sistema (main, `b2c82e8`):
 
 1. Páginas `/privacidade` e `/termos`, que mostram os arquivos desta pasta.
 2. Junto de cada botão **Conectar com Mercado Livre**: "Ao conectar, você aceita os Termos de Uso e confirma que leu a
@@ -143,6 +145,10 @@ Já feito no sistema (main, `909617d`):
     44 horas: é o tempo máximo para o Orzy perceber, com o servidor ligado.
 13. **Sair** encerra só a sessão daquele navegador, e **Apagar meu histórico** apaga só os relatórios: nos dois, a conta
     e o acesso guardado ficam.
+14. Pedido para apagar por e-mail: `python manage.py apagar_conta <número da conta>` apaga como o **Desconectar e
+    apagar tudo** e diz se o Mercado Livre confirmou que tirou a permissão. Ele roda fora do servidor, e as sessões
+    ficam na memória do servidor: uma sessão aberta da conta continua até **Sair**, até 8 horas depois do login ou até
+    o servidor reiniciar. Ela não guarda mais nada da conta: sem a conta, o relatório não vai para o histórico.
 
 Regras que continuam valendo:
 
@@ -193,15 +199,19 @@ Sobre os pontos que a thread do site deixou para esta thread nos passos 1 e 2 da
   com outro endereço (robôs) mostram só o endereço recusado, nada do vendedor, e não pedem frase.
 - **Banco de dados de outra empresa:** o item 4 da Política tem a hospedagem do site e o banco de dados em linhas
   separadas, cada uma com o seu `[PREENCHER]` (podem ser a mesma empresa), e o item 5 pede o país dos dois.
-- **Registro de quem apagou:** continua, agora também para o **Desconectar e apagar tudo** (ver "Registro de quem
-  apagou", acima). As limpezas automáticas (12 meses, e 30 dias sem acesso) não precisam dele: depois de voltar uma
-  cópia, elas apagam de novo sozinhas, porque a regra está nos próprios dados (no máximo, os 30 dias recomeçam).
+- **Registro de quem apagou:** continua, agora também para o **Desconectar e apagar tudo** e o comando `apagar_conta`
+  (ver "Registro de quem apagou", acima). As limpezas automáticas (12 meses, e 30 dias sem acesso) não precisam dele:
+  depois de voltar uma cópia, elas apagam de novo sozinhas, porque a regra está nos próprios dados (no máximo, os 30
+  dias recomeçam).
 - **30 dias depois de o Mercado Livre recusar o acesso:** aceito. Os termos do Mercado Livre (2.2.4) pedem para
   revogar o acesso aos dados de quem avisou o desenvolvedor que não vai mais usar o aplicativo, e o **Desconectar e
   apagar tudo** faz isso na hora; o item 14 trata do Mercado Livre cortar o acesso do desenvolvedor. Quem tira a
   permissão pelo Mercado Livre perde o acesso guardado assim que o Orzy percebe, e a espera curta, dita na Política,
   protege quem só trocou a senha. Quem quiser antes conecta de novo e usa o **Desconectar e apagar tudo**, ou escreve
   para o e-mail.
+- **Sessão aberta no pedido por e-mail:** fica como está. A Política só promete encerrar as sessões no **Desconectar
+  e apagar tudo** e quando o Mercado Livre recusa o acesso (item 8), e o item 6 já diz que o número, o apelido e o
+  código de acesso ficam na sessão até ela acabar. A resposta ao e-mail não promete que a sessão acabou.
 - **Sugestão para o passo 3 (não decidida):** hoje a conta que continua com acesso, mas não é usada, fica guardada sem
   prazo (o histórico sai em 12 meses). Com a importação e a sincronia do passo 3, o Orzy leria todo dia a conta de quem
   parou de usar. Sugestão: a conta sem nenhum Conectar há 12 meses sai com tudo, como o histórico. Quem decide é o
@@ -217,7 +227,7 @@ Lido em 15/10/2026 nos [termos para desenvolvedores](https://developers.mercadol
 | 6 | Cumprir a LGPD; usar os dados só para a finalidade; o usuário do Mercado Livre que autoriza é o controlador e o desenvolvedor segue as instruções dele; subcontratados com a mesma segurança; avisar o Mercado Livre se uma autoridade pedir dados | Política itens 2.3, 3 e 4. Avisar o Mercado Livre fica com o responsável, se acontecer |
 | 10 | Medidas de segurança para dados pessoais (nomes, e-mails), credenciais e apelidos | Política item 7; o acesso guardado vai cifrado, com a chave fora do banco |
 | 2.2.1.3 | Cópias intermediárias só as necessárias, apagadas de vez quando não servem mais | Token de acesso só na memória; código de renovação só enquanto a conta está conectada, cifrado; cadastro e compradores descartados na hora |
-| 2.2.4 | Revogar o acesso do aplicativo aos dados de quem avisou o desenvolvedor que não vai mais usar; não usar "mercado", "libre", "livre", "payment", "shipments" nem "credit" no nome ou no visual do aplicativo | **Desconectar e apagar tudo** apaga a conta, o acesso e o histórico e pede ao Mercado Livre para tirar a permissão; por e-mail, o responsável faz o mesmo (ver "Antes de abrir ao público"); o nome Orzy está fora da lista |
+| 2.2.4 | Revogar o acesso do aplicativo aos dados de quem avisou o desenvolvedor que não vai mais usar; não usar "mercado", "libre", "livre", "payment", "shipments" nem "credit" no nome ou no visual do aplicativo | **Desconectar e apagar tudo** apaga a conta, o acesso e o histórico e pede ao Mercado Livre para tirar a permissão; por e-mail, o responsável faz o mesmo com o comando `apagar_conta` (ver "Antes de abrir ao público"); o nome Orzy está fora da lista |
 | 4.1 | Deixar sempre claro que o aplicativo não pertence ao Mercado Livre; marcas do Mercado Livre só conforme o manual de marcas deles | Termos item 2 e rodapé do site |
 | 5.2 e 5.3 | Informação não pública do usuário só com autorização dele; conteúdo atualizado pelo menos a cada 24 horas; o aplicativo informa a frequência de atualização | Termos item 6 e site item 4 acima |
 | 2.2.2 | Client Secret em sigilo; avisar o Mercado Livre se houver uso indevido | Secret só no ambiente do servidor |
@@ -266,9 +276,10 @@ comunicar incidentes (art. 14). Os textos prometem o prazo normal de 15 dias, qu
   risco ou dano relevante, e guardar o registro de todo incidente por 5 anos (Resolução CD/ANPD nº 15/2024).
 - Contrato de dados (LGPD) do banco grátis, antes de entrar dado de outra pessoa: a thread de hospedagem escolhe o
   banco no fim da fase 4.
-- **Pedido para apagar tudo por e-mail:** `acesso.desconectar(número da conta)` faz o mesmo que o botão, sem precisar
-  de sessão, e também pede ao Mercado Livre para tirar a permissão (`sistema/contas/acesso.py:108`). A thread do site
-  pode deixar isso num comando pronto antes do lançamento.
+- **Pedido para apagar tudo por e-mail:** ter um jeito de rodar o comando do item 14 acima na hospedagem, com
+  `--no-input`. Na resposta, dizer o que saiu e, se o comando avisar que o Mercado Livre não confirmou, pedir para a
+  pessoa tirar a permissão por lá. Não prometer que uma sessão aberta acabou: ela acaba no **Sair** ou até 8 horas
+  depois do login. Quem consegue entrar no Orzy pode usar o próprio botão, que também encerra as sessões na hora.
 - **E-mail de contato:** orzy.suporte@gmail.com, criado pelo Nicolas em 15/10/2026. É um Gmail comum: segue os termos de
   consumidor do Google, sem contrato de tratamento de dados nem as cláusulas-padrão da ANPD, e as mensagens podem ficar
   em servidores fora do Brasil (a Política diz isso nos itens 4 e 5). O Google diz que pode pôr essas cláusulas nos
@@ -280,7 +291,7 @@ comunicar incidentes (art. 14). Os textos prometem o prazo normal de 15 dias, qu
 
 ## De onde vem cada frase
 
-Código do main em `909617d` (fase 4, passo 2), conferido em 19/10/2026.
+Código do main em `b2c82e8` (fase 4, passo 2, com o comando `apagar_conta`), conferido em 19/10/2026.
 
 | O que os textos dizem | Onde está no código |
 |---|---|
@@ -314,6 +325,7 @@ Código do main em `909617d` (fase 4, passo 2), conferido em 19/10/2026.
 | A conferência de todo dia renova quem não renovou nas últimas 20 horas | `sistema/contas/acesso.py:31` e `150` a `172`; `sistema/relatorios/limpezas.py:38` a `59` e `77` a `83` |
 | A conta sem acesso há 30 dias, e sem Conectar nesse tempo, sai com o histórico | `sistema/contas/acesso.py:30` e `175` a `190` |
 | "Desconectar e apagar tudo" | `sistema/contas/views.py:69` a `85`; `sistema/contas/acesso.py:108` a `147`; `painel-ml/ml_api.py:264` a `270` |
+| Pedido por e-mail: o comando apaga como o botão e diz se o Mercado Livre confirmou, mas não alcança as sessões abertas, que ficam na memória do servidor | `sistema/contas/management/commands/apagar_conta.py:1` a `10` e `25` a `45`; `sistema/contas/acesso.py:108` a `125` |
 | O histórico sai com a conta, pelo próprio banco, e um relatório que termina depois não traz a conta de volta | `sistema/relatorios/models.py:13` e `24`; `sistema/relatorios/historico.py:38` a `53` |
 | "Apagar meu histórico" apaga só os relatórios | `sistema/relatorios/historico.py:80` a `83`; `sistema/relatorios/views.py:123` a `131` |
 | "Sair" encerra só a sessão daquele navegador | `sistema/contas/views.py:45` a `48` |

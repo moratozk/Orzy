@@ -1,6 +1,6 @@
 # Política de Privacidade do Orzy
 
-> **Rascunho, não publicar.** Escrito em 15/10/2026 a partir do código do site (PR #5, ainda em rascunho)
+> **Rascunho, não publicar.** Escrito a partir do código do sistema (fase 4, passo 2, conferido em 19/10/2026)
 > e do programa do PC. Não é parecer jurídico. Antes de publicar: preencher os campos `[PREENCHER: ...]`,
 > conferir os `[CONFIRMAR: ...]` e, de preferência, pedir a revisão de um advogado. O que falta está no
 > [LEIA-ME](LEIA-ME.md).
@@ -14,11 +14,13 @@ de Proteção de Dados Pessoais (LGPD, Lei nº 13.709/2018).
 ## Resumo
 
 - O Orzy **só lê** a sua conta do Mercado Livre: anúncios ativos, visitas, pedidos pagos e a nota de qualidade
-  dos anúncios. Ele não altera nada na sua conta.
-- O acesso à sua conta fica **só na memória do servidor**, enquanto a sua sessão dura. Ele não é gravado em disco
-  nem no seu navegador, e o Orzy não guarda o código que renovaria esse acesso.
+  dos anúncios. Ele não altera nada na sua conta, a não ser tirar a permissão do próprio Orzy quando você pede.
+- O Orzy guarda o acesso à sua conta **cifrado**, com a chave fora do banco de dados, e o renova sozinho para ele não
+  vencer. O código que lê os seus dados enquanto você usa o site fica só na memória do servidor.
 - O Orzy guarda um **histórico** dos seus relatórios (número e título de cada anúncio, visitas, vendas e situação) por
-  até 12 meses e mostra o que mudou de um relatório para o outro. Você apaga tudo quando quiser, com um clique.
+  até 12 meses e mostra o que mudou de um relatório para o outro. Você apaga o histórico quando quiser, com um clique.
+- Na página **Sua conta**, **Desconectar e apagar tudo** apaga a sua conta no Orzy, o acesso guardado e o histórico, e
+  pede ao Mercado Livre para tirar a permissão do Orzy.
 - O Orzy **não guarda dados dos seus compradores** nem os dados do seu cadastro no Mercado Livre (nome, e-mail,
   CPF ou CNPJ, endereço, telefone).
 - Para acompanhar a fase de testes, o Orzy conta quantos logins e relatórios o site tem por dia, **só em números**, sem
@@ -44,13 +46,22 @@ Você clica em **Conectar com Mercado Livre**, entra no site do próprio Mercado
 dados. O Orzy nunca vê a sua senha do Mercado Livre. Depois da autorização, o Mercado Livre envia ao Orzy:
 
 - **um código de acesso**, que deixa o Orzy ler a sua conta por algumas horas;
-- **um código de renovação**, que o Orzy descarta assim que recebe, sem guardar;
+- **um código de renovação**, que deixa o Orzy pedir um código de acesso novo quando o anterior vence;
 - **o número do seu usuário e o seu apelido** no Mercado Livre;
 - **outros dados do seu cadastro**, como nome, e-mail, CPF ou CNPJ, endereço e telefone. O Orzy não usa, não mostra
   e não guarda esses dados.
 
-Para que: identificar a sua conta, mostrar o seu apelido na tela, ler os dados do relatório em seu nome e separar o
-seu histórico do histórico de outras pessoas.
+No primeiro **Conectar**, o Orzy cria a sua conta no Orzy, sem senha: você entra sempre pelo Mercado Livre. A conta
+guarda o número e o apelido da sua conta do Mercado Livre, as datas do primeiro e do último **Conectar** e o código de
+renovação, cifrado (veja o item 7). A página **Sua conta** mostra o que fica guardado.
+
+Enquanto a sua conta estiver conectada, o Orzy usa o código de renovação para manter o acesso válido: quando o código
+de acesso vence no meio do uso e, mais ou menos uma vez por dia, para o acesso não vencer de vez. A cada renovação, o
+Mercado Livre manda um código de renovação novo, e o anterior deixa de valer. Na renovação, o Orzy não lê os seus
+dados.
+
+Para que: criar a sua conta no Orzy, identificar a sua conta, mostrar o seu apelido na tela, ler os dados do relatório
+em seu nome, manter o acesso válido entre um uso e outro e separar o seu histórico do histórico de outras pessoas.
 
 ### 2.2 Quando você gera um relatório
 
@@ -86,8 +97,8 @@ pediu. O responsável por esses dados é você, como vendedor.
   à sua sessão. Ele é necessário para o login funcionar e deixa de valer quando você clica em **Sair** ou, no máximo,
   8 horas depois de você entrar. O Orzy não usa cookies de propaganda, de estatística nem de outras empresas.
 - **Registros do servidor:** o servidor do Orzy anota a data e a hora de cada acesso, a página pedida e as mensagens
-  de erro. Ele não anota o código de acesso do Mercado Livre. Esses registros servem para manter o site funcionando
-  e investigar problemas.
+  de erro. Ele não anota o seu endereço IP nem o código de acesso do Mercado Livre. Esses registros servem para manter
+  o site funcionando e investigar problemas.
 - **Registros da hospedagem:** a empresa que hospeda o Orzy registra dados técnicos de cada acesso, como o endereço IP,
   a data e a hora, o endereço da página (com o que você digitar na busca de anúncios) e o navegador, para segurança e
   funcionamento. [CONFIRMAR com a hospedagem escolhida.]
@@ -106,7 +117,7 @@ isso só para responder.
 
 | Uso | Base legal na LGPD |
 |---|---|
-| Conectar a sua conta, gerar relatórios e sugestões, guardar e mostrar o histórico e o que mudou entre os relatórios | Execução do contrato que você aceita ao usar o Orzy (art. 7º, V) |
+| Conectar a sua conta, guardar e renovar o acesso, gerar relatórios e sugestões, guardar e mostrar o histórico e o que mudou entre os relatórios, e manter a sua conta por 30 dias quando o Mercado Livre recusa o acesso | Execução do contrato que você aceita ao usar o Orzy (art. 7º, V) |
 | Contar as vendas com os dados dos pedidos | O Orzy age em seu nome, como operador. A base legal é a sua, como vendedor e responsável por esses dados |
 | Cookie de sessão e registros do servidor e da hospedagem | Legítimo interesse do Orzy em manter o site seguro e funcionando (art. 7º, IX) e, quando a lei exigir, cumprimento de obrigação legal (art. 7º, II) |
 | Contagens de uso e os números do histórico de todos juntos, para acompanhar a fase de testes | Legítimo interesse do Orzy em saber se o site funciona e quanto ele é usado (art. 7º, IX) |
@@ -118,8 +129,10 @@ isso só para responder.
 - **Mercado Livre:** para ler os seus dados, o Orzy faz pedidos ao Mercado Livre com o acesso que você autorizou.
   O Mercado Livre tem a própria
   [Declaração de Privacidade](https://www.mercadolivre.com.br/privacidade/declaracao-privacidade).
-- **Hospedagem:** [PREENCHER: nome da empresa de hospedagem], que roda o servidor e guarda o histórico e as contagens em
-  nome do Orzy, seguindo as instruções do Orzy.
+- **Hospedagem do site:** [PREENCHER: nome da empresa de hospedagem], que roda o servidor do Orzy, seguindo as
+  instruções do Orzy.
+- **Banco de dados:** [PREENCHER: nome da empresa do banco de dados; pode ser a mesma da hospedagem], que guarda a sua
+  conta no Orzy, o acesso cifrado, o histórico e as contagens em nome do Orzy, seguindo as instruções do Orzy.
 - **E-mail:** o Gmail, do Google, guarda as mensagens que você manda para o Orzy e as respostas.
 - **Autoridades:** quando a lei ou uma ordem judicial obrigar.
 
@@ -127,8 +140,8 @@ O Orzy não vende, não aluga e não passa os seus dados para mais ninguém, e n
 
 ## 5. Em que país os dados ficam
 
-Os dados ficam em servidores [PREENCHER: no Brasil, ou o país da hospedagem]. [CONFIRMAR: se for fora do Brasil, usar
-o texto do LEIA-ME para o país escolhido.]
+Os dados ficam em servidores [PREENCHER: no Brasil, ou o país da hospedagem e o do banco de dados]. [CONFIRMAR: se for
+fora do Brasil, usar o texto do LEIA-ME para o país escolhido.]
 
 Já as mensagens que você manda por e-mail ficam no Gmail, em servidores do Google que podem estar fora do Brasil, como
 nos Estados Unidos. Elas servem só para responder você e seguem os prazos do item 6. [CONFIRMAR: base dessa
@@ -139,14 +152,14 @@ transferência; ver o LEIA-ME.]
 | Dado | Por quanto tempo |
 |---|---|
 | Código de acesso do Mercado Livre | Só na memória do servidor, até a sessão acabar: quando você clica em **Sair**, no máximo 8 horas depois de você entrar, ou se o servidor reiniciar. O próprio Mercado Livre invalida esse código depois de algumas horas. |
-| Código de renovação | Não é guardado. |
-| Número do usuário e apelido | Na sessão, até ela acabar. O número também fica no histórico, ligado aos seus relatórios. |
+| Código de renovação | No banco de dados, cifrado, enquanto a sua conta estiver conectada. A cada renovação, o código de antes é trocado pelo novo. Sai na hora quando você usa **Desconectar e apagar tudo** ou quando o Mercado Livre deixa de aceitá-lo. |
+| Sua conta no Orzy: o número do usuário e o apelido no Mercado Livre, as datas do primeiro e do último **Conectar** e da última renovação do acesso e, se o Mercado Livre recusar o acesso, desde quando | Até você usar **Desconectar e apagar tudo**, ou 30 dias depois de o Mercado Livre recusar o acesso, se você não conectar de novo nesse prazo. O número e o apelido também ficam na sessão, até ela acabar. |
 | Relatório completo (com preço, estoque, link e sugestões) | Na memória do servidor, enquanto a sessão dura, para você ver o relatório e baixar a planilha. |
-| Histórico: de cada relatório, a data, o período, o número da sua conta, quantos anúncios e quantos em cada situação; de cada anúncio, o número, o título, as visitas, as vendas, a situação e a pontuação das sugestões | Até você apagar, ou 12 meses depois de cada relatório. |
+| Histórico: de cada relatório, a data, o período, a sua conta, quantos anúncios e quantos em cada situação; de cada anúncio, o número, o título, as visitas, as vendas, a situação e a pontuação das sugestões | Até você apagar, ou 12 meses depois de cada relatório. Sai também junto com a sua conta no Orzy. |
 | Contagens de uso por dia (só números, sem conta, apelido nem anúncio) | 12 meses. |
 | Dados dos compradores e os outros dados do seu cadastro | Não são guardados. |
 | Registros do servidor e da hospedagem | [CONFIRMAR: prazo da hospedagem escolhida.] |
-| Cópias de segurança do servidor | [CONFIRMAR: se a hospedagem faz cópias, por quantos dias um dado apagado continua nelas.] |
+| Cópias de segurança do banco de dados | [CONFIRMAR: se o banco de dados escolhido faz cópias, por quantos dias um dado apagado continua nelas.] |
 | Mensagens | Até 12 meses depois de o assunto ser resolvido. Pedidos sobre os seus dados e as respostas: até 5 anos, como prova do atendimento. |
 
 Quando o prazo acaba, o dado é apagado.
@@ -155,11 +168,14 @@ Quando o prazo acaba, o dado é apagado.
 
 - A conexão com o site é sempre criptografada (HTTPS).
 - A chave secreta do aplicativo do Orzy no Mercado Livre fica só no servidor, fora do código.
-- O acesso à sua conta fica só na memória do servidor, durante a sessão. Ele não vai para o seu navegador nem para
-  arquivos.
+- O código de acesso fica só na memória do servidor, durante a sessão. Ele não vai para o seu navegador, para
+  arquivos nem para o banco de dados.
+- O código de renovação fica no banco de dados cifrado (AES-256-GCM) e só abre na linha da sua conta. A chave que abre
+  fica só no ambiente do servidor, fora do código e do banco: quem tiver só o banco, ou uma cópia dele, não consegue
+  usar o acesso.
 - O cookie de sessão não pode ser lido por scripts das páginas e só viaja em conexão segura.
 - Cada conta só vê o próprio histórico.
-- Do lado do Orzy, só o responsável tem acesso ao servidor e ao banco de dados.
+- Do lado do Orzy, só o responsável tem acesso ao servidor, ao banco de dados e à chave.
 
 Nenhum sistema é totalmente seguro. Se acontecer um incidente de segurança que possa trazer risco ou dano relevante
 a você, o Orzy avisa você e a Autoridade Nacional de Proteção de Dados (ANPD), como mandam a LGPD (art. 48) e a
@@ -181,13 +197,19 @@ Pela LGPD (art. 18), você pode pedir a qualquer momento, sem custo:
 
 Como fazer:
 
-- **No site:** o botão **Apagar meu histórico**, na página Histórico, apaga todos os seus relatórios guardados.
-  **Baixar planilha (CSV)** dá uma cópia completa do relatório que você acabou de gerar. **Sair** encerra a sessão
-  e o acesso à sua conta.
+- **Na página Sua conta** (o círculo com as suas iniciais, no alto do site): **Desconectar e apagar tudo** apaga na
+  hora a sua conta no Orzy, o acesso guardado e todo o histórico, encerra as suas sessões em todos os navegadores e
+  pede ao Mercado Livre para tirar a permissão do Orzy. Se o Mercado Livre não confirmar, o Orzy apaga tudo do lado
+  dele mesmo assim e avisa para você tirar a permissão por lá. A mesma página mostra o que o Orzy guarda da sua conta.
+- **Na página Histórico:** **Apagar meu histórico** apaga todos os seus relatórios guardados. A conta e o acesso
+  guardado continuam.
+- **No relatório:** **Baixar planilha (CSV)** dá uma cópia completa do relatório que você acabou de gerar.
+- **Sair** encerra a sessão naquele navegador. A conta e o acesso guardado continuam.
 - **No Mercado Livre:** você pode tirar a permissão do Orzy na sua conta a qualquer momento
-  [CONFIRMAR: caminho do menu no Mercado Livre]. Trocar a senha do Mercado Livre também encerra o acesso.
-  O histórico já guardado continua no Orzy até completar 12 meses; para apagar antes, entre de novo no site e use
-  **Apagar meu histórico**, ou escreva para o e-mail abaixo.
+  [CONFIRMAR: caminho do menu no Mercado Livre]. Trocar a senha do Mercado Livre também encerra o acesso. O Mercado
+  Livre não avisa o Orzy: o Orzy percebe na renovação seguinte, em até dois dias, apaga o acesso guardado e encerra as
+  suas sessões. A sua conta no Orzy e o histórico saem 30 dias depois disso, se você não conectar de novo. Para apagar
+  antes, conecte de novo e use **Desconectar e apagar tudo**, ou escreva para o e-mail abaixo.
 - **Por e-mail:** escreva para [orzy.suporte@gmail.com](mailto:orzy.suporte@gmail.com). O Orzy responde em até 15 dias.
   Para proteger você, o Orzy pode pedir que confirme que é o dono da conta, por exemplo entrando no Orzy com o Mercado
   Livre.
